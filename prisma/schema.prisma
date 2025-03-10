@@ -12,13 +12,13 @@ datasource db {
 
 model Playground {
   id      String   @id @default(uuid())
-  nome    String
+  name    String
   groups  Group[]
 }
 
 model Group {
   id       String   @id @default(uuid())
-  nome     String
+  name     String
   playground   Playground   @relation(fields: [playgroundId], references: [id])
   playgroundId String
   teams  Team[]
@@ -26,7 +26,7 @@ model Group {
 
 model Team {
   id       String   @id @default(uuid())
-  nome     String
+  name     String
   group   Group   @relation(fields: [groupId], references: [id])
   groupId String
   players  Player[]
@@ -34,8 +34,8 @@ model Team {
 
 model Player {
   id       String   @id @default(uuid())
-  nome     String
-  cognome  String
+  name     String
+  surname  String
   team  Team  @relation(fields: [teamId], references: [id])
   teamId String
 }
