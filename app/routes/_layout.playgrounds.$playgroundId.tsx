@@ -5,7 +5,7 @@ import {
 	type LoaderFunctionArgs,
 } from '@remix-run/node'
 import { Form, Link, redirect, useLoaderData } from '@remix-run/react'
-import { CalendarRange } from 'lucide-react'
+import { Trophy } from 'lucide-react'
 import invariant from 'tiny-invariant'
 import Header from '~/components/Header'
 import { Button } from '~/components/ui/button'
@@ -52,7 +52,7 @@ export default function PlaygroundDetails() {
 				<Header
 					title={playground.name}
 					backLink="/playgrounds"
-					icon={<CalendarRange />}
+					icon={<Trophy />}
 				/>
 				<Form
 					method="post"
@@ -76,6 +76,7 @@ export default function PlaygroundDetails() {
 					type="text"
 					name="name"
 					placeholder="Inserisci il nome del girone"
+					required
 				/>
 				<Button type="submit">Aggiungi Girone</Button>
 			</Form>

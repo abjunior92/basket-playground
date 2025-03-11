@@ -62,7 +62,7 @@ export default function TournamentOverview() {
 
 												{team.players.length === 0 ? (
 													<p className="mt-1 text-sm">
-														Nessuno giocatore in questa squadra
+														Nessun giocatore in questa squadra
 													</p>
 												) : (
 													<ul className="mt-1 text-sm">

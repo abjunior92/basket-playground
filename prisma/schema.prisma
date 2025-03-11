@@ -14,6 +14,7 @@ model Playground {
   id      String   @id @default(uuid())
   name    String
   groups  Group[]
+  matches Match[]
 }
 
 model Group {
@@ -27,15 +28,60 @@ model Group {
 model Team {
   id       String   @id @default(uuid())
   name     String
-  group   Group   @relation(fields: [groupId], references: [id])
-  groupId String
+  group    Group   @relation(fields: [groupId], references: [id])
+  groupId  String
+
+  matchesAsTeam1 Match[] @relation(name: "Team1Matches")
+  matchesAsTeam2 Match[] @relation(name: "Team2Matches")
+
   players  Player[]
 }
 
 model Player {
-  id       String   @id @default(uuid())
-  name     String
-  surname  String
-  team  Team  @relation(fields: [teamId], references: [id])
-  teamId String
+  id           String  @id @default(uuid())
+  name         String
+  surname      String
+  birthYear    Int
+  level        Level
+  paid         Boolean
+  totalPoints  Int     @default(0)
+  team         Team    @relation(fields: [teamId], references: [id])
+  teamId       String
+}
+
+enum Level {
+  serie_b
+  serie_c
+  serie_d
+  prima_divisione
+  promozione
+  u15
+  u17
+  u19
+  u20
+  over
+  mai_giocato
+  free_agent
+  csi
+  campetto
+  basket2all
+}
+
+model Match {
+  id           String   @id @default(uuid())
+  playground   Playground @relation(fields: [playgroundId], references: [id])
+  playgroundId String
+  day          Int
+  timeSlot     String
+  field        String
+
+  team1       Team @relation(name: "Team1Matches", fields: [team1Id], references: [id])
+  team1Id     String
+  team2       Team @relation(name: "Team2Matches", fields: [team2Id], references: [id])
+  team2Id     String
+
+  score1    Int?
+  score2    Int?
+
+  @@unique([playgroundId, day, timeSlot, field]) // Evita partite duplicate sullo stesso campo e orario
 }

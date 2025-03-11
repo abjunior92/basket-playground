@@ -5,12 +5,23 @@ import {
 	redirect,
 	type LoaderFunctionArgs,
 } from '@remix-run/node'
-import { Form, useLoaderData } from '@remix-run/react'
-import { ShieldHalf, XCircle } from 'lucide-react'
+import { Form, useActionData, useLoaderData } from '@remix-run/react'
+import { Pencil, ShieldHalf, X } from 'lucide-react'
 import invariant from 'tiny-invariant'
 import Header from '~/components/Header'
 import { Button } from '~/components/ui/button'
+import { Checkbox } from '~/components/ui/checkbox'
 import { Input } from '~/components/ui/input'
+import {
+	Select,
+	SelectContent,
+	SelectGroup,
+	SelectItem,
+	SelectLabel,
+	SelectTrigger,
+	SelectValue,
+} from '~/components/ui/select'
+import { type PlayerLevels, playerLevelsMap } from '~/lib/types'
 
 const prisma = new PrismaClient()
 
@@ -31,9 +42,13 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 	const name = formData.get('name') as string
 	const surname = formData.get('surname') as string
 
-	if (!name || !surname) {
+	const birthYear = parseInt(formData.get('birthYear') as string)
+	const level = formData.get('level') as PlayerLevels
+	const paid = formData.get('paid') === 'on'
+
+	if (!name || !surname || !birthYear || !level) {
 		return json(
-			{ error: 'Nome e cognome del giocatore sono obbligatori' },
+			{ error: 'Compila tutti i campi correttamente!' },
 			{ status: 400 },
 		)
 	}
@@ -42,6 +57,9 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 		data: {
 			name,
 			surname,
+			birthYear,
+			level,
+			paid,
 			teamId: params.teamId,
 		},
 	})
@@ -51,6 +69,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 
 export default function TeamDetails() {
 	const { team } = useLoaderData<typeof loader>()
+	const actionData = useActionData<typeof action>()
 
 	return (
 		<div className="p-4">
@@ -83,13 +102,48 @@ export default function TeamDetails() {
 					type="text"
 					name="name"
 					placeholder="Inserisci il nome del giocatore"
+					required
 				/>
 				<Input
 					type="text"
 					name="surname"
 					placeholder="Inserisci il cognome del giocatore"
+					required
 				/>
+				<Input
+					type="text"
+					name="birthYear"
+					placeholder="Inserisci l'anno di nascita del giocatore"
+					required
+				/>
+				<Select name="level" required>
+					<SelectTrigger>
+						<SelectValue placeholder="Seleziona un livello di esperienza" />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectGroup>
+							<SelectLabel>Livello</SelectLabel>
+							{Array.from(playerLevelsMap.entries()).map(([key, value]) => (
+								<SelectItem key={key} value={key}>
+									{value}
+								</SelectItem>
+							))}
+						</SelectGroup>
+					</SelectContent>
+				</Select>
+				<div className="flex items-center space-x-2">
+					<Checkbox name="paid" />
+					<label
+						htmlFor="paid"
+						className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+					>
+						Iscrizione pagata
+					</label>
+				</div>
 				<Button type="submit">Aggiungi Giocatore</Button>
+				{actionData?.error && (
+					<p className="text-red-500">{actionData.error}</p>
+				)}
 			</Form>
 
 			<h2 className="mt-12 text-xl">Lista Giocatori</h2>
@@ -99,20 +153,35 @@ export default function TeamDetails() {
 						key={player.id}
 						method="post"
 						action={`/data/players/${player.id}/${player.teamId}/delete`}
-						className="flex max-w-xs items-center justify-between"
+						className="flex items-center justify-between"
 					>
-						<li className="list-inside list-decimal">
-							{player.name} {player.surname}
+						<li className="list-inside list-decimal space-x-2">
+							<span>
+								{player.name} {player.surname}
+							</span>
+							<span>|</span>
+							<span>{player.birthYear}</span>
+							<span>|</span>
+							<span>{player.level.replace('_', ' ')}</span>
+							<span>|</span>
+							<span>{player.paid ? '✅ Pagato' : '❌ Non pagato'}</span>
+							<span>|</span>
+							<span>punti: {player.totalPoints}</span>
 						</li>
-						<Button
-							type="submit"
-							variant="link"
-							onClick={() =>
-								confirm('Sei sicuro di voler eliminare questo giocatore?')
-							}
-						>
-							<XCircle className="h-4 w-4 text-red-500" />
-						</Button>
+						<div className="flex items-center space-x-2">
+							<Button
+								type="submit"
+								variant="destructive"
+								onClick={() =>
+									confirm('Sei sicuro di voler eliminare questo giocatore?')
+								}
+							>
+								<X className="h-4 w-4" />
+							</Button>
+							<Button variant="secondary" type="button">
+								<Pencil className="h-4 w-4" />
+							</Button>
+						</div>
 					</Form>
 				))}
 			</ul>

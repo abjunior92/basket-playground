@@ -80,6 +80,7 @@ export default function GroupDetails() {
 					type="text"
 					name="name"
 					placeholder="Inserisci il nome della squadra"
+					required
 				/>
 				<Button type="submit">Aggiungi Squadra</Button>
 			</Form>

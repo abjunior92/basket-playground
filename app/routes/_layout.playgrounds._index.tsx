@@ -44,6 +44,7 @@ export default function Playgrounds() {
 					type="text"
 					name="name"
 					placeholder="Inserisci il nome del torneo"
+					required
 				/>
 				<Button type="submit">Aggiungi Torneo</Button>
 			</Form>

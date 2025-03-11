@@ -50,4 +50,14 @@ const resources = [
 		text: 'Panoramica tornei',
 		icon: '🏆',
 	},
+	{
+		href: '/matches',
+		text: 'Calendario partite',
+		icon: '🗓️',
+	},
+	{
+		href: '/matches/new',
+		text: 'Aggiungi partita',
+		icon: '🆚',
+	},
 ]
