@@ -32,3 +32,20 @@ export const playerLevelsMap = new Map<PlayerLevels, string>([
 	['campetto', 'Campetto'],
 	['basket2all', 'Basket2All'],
 ])
+
+export type PlayerStatsType = {
+	id: string
+	name: string
+	surname: string
+	birthYear: number
+	team: string
+	paid: boolean
+	totalPoints: number
+	matches: {
+		matchId: string
+		opponent: string
+		day: number
+		timeSlot: string
+		points: number
+	}[]
+}

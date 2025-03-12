@@ -60,4 +60,9 @@ const resources = [
 		text: 'Aggiungi partita',
 		icon: '🆚',
 	},
+	{
+		href: '/players',
+		text: 'Giocatori',
+		icon: '⛹🏻‍♂️',
+	},
 ]

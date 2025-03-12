@@ -68,6 +68,19 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 
 	// Aggiorniamo i punti segnati dai giocatori
 	for (const stat of playerStats) {
+		// Recuperiamo il punteggio precedente del giocatore in questa partita
+		const existingStat = await prisma.playerMatchStats.findUnique({
+			where: {
+				matchId_playerId: {
+					matchId: params.matchId,
+					playerId: stat.playerId,
+				},
+			},
+			select: { points: true },
+		})
+
+		const previousPoints = existingStat?.points || 0
+
 		await prisma.playerMatchStats.upsert({
 			where: {
 				matchId_playerId: {
@@ -89,9 +102,17 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 		await prisma.player.update({
 			where: { id: stat.playerId },
 			data: {
-				totalPoints: {
-					increment: stat.points,
-				},
+				// Sottrai il vecchio punteggio
+				totalPoints: { decrement: previousPoints },
+			},
+		})
+
+		// Poi aggiungiamo il nuovo punteggio
+		await prisma.player.update({
+			where: { id: stat.playerId },
+			data: {
+				// Aggiungi il nuovo punteggio
+				totalPoints: { increment: stat.points },
 			},
 		})
 	}

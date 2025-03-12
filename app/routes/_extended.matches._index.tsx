@@ -69,44 +69,62 @@ export default function Matches() {
 							</tr>
 						</thead>
 						<tbody>
-							{matchesByDay[Number(day)]?.map((match) => (
-								<tr key={match.id} className="border-t text-center">
-									<td className="border p-2">{match.timeSlot}</td>
-									<td className="border p-2">{match.field}</td>
-									<td className="border p-2">
-										{match.team1.name} ({match.team1.group.name})
-									</td>
-									<td className="border p-2">
-										{match.team2.name} ({match.team2.group.name})
-									</td>
-									<td className="border p-2">
-										<span
-											className={cn(
-												(match.score1 || 0) > (match.score2 || 0) &&
-													'font-bold text-green-600',
-											)}
-										>
-											{match.score1}
-										</span>{' '}
-										-{' '}
-										<span
-											className={cn(
-												(match.score2 || 0) > (match.score1 || 0) &&
-													'font-bold text-green-600',
-											)}
-										>
-											{match.score2}
-										</span>
-									</td>
-									<td className="border p-2">
-										<Button asChild variant="outline">
-											<Link to={`/matches/${match.id}/edit`}>
-												<Pencil />
-											</Link>
-										</Button>
-									</td>
-								</tr>
-							))}
+							{matchesByDay[Number(day)]?.map((match) => {
+								const isTeam1Winner = (match.score1 || 0) > (match.score2 || 0)
+								const isTeam2Winner = (match.score2 || 0) > (match.score1 || 0)
+								return (
+									<tr key={match.id} className="border-t text-center">
+										<td className="border p-2">{match.timeSlot}</td>
+										<td className="border p-2">{match.field}</td>
+										<td className="border p-2">
+											<div className="flex flex-col">
+												<span>
+													{isTeam1Winner && '🏆 '}
+													{match.team1.name}
+												</span>
+												<span className="text-xs">
+													{match.team1.group.name}
+												</span>
+											</div>
+										</td>
+										<td className="border p-2">
+											<div className="flex flex-col">
+												<span>
+													{isTeam2Winner && '🏆 '}
+													{match.team2.name}
+												</span>
+												<span className="text-xs">
+													{match.team2.group.name}
+												</span>
+											</div>
+										</td>
+										<td className="border p-2">
+											<span
+												className={cn(
+													isTeam1Winner && 'font-bold text-green-600',
+												)}
+											>
+												{match.score1}
+											</span>{' '}
+											-{' '}
+											<span
+												className={cn(
+													isTeam2Winner && 'font-bold text-green-600',
+												)}
+											>
+												{match.score2}
+											</span>
+										</td>
+										<td className="border p-2">
+											<Button asChild variant="outline">
+												<Link to={`/matches/${match.id}/edit`}>
+													<Pencil />
+												</Link>
+											</Button>
+										</td>
+									</tr>
+								)
+							})}
 						</tbody>
 					</table>
 				</div>
