@@ -70,8 +70,8 @@ export default function Matches() {
 						</thead>
 						<tbody>
 							{matchesByDay[Number(day)]?.map((match) => {
-								const isTeam1Winner = (match.score1 || 0) > (match.score2 || 0)
-								const isTeam2Winner = (match.score2 || 0) > (match.score1 || 0)
+								const isTeam1Winner = match.winner === match.team1Id
+								const isTeam2Winner = match.winner === match.team2Id
 								return (
 									<tr key={match.id} className="border-t text-center">
 										<td className="border p-2">{match.timeSlot}</td>

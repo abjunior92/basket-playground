@@ -81,8 +81,9 @@ model Match {
   team2       Team @relation(name: "Team2Matches", fields: [team2Id], references: [id])
   team2Id     String
 
-  score1    Int?
-  score2    Int?
+  score1      Int?
+  score2      Int?
+  winner      String?
 
   playerStats PlayerMatchStats[]
 

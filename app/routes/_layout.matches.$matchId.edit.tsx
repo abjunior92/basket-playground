@@ -43,9 +43,15 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 	const score1 = Number(formData.get('score1') || '0')
 	const score2 = Number(formData.get('score2') || '0')
 
+	const team1Id = formData.get('team1Id') as string
+	const team2Id = formData.get('team2Id') as string
+
+	const winnerTeamId =
+		score1 > score2 ? team1Id : score2 > score1 ? team2Id : null
+
 	await prisma.match.update({
 		where: { id: params.matchId },
-		data: { score1, score2 },
+		data: { score1, score2, winner: winnerTeamId },
 	})
 
 	const playerStats = []
@@ -188,6 +194,7 @@ export default function EditMatch() {
 			<Form method="post" className="mt-4">
 				<div className="flex justify-between">
 					<label>
+						<input hidden name="team1Id" value={match.team1Id} />
 						<Input
 							type="number"
 							name="score1"
@@ -198,6 +205,7 @@ export default function EditMatch() {
 					</label>
 
 					<label>
+						<input hidden name="team2Id" value={match.team2Id} />
 						<Input
 							type="number"
 							name="score2"
