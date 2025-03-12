@@ -153,7 +153,7 @@ export default function TeamDetails() {
 						key={player.id}
 						method="post"
 						action={`/data/players/${player.id}/${player.teamId}/delete`}
-						className="flex items-center justify-between"
+						className="flex items-center justify-between space-y-2"
 					>
 						<li className="list-inside list-decimal space-x-2">
 							<span>

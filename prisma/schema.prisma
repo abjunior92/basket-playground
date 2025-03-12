@@ -47,6 +47,7 @@ model Player {
   totalPoints  Int     @default(0)
   team         Team    @relation(fields: [teamId], references: [id])
   teamId       String
+  matchStats PlayerMatchStats[]
 }
 
 enum Level {
@@ -83,5 +84,19 @@ model Match {
   score1    Int?
   score2    Int?
 
+  playerStats PlayerMatchStats[]
+
   @@unique([playgroundId, day, timeSlot, field]) // Evita partite duplicate sullo stesso campo e orario
+}
+
+model PlayerMatchStats {
+  id        String   @id @default(uuid())
+  matchId   String
+  playerId  String
+  points    Int     @default(0)
+
+  match     Match    @relation(fields: [matchId], references: [id])
+  player    Player   @relation(fields: [playerId], references: [id])
+
+  @@unique([matchId, playerId])  // Definisce una combinazione unica di matchId e playerId
 }
