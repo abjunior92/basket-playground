@@ -39,6 +39,7 @@ export type PlayerStatsType = {
 	surname: string
 	birthYear: number
 	team: string
+	teamId: string
 	paid: boolean
 	totalPoints: number
 	matches: {
@@ -48,4 +49,13 @@ export type PlayerStatsType = {
 		timeSlot: string
 		points: number
 	}[]
+}
+
+export type TeamWithStatsType = {
+	id: string
+	name: string
+	matchesPlayed: number
+	matchesWon: number
+	winPercentage: number
+	pointDifference: number
 }

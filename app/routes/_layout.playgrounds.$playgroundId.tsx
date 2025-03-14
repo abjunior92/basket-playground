@@ -58,6 +58,7 @@ export default function PlaygroundDetails() {
 					title={playground.name}
 					backLink="/playgrounds"
 					icon={<Trophy />}
+					home
 				/>
 				<Form
 					method="post"

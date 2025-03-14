@@ -7,7 +7,7 @@ import {
 	type LoaderFunctionArgs,
 } from '@remix-run/node'
 import { Form, Link, useLoaderData } from '@remix-run/react'
-import { Boxes } from 'lucide-react'
+import { LayoutGrid } from 'lucide-react'
 import invariant from 'tiny-invariant'
 import Header from '~/components/Header'
 import { Button } from '~/components/ui/button'
@@ -61,7 +61,8 @@ export default function GroupDetails() {
 				<Header
 					title={group.name}
 					backLink={`/playgrounds/${group.playgroundId}`}
-					icon={<Boxes />}
+					icon={<LayoutGrid />}
+					home
 				/>
 				<Form
 					method="post"

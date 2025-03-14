@@ -7,11 +7,21 @@ import {
 	type LoaderFunctionArgs,
 } from '@remix-run/node'
 import { Form, useActionData, useLoaderData } from '@remix-run/react'
-import { Pencil, ShieldHalf, X } from 'lucide-react'
+import { Pencil, ShieldUser, X } from 'lucide-react'
 import invariant from 'tiny-invariant'
 import Header from '~/components/Header'
 import { Button } from '~/components/ui/button'
 import { Checkbox } from '~/components/ui/checkbox'
+import {
+	Dialog,
+	DialogClose,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from '~/components/ui/dialog'
 import { Input } from '~/components/ui/input'
 import {
 	Select,
@@ -22,6 +32,14 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '~/components/ui/select'
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from '~/components/ui/table'
 import { type PlayerLevels, playerLevelsMap } from '~/lib/types'
 
 const prisma = new PrismaClient()
@@ -82,7 +100,8 @@ export default function TeamDetails() {
 				<Header
 					title={team.name}
 					backLink={`/groups/${team.groupId}`}
-					icon={<ShieldHalf />}
+					icon={<ShieldUser />}
+					home
 				/>
 
 				<Form
@@ -152,44 +171,148 @@ export default function TeamDetails() {
 			</Form>
 
 			<h2 className="mt-12 text-xl">Lista Giocatori</h2>
-			<ul className="mt-2">
-				{team.players.map((player) => (
-					<Form
-						key={player.id}
-						method="post"
-						action={`/data/players/${player.id}/${player.teamId}/delete`}
-						className="flex items-center justify-between space-y-2"
-					>
-						<li className="list-inside list-decimal space-x-2">
-							<span>
-								{player.name} {player.surname}
-							</span>
-							<span>|</span>
-							<span>{player.birthYear}</span>
-							<span>|</span>
-							<span>{player.level.replace('_', ' ')}</span>
-							<span>|</span>
-							<span>{player.paid ? '✅ Pagato' : '❌ Non pagato'}</span>
-							<span>|</span>
-							<span>punti: {player.totalPoints}</span>
-						</li>
-						<div className="flex items-center space-x-2">
-							<Button
-								type="submit"
-								variant="destructive"
-								onClick={() =>
-									confirm('Sei sicuro di voler eliminare questo giocatore?')
-								}
-							>
-								<X className="h-4 w-4" />
-							</Button>
-							<Button variant="secondary" type="button">
-								<Pencil className="h-4 w-4" />
-							</Button>
-						</div>
-					</Form>
-				))}
-			</ul>
+
+			<div className="mt-4 overflow-hidden rounded-lg border border-gray-300">
+				<Table className="w-full border-collapse">
+					<TableHeader>
+						<TableRow className="bg-gray-100">
+							<TableHead>Nome</TableHead>
+							<TableHead>Cognome</TableHead>
+							<TableHead>Anno</TableHead>
+							<TableHead>Livello</TableHead>
+							<TableHead>Pagato</TableHead>
+							<TableHead>Punti totali</TableHead>
+							<TableHead>Modifica</TableHead>
+							<TableHead>Elimina</TableHead>
+						</TableRow>
+					</TableHeader>
+					<TableBody>
+						{team.players.map((player) => (
+							<TableRow key={player.id} className="text-center">
+								<TableCell>{player.name}</TableCell>
+								<TableCell>{player.surname}</TableCell>
+								<TableCell>{player.birthYear}</TableCell>
+								<TableCell>{player.level.replace('_', ' ')}</TableCell>
+								<TableCell>{player.paid ? '✅' : '❌'}</TableCell>
+								<TableCell>{player.totalPoints}</TableCell>
+								<TableCell>
+									<Dialog>
+										<DialogTrigger asChild>
+											<Button
+												variant="outline"
+												type="button"
+												aria-label="Modifica giocatore"
+											>
+												<Pencil className="h-4 w-4" />
+											</Button>
+										</DialogTrigger>
+										<DialogContent className="sm:max-w-[425px]">
+											<DialogHeader>
+												<DialogTitle>Modifica giocatore</DialogTitle>
+												<DialogDescription>
+													Modifica i dati del giocatore {player.name}{' '}
+													{player.surname}.
+												</DialogDescription>
+											</DialogHeader>
+											<div className="grid gap-4 py-4">
+												<Input
+													form="editPlayerForm"
+													type="text"
+													name="name"
+													placeholder="Inserisci il nome del giocatore"
+													defaultValue={player.name}
+													required
+												/>
+												<Input
+													form="editPlayerForm"
+													type="text"
+													name="surname"
+													placeholder="Inserisci il cognome del giocatore"
+													defaultValue={player.surname}
+													required
+												/>
+												<Input
+													form="editPlayerForm"
+													type="text"
+													name="birthYear"
+													placeholder="Inserisci l'anno di nascita del giocatore"
+													defaultValue={player.birthYear}
+													required
+												/>
+												<Select
+													form="editPlayerForm"
+													name="level"
+													defaultValue={player.level}
+													required
+												>
+													<SelectTrigger>
+														<SelectValue placeholder="Seleziona un livello di esperienza" />
+													</SelectTrigger>
+													<SelectContent>
+														<SelectGroup>
+															<SelectLabel>Livello</SelectLabel>
+															{Array.from(playerLevelsMap.entries()).map(
+																([key, value]) => (
+																	<SelectItem key={key} value={key}>
+																		{value}
+																	</SelectItem>
+																),
+															)}
+														</SelectGroup>
+													</SelectContent>
+												</Select>
+												<div className="flex items-center space-x-2">
+													<Checkbox
+														form="editPlayerForm"
+														name="paid"
+														defaultChecked={player.paid}
+													/>
+													<label
+														htmlFor="paid"
+														className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+													>
+														Iscrizione pagata
+													</label>
+												</div>
+											</div>
+											<DialogFooter>
+												<Form
+													id="editPlayerForm"
+													method="post"
+													action={`/data/players/${player.id}/${player.teamId}/edit`}
+												>
+													<DialogClose>
+														<Button type="submit">Salva</Button>
+													</DialogClose>
+												</Form>
+											</DialogFooter>
+										</DialogContent>
+									</Dialog>
+								</TableCell>
+								<TableCell>
+									<Form
+										method="post"
+										action={`/data/players/${player.id}/${player.teamId}/delete`}
+										className="flex items-center justify-center"
+									>
+										<Button
+											type="submit"
+											variant="destructive"
+											onClick={() =>
+												confirm(
+													'Sei sicuro di voler eliminare questo giocatore?',
+												)
+											}
+										>
+											<X className="h-4 w-4" />
+										</Button>
+									</Form>
+								</TableCell>
+							</TableRow>
+						))}
+					</TableBody>
+				</Table>
+			</div>
 		</div>
 	)
 }

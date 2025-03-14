@@ -65,4 +65,9 @@ const resources = [
 		text: 'Giocatori',
 		icon: '⛹🏻‍♂️',
 	},
+	{
+		href: '/rankings',
+		text: 'Classifiche',
+		icon: '🥇',
+	},
 ]

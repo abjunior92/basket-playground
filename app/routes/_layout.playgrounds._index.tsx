@@ -5,7 +5,6 @@ import {
 	json,
 } from '@remix-run/node'
 import { Form, Link, redirect, useLoaderData } from '@remix-run/react'
-import { Home } from 'lucide-react'
 import Header from '~/components/Header'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
@@ -44,7 +43,7 @@ export default function Playgrounds() {
 
 	return (
 		<div className="p-4">
-			<Header title="Tornei" backLink="/" icon={<Home />} />
+			<Header title="Tornei" backLink="/" />
 
 			<h4 className="mt-4 text-xl">Nuovo Torneo</h4>
 			<Form method="post" className="mt-2 space-y-4">

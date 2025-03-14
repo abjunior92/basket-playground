@@ -1,0 +1,183 @@
+import { PrismaClient } from '@prisma/client'
+import { type MetaFunction } from '@remix-run/node'
+import { useLoaderData } from '@remix-run/react'
+import { Medal } from 'lucide-react'
+import Header from '~/components/Header'
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from '~/components/ui/table'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
+import { type TeamWithStatsType } from '~/lib/types'
+
+const prisma = new PrismaClient()
+
+export const meta: MetaFunction = () => {
+	return [
+		{ title: 'Classifiche' },
+		{ name: 'description', content: 'Classifiche' },
+	]
+}
+
+export const loader = async () => {
+	const teams = await prisma.team.findMany({
+		include: {
+			group: true,
+			matchesAsTeam1: {
+				select: { id: true, winner: true, score1: true, score2: true },
+			},
+			matchesAsTeam2: {
+				select: { id: true, winner: true, score1: true, score2: true },
+			},
+		},
+	})
+
+	const topPlayers = await prisma.player.findMany({
+		orderBy: { totalPoints: 'desc' },
+		include: { team: { include: { group: true } } },
+		take: 10,
+	})
+
+	// Raggruppiamo le squadre per girone
+	const groups = teams.reduce(
+		(acc, team) => {
+			const matches = [...team.matchesAsTeam1, ...team.matchesAsTeam2]
+
+			const matchesPlayed = matches.filter(
+				(match) => match.winner !== null,
+			).length
+			const matchesWon = matches.filter(
+				(match) => match.winner === team.id,
+			).length
+
+			// Calcolo della differenza punti
+			let pointsScored = 0
+			let pointsConceded = 0
+
+			matches.forEach((match) => {
+				if (match.winner !== null) {
+					if (team.matchesAsTeam1.some((m) => m.id === match.id)) {
+						pointsScored += match.score1 || 0
+						pointsConceded += match.score2 || 0
+					} else {
+						pointsScored += match.score2 || 0
+						pointsConceded += match.score1 || 0
+					}
+				}
+			})
+
+			const pointDifference = pointsScored - pointsConceded
+			const winPercentage = matchesPlayed > 0 ? matchesWon / matchesPlayed : 0
+
+			const teamData = {
+				id: team.id,
+				name: team.name,
+				matchesPlayed,
+				matchesWon,
+				winPercentage,
+				pointDifference,
+			}
+
+			if (!acc[team.group.name]) {
+				acc[team.group.name] = []
+			}
+
+			acc[team.group.name]?.push(teamData)
+			return acc
+		},
+		{} as Record<string, TeamWithStatsType[]>,
+	)
+
+	// Ordiniamo le squadre di ogni girone per percentuale vittorie e, successivamente, per differenza punti
+	Object.keys(groups).forEach((groupName) => {
+		groups[groupName]?.sort((a, b) => {
+			if (b?.winPercentage !== a?.winPercentage) {
+				return b.winPercentage - a.winPercentage
+			}
+			return b.pointDifference - a.pointDifference
+		})
+	})
+
+	return { groups, topPlayers }
+}
+
+export default function Standings() {
+	const { topPlayers, groups } = useLoaderData<typeof loader>()
+
+	return (
+		<div className="p-4">
+			<Header title="Classifiche" backLink="/" icon={<Medal />} />
+			<Tabs defaultValue="groups" className="mt-4 w-full">
+				<TabsList>
+					<TabsTrigger value="groups">Classifica Gironi</TabsTrigger>
+					<TabsTrigger value="players">Classifica Giocatori</TabsTrigger>
+				</TabsList>
+
+				<TabsContent value="groups">
+					{Object.entries(groups).map(([groupName, teams]) => (
+						<div key={groupName} className="mt-4">
+							<h2 className="text-lg font-bold">{groupName}</h2>
+							<div className="overflow-hidden rounded-lg border border-gray-300">
+								<Table className="w-full border-collapse">
+									<TableHeader>
+										<TableRow className="bg-gray-100">
+											<TableHead>Nome squadra</TableHead>
+											<TableHead>Partite vinte</TableHead>
+											<TableHead>Partite giocate</TableHead>
+											<TableHead>%</TableHead>
+											<TableHead>+/-</TableHead>
+										</TableRow>
+									</TableHeader>
+									<TableBody>
+										{teams.map((team) => {
+											return (
+												<TableRow key={team.id} className="text-center">
+													<TableCell>{team.name}</TableCell>
+													<TableCell>{team.matchesWon}</TableCell>
+													<TableCell>{team.matchesPlayed}</TableCell>
+													<TableCell>{team.winPercentage}</TableCell>
+													<TableCell>{team.pointDifference}</TableCell>
+												</TableRow>
+											)
+										})}
+									</TableBody>
+								</Table>
+							</div>
+						</div>
+					))}
+				</TabsContent>
+
+				<TabsContent value="players">
+					<div className="mt-4 overflow-hidden rounded-lg border border-gray-300">
+						<Table className="w-full border-collapse">
+							<TableHeader>
+								<TableRow className="bg-gray-100">
+									<TableHead>Nome Cognome</TableHead>
+									<TableHead>Squadra</TableHead>
+									<TableHead>Girone</TableHead>
+									<TableHead>Punti Totali</TableHead>
+								</TableRow>
+							</TableHeader>
+							<TableBody>
+								{topPlayers.map((player) => (
+									<TableRow key={player.id} className="text-center">
+										<TableCell>
+											{player.name} {player.surname}
+										</TableCell>
+										<TableCell>{player.team.name}</TableCell>
+										<TableCell>{player.team.group.name}</TableCell>
+										<TableCell>{player.totalPoints}</TableCell>
+									</TableRow>
+								))}
+							</TableBody>
+						</Table>
+					</div>
+				</TabsContent>
+			</Tabs>
+		</div>
+	)
+}

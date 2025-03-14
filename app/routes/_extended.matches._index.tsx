@@ -4,6 +4,14 @@ import { Link, useLoaderData } from '@remix-run/react'
 import { CalendarRange, Pencil } from 'lucide-react'
 import Header from '~/components/Header'
 import { Button } from '~/components/ui/button'
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from '~/components/ui/table'
 import { cn } from '~/lib/utils'
 
 const prisma = new PrismaClient()
@@ -49,7 +57,7 @@ export default function Matches() {
 	)
 
 	return (
-		<div className="container mx-auto p-4">
+		<div className="p-4">
 			<div className="mb-4 flex items-center justify-between">
 				<Header
 					title="Calendario Partite"
@@ -64,76 +72,78 @@ export default function Matches() {
 			{Object.keys(matchesByDay).map((day) => (
 				<div key={day} className="mb-6">
 					<h2 className="mb-2 text-xl font-semibold">Giorno {day}</h2>
-					<table className="w-full border-collapse border border-gray-300">
-						<thead>
-							<tr className="bg-gray-100">
-								<th className="border p-2">⏱️ Orario</th>
-								<th className="border p-2">📍 Campo</th>
-								<th className="border p-2">👥 Squadra 1</th>
-								<th className="border p-2">👥 Squadra 2</th>
-								<th className="border p-2">📝 Risultato</th>
-								<th className="border p-2"></th>
-							</tr>
-						</thead>
-						<tbody>
-							{matchesByDay[Number(day)]?.map((match) => {
-								const isTeam1Winner = match.winner === match.team1Id
-								const isTeam2Winner = match.winner === match.team2Id
-								return (
-									<tr key={match.id} className="border-t text-center">
-										<td className="border p-2">{match.timeSlot}</td>
-										<td className="border p-2">{match.field}</td>
-										<td className="border p-2">
-											<div className="flex flex-col">
-												<span>
-													{isTeam1Winner && '🏆 '}
-													{match.team1.name}
+					<div className="overflow-hidden rounded-lg border border-gray-300">
+						<Table className="w-full border-collapse">
+							<TableHeader>
+								<TableRow className="bg-gray-100">
+									<TableHead>⏱️ Orario</TableHead>
+									<TableHead>📍 Campo</TableHead>
+									<TableHead>👥 Squadra 1</TableHead>
+									<TableHead>👥 Squadra 2</TableHead>
+									<TableHead>📝 Risultato</TableHead>
+									<TableHead></TableHead>
+								</TableRow>
+							</TableHeader>
+							<TableBody>
+								{matchesByDay[Number(day)]?.map((match) => {
+									const isTeam1Winner = match.winner === match.team1Id
+									const isTeam2Winner = match.winner === match.team2Id
+									return (
+										<TableRow key={match.id} className="text-center">
+											<TableCell>{match.timeSlot}</TableCell>
+											<TableCell>{match.field}</TableCell>
+											<TableCell>
+												<div className="flex flex-col">
+													<span>
+														{isTeam1Winner && '🏆 '}
+														{match.team1.name}
+													</span>
+													<span className="text-xs">
+														{match.team1.group.name}
+													</span>
+												</div>
+											</TableCell>
+											<TableCell>
+												<div className="flex flex-col">
+													<span>
+														{isTeam2Winner && '🏆 '}
+														{match.team2.name}
+													</span>
+													<span className="text-xs">
+														{match.team2.group.name}
+													</span>
+												</div>
+											</TableCell>
+											<TableCell>
+												<span
+													className={cn(
+														isTeam1Winner && 'font-bold text-green-600',
+													)}
+												>
+													{match.score1}
+												</span>{' '}
+												-{' '}
+												<span
+													className={cn(
+														isTeam2Winner && 'font-bold text-green-600',
+													)}
+												>
+													{match.score2}
 												</span>
-												<span className="text-xs">
-													{match.team1.group.name}
-												</span>
-											</div>
-										</td>
-										<td className="border p-2">
-											<div className="flex flex-col">
-												<span>
-													{isTeam2Winner && '🏆 '}
-													{match.team2.name}
-												</span>
-												<span className="text-xs">
-													{match.team2.group.name}
-												</span>
-											</div>
-										</td>
-										<td className="border p-2">
-											<span
-												className={cn(
-													isTeam1Winner && 'font-bold text-green-600',
-												)}
-											>
-												{match.score1}
-											</span>{' '}
-											-{' '}
-											<span
-												className={cn(
-													isTeam2Winner && 'font-bold text-green-600',
-												)}
-											>
-												{match.score2}
-											</span>
-										</td>
-										<td className="border p-2">
-											<Button asChild variant="outline">
-												<Link to={`/matches/${match.id}/edit`}>
-													<Pencil />
-												</Link>
-											</Button>
-										</td>
-									</tr>
-								)
-							})}
-						</tbody>
-					</table>
+											</TableCell>
+											<TableCell>
+												<Button asChild variant="outline">
+													<Link to={`/matches/${match.id}/edit`}>
+														<Pencil />
+													</Link>
+												</Button>
+											</TableCell>
+										</TableRow>
+									)
+								})}
+							</TableBody>
+						</Table>
+					</div>
 				</div>
 			))}
 		</div>

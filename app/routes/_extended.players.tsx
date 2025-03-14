@@ -1,11 +1,12 @@
 import { PrismaClient } from '@prisma/client'
 import { type MetaFunction } from '@remix-run/node'
-import { useLoaderData } from '@remix-run/react'
-import { ArrowUp, ChevronDown, ChevronUp, Users2 } from 'lucide-react'
+import { Link, useLoaderData } from '@remix-run/react'
+import { ArrowUp, ChevronDown, ChevronUp, Pencil, Users2 } from 'lucide-react'
 import { useState } from 'react'
 import Header from '~/components/Header'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
+import { Separator } from '~/components/ui/separator'
 import {
 	Table,
 	TableBody,
@@ -49,6 +50,7 @@ export const loader = async () => {
 		surname: player.surname,
 		birthYear: player.birthYear,
 		team: player.team.name,
+		teamId: player.teamId,
 		paid: player.paid,
 		totalPoints: player.totalPoints,
 		matches: player.matchStats.map((stat) => ({
@@ -124,82 +126,107 @@ export default function PlayerStatsPage() {
 				className="max-w-lg"
 			/>
 
-			<Table className="table-auto">
-				<TableHeader>
-					<TableRow>
-						{tableHeads.map(({ label, key }) => (
-							<TableHead
-								key={key}
-								onClick={() => handleSort(key)}
-								className={`cursor-pointer select-none ${
-									sortColumn === key ? 'text-primary' : ''
-								}`}
-							>
-								<div className="flex items-center gap-1">
-									{label}
+			<div className="overflow-hidden rounded-lg border border-gray-300">
+				<Table className="w-full border-collapse">
+					<TableHeader>
+						<TableRow className="bg-gray-100">
+							<TableHead></TableHead>
+							{tableHeads.map(({ label, key }) => (
+								<TableHead
+									key={key}
+									onClick={() => handleSort(key)}
+									className={`cursor-pointer select-none ${
+										sortColumn === key ? 'text-primary' : ''
+									}`}
+								>
+									<div className="flex items-center gap-1">
+										{label}
 
-									<span
-										className={cn('transition-transform', {
-											'rotate-180': sortDirection === 'desc',
-											visible: sortColumn === key,
-											invisible: sortColumn !== key,
-										})}
-									>
-										<ArrowUp className="h-4 w-4" />
-									</span>
-								</div>
-							</TableHead>
-						))}
-						<TableHead></TableHead>
-					</TableRow>
-				</TableHeader>
-				<TableBody>
-					{sortedPlayers.map((player) => (
-						<>
-							<TableRow
-								key={player.id}
-								role="button"
-								onClick={() =>
-									setExpandedPlayer(
-										expandedPlayer === player.id ? null : player.id,
-									)
-								}
-							>
-								<TableCell>{player.name}</TableCell>
-								<TableCell>{player.surname}</TableCell>
-								<TableCell>{player.birthYear}</TableCell>
-								<TableCell>{player.team}</TableCell>
-								<TableCell>{player.paid ? '✅' : '❌'}</TableCell>
-								<TableCell>{player.totalPoints}</TableCell>
-								<TableCell className="w-10">
-									<Button variant={'link'} size="icon">
-										{expandedPlayer === player.id ? (
-											<ChevronUp />
-										) : (
-											<ChevronDown />
-										)}
-									</Button>
-								</TableCell>
-							</TableRow>
-							{expandedPlayer === player.id && (
-								<TableRow className="bg-gray-100">
-									<TableCell colSpan={7}>
-										<ul className="list-inside list-decimal">
-											{player.matches.map((match) => (
-												<li key={match.matchId}>
-													Giorno {match.day} ({match.timeSlot}) vs{' '}
-													{match.opponent}:{' '}
-													<strong>{match.points} punti</strong>
-												</li>
-											))}
-										</ul>
+										<span
+											className={cn('transition-transform', {
+												'rotate-180': sortDirection === 'desc',
+												visible: sortColumn === key,
+												invisible: sortColumn !== key,
+											})}
+										>
+											<ArrowUp className="h-4 w-4" />
+										</span>
+									</div>
+								</TableHead>
+							))}
+							<TableHead></TableHead>
+						</TableRow>
+					</TableHeader>
+					<TableBody>
+						{sortedPlayers.map((player) => (
+							<>
+								<TableRow
+									key={player.id}
+									role="button"
+									onClick={() =>
+										setExpandedPlayer(
+											expandedPlayer === player.id ? null : player.id,
+										)
+									}
+								>
+									<TableCell className="text-center">
+										<Button
+											asChild
+											variant={'outline'}
+											onClick={(e) => {
+												e.stopPropagation()
+											}}
+										>
+											<Link to={`/teams/${player.teamId}`}>
+												<Pencil />
+											</Link>
+										</Button>
+									</TableCell>
+									<TableCell>{player.name}</TableCell>
+									<TableCell>{player.surname}</TableCell>
+									<TableCell>{player.birthYear}</TableCell>
+									<TableCell>{player.team}</TableCell>
+									<TableCell>{player.paid ? '✅' : '❌'}</TableCell>
+									<TableCell>{player.totalPoints}</TableCell>
+									<TableCell className="w-10">
+										<Button variant={'link'} size="icon">
+											{expandedPlayer === player.id ? (
+												<ChevronUp />
+											) : (
+												<ChevronDown />
+											)}
+										</Button>
 									</TableCell>
 								</TableRow>
-							)}
-						</>
-					))}
-				</TableBody>
-			</Table>
+								{expandedPlayer === player.id && (
+									<TableRow>
+										<TableCell colSpan={7}>
+											<div className="mb-2 grid grid-cols-4">
+												<div className="text-center font-bold">Giorno</div>
+												<div className="text-center font-bold">Orario</div>
+												<div className="text-center font-bold">Avversario</div>
+												<div className="text-center font-bold">Punti</div>
+											</div>
+											<Separator />
+											{player.matches.map((match) => (
+												<div
+													key={match.matchId}
+													className="grid grid-cols-4 py-1"
+												>
+													<div className="text-center">{match.day}</div>
+													<div className="text-center">{match.timeSlot}</div>
+													<div className="text-center">{match.opponent}</div>
+													<div className="text-center">{match.points}</div>
+												</div>
+											))}
+										</TableCell>
+									</TableRow>
+								)}
+							</>
+						))}
+					</TableBody>
+				</Table>
+			</div>
 		</div>
 	)
 }
