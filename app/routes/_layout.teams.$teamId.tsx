@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 import {
+	type MetaFunction,
 	type ActionFunctionArgs,
 	json,
 	redirect,
@@ -24,6 +25,10 @@ import {
 import { type PlayerLevels, playerLevelsMap } from '~/lib/types'
 
 const prisma = new PrismaClient()
+
+export const meta: MetaFunction = () => {
+	return [{ title: 'Squadra' }, { name: 'description', content: 'Squadra' }]
+}
 
 export const loader = async ({ params }: LoaderFunctionArgs) => {
 	const team = await prisma.team.findUnique({

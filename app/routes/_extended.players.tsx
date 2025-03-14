@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client'
+import { type MetaFunction } from '@remix-run/node'
 import { useLoaderData } from '@remix-run/react'
 import { ArrowUp, ChevronDown, ChevronUp, Users2 } from 'lucide-react'
 import { useState } from 'react'
@@ -17,6 +18,13 @@ import { type PlayerStatsType } from '~/lib/types'
 import { cn } from '~/lib/utils'
 
 const prisma = new PrismaClient()
+
+export const meta: MetaFunction = () => {
+	return [
+		{ title: 'Statistiche Giocatori' },
+		{ name: 'description', content: 'Statistiche Giocatori' },
+	]
+}
 
 export const loader = async () => {
 	const players = await prisma.player.findMany({

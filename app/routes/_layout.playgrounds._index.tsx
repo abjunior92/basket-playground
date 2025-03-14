@@ -1,5 +1,9 @@
 import { PrismaClient } from '@prisma/client'
-import { type ActionFunctionArgs, json } from '@remix-run/node'
+import {
+	type MetaFunction,
+	type ActionFunctionArgs,
+	json,
+} from '@remix-run/node'
 import { Form, Link, redirect, useLoaderData } from '@remix-run/react'
 import { Home } from 'lucide-react'
 import Header from '~/components/Header'
@@ -7,6 +11,10 @@ import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 
 const prisma = new PrismaClient()
+
+export const meta: MetaFunction = () => {
+	return [{ title: 'Tornei' }, { name: 'description', content: 'Tornei' }]
+}
 
 export const loader = async () => {
 	const playgrounds = await prisma.playground.findMany()

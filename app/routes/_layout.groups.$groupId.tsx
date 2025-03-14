@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 import {
+	type MetaFunction,
 	type ActionFunctionArgs,
 	json,
 	redirect,
@@ -13,6 +14,10 @@ import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 
 const prisma = new PrismaClient()
+
+export const meta: MetaFunction = () => {
+	return [{ title: 'Girone' }, { name: 'description', content: 'Girone' }]
+}
 
 export const loader = async ({ params }: LoaderFunctionArgs) => {
 	const group = await prisma.group.findUnique({

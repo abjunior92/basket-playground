@@ -1,9 +1,16 @@
 import { PrismaClient } from '@prisma/client'
-import { json } from '@remix-run/node'
+import { json, type MetaFunction } from '@remix-run/node'
 import { useLoaderData } from '@remix-run/react'
 import { User } from 'lucide-react'
 
 const prisma = new PrismaClient()
+
+export const meta: MetaFunction = () => {
+	return [
+		{ title: 'Panoramica Tornei' },
+		{ name: 'description', content: 'Panoramica Tornei' },
+	]
+}
 
 export const loader = async () => {
 	const playgrounds = await prisma.playground.findMany({

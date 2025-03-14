@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-import { json } from '@remix-run/node'
+import { json, type MetaFunction } from '@remix-run/node'
 import { Link, useLoaderData } from '@remix-run/react'
 import { CalendarRange, Pencil } from 'lucide-react'
 import Header from '~/components/Header'
@@ -7,6 +7,13 @@ import { Button } from '~/components/ui/button'
 import { cn } from '~/lib/utils'
 
 const prisma = new PrismaClient()
+
+export const meta: MetaFunction = () => {
+	return [
+		{ title: 'Calendario Partite' },
+		{ name: 'description', content: 'Calendario Partite' },
+	]
+}
 
 export async function loader() {
 	const matches = await prisma.match.findMany({

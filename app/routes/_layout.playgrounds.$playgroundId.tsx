@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 import {
+	type MetaFunction,
 	type ActionFunctionArgs,
 	json,
 	type LoaderFunctionArgs,
@@ -12,6 +13,10 @@ import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 
 const prisma = new PrismaClient()
+
+export const meta: MetaFunction = () => {
+	return [{ title: 'Torneo' }, { name: 'description', content: 'Torneo' }]
+}
 
 export const loader = async ({ params }: LoaderFunctionArgs) => {
 	const playground = await prisma.playground.findUnique({

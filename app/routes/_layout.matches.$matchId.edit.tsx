@@ -3,6 +3,7 @@ import {
 	type ActionFunctionArgs,
 	json,
 	type LoaderFunctionArgs,
+	type MetaFunction,
 	redirect,
 } from '@remix-run/node'
 import { Form, useActionData, useLoaderData } from '@remix-run/react'
@@ -14,6 +15,13 @@ import { Input } from '~/components/ui/input'
 import { Separator } from '~/components/ui/separator'
 
 const prisma = new PrismaClient()
+
+export const meta: MetaFunction = () => {
+	return [
+		{ title: 'Modifica Risultato' },
+		{ name: 'description', content: 'Modifica Risultato' },
+	]
+}
 
 export const loader = async ({ params }: LoaderFunctionArgs) => {
 	const match = await prisma.match.findUnique({

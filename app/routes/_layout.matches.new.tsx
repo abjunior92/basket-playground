@@ -1,5 +1,10 @@
 import { PrismaClient } from '@prisma/client'
-import { type ActionFunctionArgs, json, redirect } from '@remix-run/node'
+import {
+	type MetaFunction,
+	type ActionFunctionArgs,
+	json,
+	redirect,
+} from '@remix-run/node'
 import { Form, useActionData, useLoaderData } from '@remix-run/react'
 import { Plus } from 'lucide-react'
 import Header from '~/components/Header'
@@ -15,6 +20,13 @@ import {
 } from '~/components/ui/select'
 
 const prisma = new PrismaClient()
+
+export const meta: MetaFunction = () => {
+	return [
+		{ title: 'Nuova Partita' },
+		{ name: 'description', content: 'Nuova Partita' },
+	]
+}
 
 export const loader = async () => {
 	const playgrounds = await prisma.playground.findMany()
