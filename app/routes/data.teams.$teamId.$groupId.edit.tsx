@@ -10,10 +10,11 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 	invariant(params.groupId, 'groupId is required')
 	const formData = await request.formData()
 	const name = formData.get('name') as string
+	const refPhoneNumber = formData.get('refPhoneNumber') as string
 
 	await prisma.team.update({
 		where: { id: params.teamId },
-		data: { name },
+		data: { name, refPhoneNumber },
 	})
 
 	return redirect(`/groups/${params.groupId}`)

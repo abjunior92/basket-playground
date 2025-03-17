@@ -56,6 +56,9 @@ export type TeamWithStatsType = {
 	name: string
 	matchesPlayed: number
 	matchesWon: number
+	pointsScored: number
+	pointsConceded: number
 	winPercentage: number
-	pointDifference: number
+	pointsDifference: number
+	pointsGroup: number
 }

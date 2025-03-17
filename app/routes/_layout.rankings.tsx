@@ -70,7 +70,7 @@ export const loader = async () => {
 				}
 			})
 
-			const pointDifference = pointsScored - pointsConceded
+			const pointsDifference = pointsScored - pointsConceded
 			const winPercentage = matchesPlayed > 0 ? matchesWon / matchesPlayed : 0
 
 			const teamData = {
@@ -78,8 +78,11 @@ export const loader = async () => {
 				name: team.name,
 				matchesPlayed,
 				matchesWon,
+				pointsScored,
+				pointsConceded,
 				winPercentage,
-				pointDifference,
+				pointsDifference,
+				pointsGroup: matchesWon * 2,
 			}
 
 			if (!acc[team.group.name]) {
@@ -98,7 +101,7 @@ export const loader = async () => {
 			if (b?.winPercentage !== a?.winPercentage) {
 				return b.winPercentage - a.winPercentage
 			}
-			return b.pointDifference - a.pointDifference
+			return b.pointsDifference - a.pointsDifference
 		})
 	})
 
@@ -126,8 +129,11 @@ export default function Standings() {
 									<TableHeader>
 										<TableRow className="bg-gray-100">
 											<TableHead>Nome squadra</TableHead>
+											<TableHead>Punti girone</TableHead>
 											<TableHead>Partite vinte</TableHead>
 											<TableHead>Partite giocate</TableHead>
+											<TableHead>Punti fatti</TableHead>
+											<TableHead>Punti subiti</TableHead>
 											<TableHead>%</TableHead>
 											<TableHead>+/-</TableHead>
 										</TableRow>
@@ -137,10 +143,13 @@ export default function Standings() {
 											return (
 												<TableRow key={team.id} className="text-center">
 													<TableCell>{team.name}</TableCell>
+													<TableCell>{team.pointsGroup}</TableCell>
 													<TableCell>{team.matchesWon}</TableCell>
 													<TableCell>{team.matchesPlayed}</TableCell>
+													<TableCell>{team.pointsScored}</TableCell>
+													<TableCell>{team.pointsConceded}</TableCell>
 													<TableCell>{team.winPercentage}</TableCell>
-													<TableCell>{team.pointDifference}</TableCell>
+													<TableCell>{team.pointsDifference}</TableCell>
 												</TableRow>
 											)
 										})}

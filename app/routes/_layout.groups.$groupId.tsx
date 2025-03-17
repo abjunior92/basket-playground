@@ -57,6 +57,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 	invariant(params.groupId, 'groupId is required')
 	const formData = await request.formData()
 	const name = formData.get('name') as string
+	const refPhoneNumber = formData.get('refPhoneNumber') as string
 
 	if (!name) {
 		return json(
@@ -68,6 +69,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 	await prisma.team.create({
 		data: {
 			name,
+			refPhoneNumber,
 			groupId: params.groupId,
 		},
 	})
@@ -111,6 +113,11 @@ export default function GroupDetails() {
 					placeholder="Inserisci il nome della squadra"
 					required
 				/>
+				<Input
+					type="tel"
+					name="refPhoneNumber"
+					placeholder="Inserisci il numero di telefono di riferimento della squadra"
+				/>
 				<Button type="submit">Aggiungi Squadra</Button>
 			</Form>
 
@@ -122,6 +129,7 @@ export default function GroupDetails() {
 						<TableRow className="bg-gray-100">
 							<TableHead>Nome</TableHead>
 							<TableHead>Squadre</TableHead>
+							<TableHead>Telefono riferimento</TableHead>
 							<TableHead>Modifica</TableHead>
 						</TableRow>
 					</TableHeader>
@@ -137,6 +145,9 @@ export default function GroupDetails() {
 									{team.players
 										.map((player) => `${player.name} ${player.surname}`)
 										.join(', ')}
+								</TableCell>
+								<TableCell className="text-center">
+									{team.refPhoneNumber}
 								</TableCell>
 								<TableCell className="text-center">
 									<Dialog>
@@ -161,6 +172,13 @@ export default function GroupDetails() {
 													placeholder="Inserisci il nome della squadra"
 													defaultValue={team.name}
 													required
+												/>
+												<Input
+													form="editTeamForm"
+													type="tel"
+													name="refPhoneNumber"
+													placeholder="Inserisci il numero di telefono di riferimento della squadra"
+													defaultValue={team.refPhoneNumber ?? ''}
 												/>
 											</div>
 											<DialogFooter>

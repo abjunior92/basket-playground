@@ -35,6 +35,8 @@ model Team {
   matchesAsTeam2 Match[] @relation(name: "Team2Matches")
 
   players  Player[]
+
+  refPhoneNumber String?
 }
 
 model Player {
