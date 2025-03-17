@@ -7,8 +7,9 @@ import {
 	type LoaderFunctionArgs,
 } from '@remix-run/node'
 import { Form, useActionData, useLoaderData } from '@remix-run/react'
-import { Pencil, ShieldUser, X } from 'lucide-react'
+import { Ellipsis, Pencil, Plus, ShieldUser, X } from 'lucide-react'
 import invariant from 'tiny-invariant'
+import DialogAlert from '~/components/DialogAlert'
 import Header from '~/components/Header'
 import { Button } from '~/components/ui/button'
 import { Checkbox } from '~/components/ui/checkbox'
@@ -22,6 +23,13 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from '~/components/ui/dialog'
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from '~/components/ui/dropdown-menu'
 import { Input } from '~/components/ui/input'
 import {
 	Select,
@@ -181,9 +189,11 @@ export default function TeamDetails() {
 							<TableHead>Anno</TableHead>
 							<TableHead>Livello</TableHead>
 							<TableHead>Pagato</TableHead>
-							<TableHead>Punti totali</TableHead>
+							<TableHead>Ammonizioni</TableHead>
+							<TableHead>Espulsione</TableHead>
 							<TableHead>Modifica</TableHead>
 							<TableHead>Elimina</TableHead>
+							<TableHead>Altre azioni</TableHead>
 						</TableRow>
 					</TableHeader>
 					<TableBody>
@@ -194,12 +204,20 @@ export default function TeamDetails() {
 								<TableCell>{player.birthYear}</TableCell>
 								<TableCell>{player.level.replace('_', ' ')}</TableCell>
 								<TableCell>{player.paid ? '✅' : '❌'}</TableCell>
-								<TableCell>{player.totalPoints}</TableCell>
+								<TableCell>
+									{player.warnings === 0
+										? '-'
+										: player.warnings === 1
+											? '🟨'
+											: '🟨 🟨'}
+								</TableCell>
+								<TableCell>{player.isExpelled ? '🟥' : '-'}</TableCell>
 								<TableCell>
 									<Dialog>
 										<DialogTrigger asChild>
 											<Button
-												variant="outline"
+												variant="secondary"
+												size={'icon'}
 												type="button"
 												aria-label="Modifica giocatore"
 											>
@@ -291,22 +309,122 @@ export default function TeamDetails() {
 								</TableCell>
 								<TableCell>
 									<Form
+										id="deletePlayerForm"
 										method="post"
 										action={`/data/players/${player.id}/${player.teamId}/delete`}
-										className="flex items-center justify-center"
 									>
-										<Button
-											type="submit"
-											variant="destructive"
-											onClick={() =>
-												confirm(
-													'Sei sicuro di voler eliminare questo giocatore?',
-												)
+										<DialogAlert
+											trigger={
+												<Button
+													variant="destructive"
+													size={'icon'}
+													type="button"
+													aria-label="Elimina giocatore"
+												>
+													<X className="h-4 w-4" />
+												</Button>
 											}
-										>
-											<X className="h-4 w-4" />
-										</Button>
+											title="Elimina giocatore"
+											description="Sei sicuro di voler eliminare questo giocatore?"
+											formId="deletePlayerForm"
+										/>
 									</Form>
+								</TableCell>
+								<TableCell>
+									<DropdownMenu>
+										<DropdownMenuTrigger asChild>
+											<Button variant="ghost" type="button" aria-label="Azioni">
+												<Ellipsis className="h-4 w-4" />
+											</Button>
+										</DropdownMenuTrigger>
+										<DropdownMenuContent>
+											{player.warnings < 2 && (
+												<DropdownMenuItem>
+													<Form
+														method="post"
+														action={`/data/players/${player.id}/${player.teamId}/add-warning`}
+														className="w-full"
+													>
+														<Button
+															variant="warning"
+															type="submit"
+															aria-label="Aggiungi ammonizione"
+															className="w-full"
+														>
+															<Plus className="h-4 w-4" />
+															Aggiungi ammonizione
+														</Button>
+													</Form>
+												</DropdownMenuItem>
+											)}
+											{player.warnings > 0 && (
+												<>
+													<DropdownMenuSeparator />
+													<DropdownMenuItem>
+														<Form
+															method="post"
+															action={`/data/players/${player.id}/${player.teamId}/remove-warning`}
+															className="w-full"
+														>
+															<Button
+																variant="secondary"
+																type="submit"
+																aria-label="Rimuovi ammonizione"
+																className="w-full"
+															>
+																<Plus className="h-4 w-4" />
+																Rimuovi ammonizione
+															</Button>
+														</Form>
+													</DropdownMenuItem>
+												</>
+											)}
+											{!player.isExpelled && (
+												<>
+													<DropdownMenuSeparator />
+													<DropdownMenuItem>
+														<Form
+															method="post"
+															action={`/data/players/${player.id}/${player.teamId}/add-expulsion`}
+															className="w-full"
+														>
+															<Button
+																variant="destructive"
+																type="submit"
+																aria-label="Espelli giocatore"
+																className="w-full"
+															>
+																<Plus className="h-4 w-4" />
+																Espelli giocatore
+															</Button>
+														</Form>
+													</DropdownMenuItem>
+												</>
+											)}
+											{player.isExpelled && (
+												<>
+													<DropdownMenuSeparator />
+													<DropdownMenuItem>
+														<Form
+															method="post"
+															action={`/data/players/${player.id}/${player.teamId}/remove-expulsion`}
+															className="w-full"
+														>
+															<Button
+																variant="secondary"
+																type="submit"
+																aria-label="Rimuovi espulsione"
+																className="w-full"
+															>
+																<Plus className="h-4 w-4" />
+																Rimuovi espulsione
+															</Button>
+														</Form>
+													</DropdownMenuItem>
+												</>
+											)}
+										</DropdownMenuContent>
+									</DropdownMenu>
 								</TableCell>
 							</TableRow>
 						))}

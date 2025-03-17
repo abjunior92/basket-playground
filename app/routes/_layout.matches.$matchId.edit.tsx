@@ -207,7 +207,7 @@ export default function EditMatch() {
 							type="number"
 							name="score1"
 							defaultValue={match.score1 ?? 0}
-							className="w-24"
+							className="w-64"
 							required
 						/>
 					</label>
@@ -218,7 +218,7 @@ export default function EditMatch() {
 							type="number"
 							name="score2"
 							defaultValue={match.score2 ?? 0}
-							className="w-24"
+							className="w-64"
 							required
 						/>
 					</label>
@@ -235,12 +235,14 @@ export default function EditMatch() {
 						{match.team1.players.map((player) => (
 							<div key={player.id}>
 								<label>
+									{player.warnings === 1 && '🟨 '}
+									{player.isExpelled && '🟥 '}
 									{player.name} {player.surname}:
 									<input hidden name={`team1Players[]`} value={player.id} />
 									<Input
 										type="number"
 										name={`player-${player.id}`}
-										className="w-24"
+										className="w-64"
 										defaultValue={playerStatsMap.get(player.id) ?? 0}
 									/>
 								</label>
@@ -263,7 +265,7 @@ export default function EditMatch() {
 									<Input
 										type="number"
 										name={`player-${player.id}`}
-										className="w-24 place-self-end"
+										className="w-64 place-self-end"
 										defaultValue={playerStatsMap.get(player.id) ?? 0}
 									/>
 								</label>

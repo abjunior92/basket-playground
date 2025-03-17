@@ -53,6 +53,8 @@ export const loader = async () => {
 		teamId: player.teamId,
 		paid: player.paid,
 		totalPoints: player.totalPoints,
+		isExpelled: player.isExpelled,
+		warnings: player.warnings,
 		matches: player.matchStats.map((stat) => ({
 			matchId: stat.matchId,
 			opponent:
@@ -168,6 +170,12 @@ export default function PlayerStatsPage() {
 											expandedPlayer === player.id ? null : player.id,
 										)
 									}
+									className={cn('', {
+										'bg-red-500/20': player.isExpelled,
+										'hover:bg-red-500/30': player.isExpelled,
+										'bg-yellow-500/20': player.warnings === 1,
+										'hover:bg-yellow-500/30': player.warnings === 1,
+									})}
 								>
 									<TableCell className="text-center">
 										<Button

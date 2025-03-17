@@ -1,7 +1,8 @@
 import { PrismaClient } from '@prisma/client'
 import { json, type MetaFunction } from '@remix-run/node'
 import { useLoaderData } from '@remix-run/react'
-import { User } from 'lucide-react'
+import { Trophy, User } from 'lucide-react'
+import Header from '~/components/Header'
 
 const prisma = new PrismaClient()
 
@@ -35,7 +36,7 @@ export default function TournamentOverview() {
 
 	return (
 		<div className="p-4">
-			<h1 className="text-2xl font-bold">Panoramica Tornei</h1>
+			<Header title="Panoramica Tornei" backLink="/" icon={<Trophy />} />
 
 			{playgrounds.length === 0 ? (
 				<p className="mt-4">Nessun torneo disponibile</p>
