@@ -13,6 +13,7 @@ import {
 } from '~/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
 import { type TeamWithStatsType } from '~/lib/types'
+import { cn } from '~/lib/utils'
 
 const prisma = new PrismaClient()
 
@@ -168,12 +169,20 @@ export default function Standings() {
 									<TableHead>Nome Cognome</TableHead>
 									<TableHead>Squadra</TableHead>
 									<TableHead>Girone</TableHead>
-									<TableHead>Punti Totali</TableHead>
+									<TableHead>Punti totali</TableHead>
 								</TableRow>
 							</TableHeader>
 							<TableBody>
 								{topPlayers.map((player) => (
-									<TableRow key={player.id} className="text-center">
+									<TableRow
+										key={player.id}
+										className={cn('text-center', {
+											'bg-red-500/20': player.isExpelled,
+											'hover:bg-red-500/30': player.isExpelled,
+											'bg-yellow-500/20': player.warnings === 1,
+											'hover:bg-yellow-500/30': player.warnings === 1,
+										})}
+									>
 										<TableCell>
 											{player.name} {player.surname}
 										</TableCell>

@@ -260,6 +260,8 @@ export default function EditMatch() {
 						{match.team2.players.map((player) => (
 							<div key={player.id} className="place-self-end">
 								<label>
+									{player.warnings === 1 && '🟨 '}
+									{player.isExpelled && '🟥 '}
 									{player.name} {player.surname}:
 									<input hidden name={`team2Players[]`} value={player.id} />
 									<Input
