@@ -6,11 +6,28 @@ import {
 	type LoaderFunctionArgs,
 } from '@remix-run/node'
 import { Form, Link, redirect, useLoaderData } from '@remix-run/react'
-import { Trophy } from 'lucide-react'
+import { Pencil, Trophy } from 'lucide-react'
 import invariant from 'tiny-invariant'
 import Header from '~/components/Header'
 import { Button } from '~/components/ui/button'
+import {
+	Dialog,
+	DialogClose,
+	DialogContent,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from '~/components/ui/dialog'
 import { Input } from '~/components/ui/input'
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from '~/components/ui/table'
 
 const prisma = new PrismaClient()
 
@@ -21,7 +38,17 @@ export const meta: MetaFunction = () => {
 export const loader = async ({ params }: LoaderFunctionArgs) => {
 	const playground = await prisma.playground.findUnique({
 		where: { id: params.playgroundId },
-		include: { groups: true },
+		include: {
+			groups: {
+				include: {
+					teams: {
+						include: {
+							players: true,
+						},
+					},
+				},
+			},
+		},
 	})
 
 	if (!playground) throw new Response('Not Found', { status: 404 })
@@ -89,15 +116,70 @@ export default function PlaygroundDetails() {
 
 			<h2 className="mt-12 text-xl">Lista Gironi</h2>
 
-			<ul className="mt-2">
-				{playground.groups.map((group) => (
-					<li key={group.id} className="list-inside list-decimal">
-						<Link to={`/groups/${group.id}`} className="text-blue-500">
-							{group.name}
-						</Link>
-					</li>
-				))}
-			</ul>
+			<div className="mt-4 overflow-hidden rounded-lg border border-gray-300">
+				<Table className="w-full border-collapse">
+					<TableHeader>
+						<TableRow className="bg-gray-100">
+							<TableHead>Nome</TableHead>
+							<TableHead>Squadre</TableHead>
+							<TableHead>Modifica</TableHead>
+						</TableRow>
+					</TableHeader>
+					<TableBody>
+						{playground.groups.map((group) => (
+							<TableRow key={group.id}>
+								<TableCell className="text-center">
+									<Link to={`/groups/${group.id}`} className="text-blue-500">
+										{group.name}
+									</Link>
+								</TableCell>
+								<TableCell>
+									{group.teams.map((team) => team.name).join(', ')}
+								</TableCell>
+								<TableCell className="text-center">
+									<Dialog>
+										<DialogTrigger asChild>
+											<Button
+												variant="outline"
+												type="button"
+												aria-label="Modifica giocatore"
+											>
+												<Pencil className="h-4 w-4" />
+											</Button>
+										</DialogTrigger>
+										<DialogContent>
+											<DialogHeader>
+												<DialogTitle>Modifica girone</DialogTitle>
+											</DialogHeader>
+											<div className="grid gap-4 py-4">
+												<Input
+													form="editGroupForm"
+													type="text"
+													name="name"
+													placeholder="Inserisci il nome del girone"
+													defaultValue={group.name}
+													required
+												/>
+											</div>
+											<DialogFooter>
+												<Form
+													id="editGroupForm"
+													method="post"
+													action={`/data/groups/${group.id}/${group.playgroundId}/edit`}
+												>
+													<DialogClose>
+														<Button type="submit">Salva</Button>
+													</DialogClose>
+												</Form>
+											</DialogFooter>
+										</DialogContent>
+									</Dialog>
+								</TableCell>
+							</TableRow>
+						))}
+					</TableBody>
+				</Table>
+			</div>
 		</div>
 	)
 }

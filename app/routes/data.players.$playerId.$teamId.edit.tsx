@@ -15,8 +15,6 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 	const level = formData.get('level') as PlayerLevels
 	const paid = formData.get('paid') === 'on'
 
-	console.log(name, surname, birthYear, level, paid)
-
 	await prisma.player.update({
 		where: { id: params.playerId },
 		data: {
