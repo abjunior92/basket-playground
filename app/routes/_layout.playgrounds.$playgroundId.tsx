@@ -95,10 +95,10 @@ export default function PlaygroundDetails() {
 						type="submit"
 						variant="destructive"
 						onClick={() =>
-							confirm('Sei sicuro di voler eliminare questo playground?')
+							confirm('Sei sicuro di voler eliminare questo torneo?')
 						}
 					>
-						Cancella Playground
+						Cancella Torneo
 					</Button>
 				</Form>
 			</div>

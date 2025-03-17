@@ -1,4 +1,12 @@
 import { type MetaFunction } from '@remix-run/node'
+import { Link } from '@remix-run/react'
+import {
+	CalendarCog,
+	Medal,
+	PersonStanding,
+	Trophy,
+	UserCog,
+} from 'lucide-react'
 
 export const meta: MetaFunction = () => {
 	return [
@@ -10,26 +18,28 @@ export const meta: MetaFunction = () => {
 export default function Index() {
 	return (
 		<div className="flex h-screen items-center justify-center">
-			<div className="flex flex-col items-center gap-16">
-				<header className="flex flex-col items-center gap-9">
+			<div className="flex flex-col items-center gap-8">
+				<header className="flex flex-col items-center">
 					<h1 className="leading text-2xl font-bold text-gray-800 dark:text-gray-100">
 						Welcome to Playgrounds
 					</h1>
 				</header>
-				<nav className="flex flex-col items-center justify-center gap-4 rounded-3xl border border-gray-200 p-6 dark:border-gray-700">
-					<p className="leading-6 text-gray-700 dark:text-gray-200">Naviga</p>
-					<ul>
+				<nav className="flex flex-col items-center justify-center">
+					<ul className="space-y-4">
 						{resources.map(({ href, text, icon }) => (
-							<li key={href}>
-								<a
-									className="group flex items-center gap-3 self-stretch p-3 leading-normal text-blue-700 hover:underline dark:text-blue-500"
-									href={href}
+							<li
+								key={href}
+								className="rounded-3xl border border-gray-200 transition-colors duration-300 ease-in-out hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800"
+							>
+								<Link
+									className="group flex items-center justify-start gap-3 p-3 leading-normal"
+									to={href}
 								>
 									<div className="flex items-center space-x-2">
 										<span>{icon}</span>
 										<span>{text}</span>
 									</div>
-								</a>
+								</Link>
 							</li>
 						))}
 					</ul>
@@ -43,31 +53,26 @@ const resources = [
 	{
 		href: '/playgrounds',
 		text: 'Gestione Tornei',
-		icon: '🏀',
+		icon: <UserCog />,
 	},
 	{
 		href: '/tournament',
 		text: 'Panoramica tornei',
-		icon: '🏆',
+		icon: <Trophy />,
 	},
 	{
 		href: '/matches',
 		text: 'Calendario partite',
-		icon: '🗓️',
-	},
-	{
-		href: '/matches/new',
-		text: 'Aggiungi partita',
-		icon: '🆚',
+		icon: <CalendarCog />,
 	},
 	{
 		href: '/players',
 		text: 'Giocatori',
-		icon: '⛹🏻‍♂️',
+		icon: <PersonStanding />,
 	},
 	{
 		href: '/rankings',
 		text: 'Classifiche',
-		icon: '🥇',
+		icon: <Medal />,
 	},
 ]
