@@ -1,18 +1,26 @@
-import { type MetaFunction } from '@remix-run/node'
-import { Link } from '@remix-run/react'
+import { type LoaderFunctionArgs, type MetaFunction } from '@remix-run/node'
+import { Form, Link } from '@remix-run/react'
 import {
 	CalendarCog,
+	LogOut,
 	Medal,
 	PersonStanding,
 	Trophy,
 	UserCog,
 } from 'lucide-react'
+import { Button } from '~/components/ui/button'
+import { checkUserIsLoggedIn } from '~/utils/helpers'
 
 export const meta: MetaFunction = () => {
 	return [
 		{ title: 'Basket Playgrounds' },
 		{ name: 'description', content: 'Basket Playgrounds' },
 	]
+}
+
+export const loader = async ({ request }: LoaderFunctionArgs) => {
+	await checkUserIsLoggedIn(request)
+	return null
 }
 
 export default function Index() {
@@ -44,6 +52,13 @@ export default function Index() {
 						))}
 					</ul>
 				</nav>
+
+				<Form method="post" action="/logout">
+					<Button type="submit">
+						<LogOut className="h-5 w-5" />
+						Logout
+					</Button>
+				</Form>
 			</div>
 		</div>
 	)

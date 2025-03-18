@@ -24,7 +24,7 @@ export const meta: MetaFunction = () => {
 	]
 }
 
-export async function loader() {
+export const loader = async () => {
 	const matches = await prisma.match.findMany({
 		include: {
 			team1: {
