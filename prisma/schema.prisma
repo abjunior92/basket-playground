@@ -50,9 +50,20 @@ model Player {
   team         Team    @relation(fields: [teamId], references: [id])
   teamId       String
   matchStats PlayerMatchStats[]
+  size         Sizes?
   
   warnings     Int     @default(0)  // Numero di ammonizioni ricevute
   isExpelled   Boolean @default(false) // Espulsione dal torneo
+}
+
+enum Sizes {
+  xsmall
+  small
+  medium
+  large
+  xlarge
+  xxlarge
+  xxxlarge
 }
 
 enum Level {
