@@ -1,8 +1,9 @@
 import { PrismaClient } from '@prisma/client'
 import { json, type MetaFunction } from '@remix-run/node'
 import { Link, useLoaderData } from '@remix-run/react'
-import { CalendarRange, Pencil } from 'lucide-react'
+import { CalendarRange, Pencil, Plus } from 'lucide-react'
 import Header from '~/components/Header'
+import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
 import {
 	Table,
@@ -66,7 +67,10 @@ export default function Matches() {
 				/>
 
 				<Button asChild>
-					<Link to="/matches/new">Aggiungi Partita</Link>
+					<Link to="/matches/new">
+						<Plus className="h-5 w-5" />
+						<span className="hidden md:block">Aggiungi Partita</span>
+					</Link>
 				</Button>
 			</div>
 			{Object.keys(matchesByDay).map((day) => (
@@ -93,25 +97,25 @@ export default function Matches() {
 											<TableCell>{match.timeSlot}</TableCell>
 											<TableCell>{match.field}</TableCell>
 											<TableCell>
-												<div className="flex flex-col">
+												<div className="flex flex-col items-center justify-center">
 													<span>
 														{isTeam1Winner && '🏆 '}
 														{match.team1.name}
 													</span>
-													<span className="text-xs">
+													<Badge variant={'secondary'}>
 														{match.team1.group.name}
-													</span>
+													</Badge>
 												</div>
 											</TableCell>
 											<TableCell>
-												<div className="flex flex-col">
+												<div className="flex flex-col items-center justify-center">
 													<span>
 														{isTeam2Winner && '🏆 '}
 														{match.team2.name}
 													</span>
-													<span className="text-xs">
+													<Badge variant={'secondary'}>
 														{match.team2.group.name}
-													</span>
+													</Badge>
 												</div>
 											</TableCell>
 											<TableCell>

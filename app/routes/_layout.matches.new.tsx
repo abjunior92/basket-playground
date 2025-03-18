@@ -239,7 +239,9 @@ export default function NewMatch() {
 					</Select>
 				</div>
 
-				<Button type="submit">Aggiungi Partita</Button>
+				<Button type="submit" className="w-full md:w-auto">
+					Aggiungi Partita
+				</Button>
 				{actionData && 'error' in actionData && (
 					<p className="text-red-500">{actionData.error}</p>
 				)}

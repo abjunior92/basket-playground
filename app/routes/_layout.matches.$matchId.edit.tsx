@@ -202,23 +202,25 @@ export default function EditMatch() {
 			<Form method="post" className="mt-4">
 				<div className="flex justify-between">
 					<label>
-						<input hidden name="team1Id" value={match.team1Id} />
+						<input hidden name="team1Id" defaultValue={match.team1Id} />
 						<Input
 							type="number"
 							name="score1"
 							defaultValue={match.score1 ?? 0}
-							className="w-64"
+							className="w-24 md:w-64"
+							inputMode="numeric"
 							required
 						/>
 					</label>
 
 					<label>
-						<input hidden name="team2Id" value={match.team2Id} />
+						<input hidden name="team2Id" defaultValue={match.team2Id} />
 						<Input
 							type="number"
 							name="score2"
 							defaultValue={match.score2 ?? 0}
-							className="w-64"
+							className="w-24 md:w-64"
+							inputMode="numeric"
 							required
 						/>
 					</label>
@@ -238,11 +240,16 @@ export default function EditMatch() {
 									{player.warnings === 1 && '🟨 '}
 									{player.isExpelled && '🟥 '}
 									{player.name} {player.surname}:
-									<input hidden name={`team1Players[]`} value={player.id} />
+									<input
+										hidden
+										name={`team1Players[]`}
+										defaultValue={player.id}
+									/>
 									<Input
 										type="number"
 										name={`player-${player.id}`}
-										className="w-64"
+										className="w-24 md:w-64"
+										inputMode="numeric"
 										defaultValue={playerStatsMap.get(player.id) ?? 0}
 									/>
 								</label>
@@ -263,11 +270,16 @@ export default function EditMatch() {
 									{player.warnings === 1 && '🟨 '}
 									{player.isExpelled && '🟥 '}
 									{player.name} {player.surname}:
-									<input hidden name={`team2Players[]`} value={player.id} />
+									<input
+										hidden
+										name={`team2Players[]`}
+										defaultValue={player.id}
+									/>
 									<Input
 										type="number"
 										name={`player-${player.id}`}
-										className="w-64 place-self-end"
+										className="w-24 place-self-end md:w-64"
+										inputMode="numeric"
 										defaultValue={playerStatsMap.get(player.id) ?? 0}
 									/>
 								</label>
@@ -282,7 +294,7 @@ export default function EditMatch() {
 					</div>
 				</div>
 
-				<Button type="submit" className="mt-8">
+				<Button type="submit" className="mt-8 w-full md:w-auto">
 					Salva
 				</Button>
 			</Form>

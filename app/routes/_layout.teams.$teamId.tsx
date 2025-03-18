@@ -7,7 +7,14 @@ import {
 	type LoaderFunctionArgs,
 } from '@remix-run/node'
 import { Form, useActionData, useLoaderData } from '@remix-run/react'
-import { Ellipsis, Pencil, Plus, ShieldUser, X } from 'lucide-react'
+import {
+	AlertCircle,
+	Ellipsis,
+	Pencil,
+	Plus,
+	ShieldUser,
+	X,
+} from 'lucide-react'
 import invariant from 'tiny-invariant'
 import DialogAlert from '~/components/DialogAlert'
 import Header from '~/components/Header'
@@ -67,15 +74,31 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 	return json({ team })
 }
 
+const MAX_PLAYERS_PER_TEAM = 5
+
 export const action = async ({ request, params }: ActionFunctionArgs) => {
 	invariant(params.teamId, 'teamId is required')
 	const formData = await request.formData()
 	const name = formData.get('name') as string
 	const surname = formData.get('surname') as string
-
 	const birthYear = parseInt(formData.get('birthYear') as string)
 	const level = formData.get('level') as PlayerLevels
 	const paid = formData.get('paid') === 'on'
+
+	const team = await prisma.team.findUnique({
+		where: { id: params.teamId },
+		include: { players: true },
+	})
+
+	if (team && team.players.length >= MAX_PLAYERS_PER_TEAM) {
+		return json(
+			{
+				error:
+					'Questa squadra ha già raggiunto il limite massimo di 5 giocatori.',
+			},
+			{ status: 400 },
+		)
+	}
 
 	if (!name || !surname || !birthYear || !level) {
 		return json(
@@ -101,6 +124,8 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 export default function TeamDetails() {
 	const { team } = useLoaderData<typeof loader>()
 	const actionData = useActionData<typeof action>()
+
+	const isFull = team && team.players.length >= MAX_PLAYERS_PER_TEAM
 
 	return (
 		<div className="md:p-4">
@@ -174,7 +199,17 @@ export default function TeamDetails() {
 						Iscrizione pagata
 					</label>
 				</div>
-				<Button type="submit">Aggiungi Giocatore</Button>
+				<div className="flex items-center space-x-4">
+					<Button type="submit" disabled={isFull}>
+						Aggiungi Giocatore
+					</Button>
+					{isFull && (
+						<span className="flex items-center space-x-1 text-red-500">
+							<AlertCircle className="h-5 w-5" />
+							<span>Squadra piena</span>
+						</span>
+					)}
+				</div>
 				{actionData?.error && (
 					<p className="text-red-500">{actionData.error}</p>
 				)}

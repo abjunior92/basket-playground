@@ -3,6 +3,7 @@ import { type MetaFunction } from '@remix-run/node'
 import { useLoaderData } from '@remix-run/react'
 import { Medal } from 'lucide-react'
 import Header from '~/components/Header'
+import { Badge } from '~/components/ui/badge'
 import {
 	Table,
 	TableBody,
@@ -124,7 +125,9 @@ export default function Standings() {
 				<TabsContent value="groups">
 					{Object.entries(groups).map(([groupName, teams]) => (
 						<div key={groupName} className="mt-4">
-							<h2 className="text-lg font-bold">{groupName}</h2>
+							<Badge variant={'secondary'} className="mb-2 text-lg">
+								{groupName}
+							</Badge>
 							<div className="overflow-hidden rounded-lg border border-gray-300">
 								<Table className="w-full border-collapse">
 									<TableHeader>
@@ -187,7 +190,11 @@ export default function Standings() {
 											{player.name} {player.surname}
 										</TableCell>
 										<TableCell>{player.team.name}</TableCell>
-										<TableCell>{player.team.group.name}</TableCell>
+										<TableCell>
+											<Badge variant={'secondary'}>
+												{player.team.group.name}
+											</Badge>
+										</TableCell>
 										<TableCell>{player.totalPoints}</TableCell>
 									</TableRow>
 								))}
