@@ -113,7 +113,7 @@ export default function Standings() {
 	const { topPlayers, groups } = useLoaderData<typeof loader>()
 
 	return (
-		<div className="p-4">
+		<div className="md:p-4">
 			<Header title="Classifiche" backLink="/" icon={<Medal />} />
 			<Tabs defaultValue="groups" className="mt-4 w-full">
 				<TabsList>

@@ -14,26 +14,26 @@ const Header = ({
 	home?: boolean
 }) => {
 	return (
-		<header className="flex items-center space-x-2">
+		<header className="flex w-full items-center space-x-2 md:w-auto">
 			{home && (
-				<Button asChild variant={'ghost'}>
+				<Button asChild variant={'secondary'}>
 					<Link
 						to={'/'}
 						className="flex items-center space-x-2 hover:text-blue-500"
 					>
 						<Home className="h-5 w-5" />
-						<span>Home</span>
+						<span className="hidden md:block">Home</span>
 					</Link>
 				</Button>
 			)}
-			<Button asChild variant={'ghost'} size={'icon'}>
-				<Link to={backLink} className="hover:text-blue-500">
-					<ChevronLeft className="h-5 w-5" />
-				</Link>
-			</Button>
-			<div className="flex items-center space-x-2">
+			<div className="flex w-full items-center space-x-2">
+				<Button asChild variant={'ghost'} size={'icon'}>
+					<Link to={backLink} className="hover:text-blue-500">
+						<ChevronLeft className="h-5 w-5" />
+					</Link>
+				</Button>
 				{icon}
-				<h1 className="text-2xl font-bold">{title}</h1>
+				<h1 className="line-clamp-1 text-2xl font-bold">{title}</h1>
 			</div>
 		</header>
 	)

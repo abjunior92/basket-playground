@@ -35,7 +35,7 @@ export default function TournamentOverview() {
 	const playgrounds = useLoaderData<typeof loader>()
 
 	return (
-		<div className="p-4">
+		<div className="md:p-4">
 			<Header title="Panoramica Tornei" backLink="/" icon={<Trophy />} />
 
 			{playgrounds.length === 0 ? (

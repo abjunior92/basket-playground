@@ -103,7 +103,7 @@ export default function TeamDetails() {
 	const actionData = useActionData<typeof action>()
 
 	return (
-		<div className="p-4">
+		<div className="md:p-4">
 			<div className="flex items-center justify-between">
 				<Header
 					title={team.name}
@@ -111,20 +111,22 @@ export default function TeamDetails() {
 					icon={<ShieldUser />}
 					home
 				/>
-
 				<Form
+					id="deleteTeamForm"
 					method="post"
 					action={`/data/teams/${team.id}/${team.groupId}/delete`}
 				>
-					<Button
-						type="submit"
-						variant="destructive"
-						onClick={() =>
-							confirm('Sei sicuro di voler eliminare questa squadra?')
+					<DialogAlert
+						trigger={
+							<Button type="button" variant="destructive">
+								<X className="h-5 w-5" />
+								<span className="hidden md:block">Cancella Squadra</span>
+							</Button>
 						}
-					>
-						Cancella Squadra
-					</Button>
+						title="Elimina squadra"
+						description="Sei sicuro di voler eliminare questa squadra?"
+						formId="deleteTeamForm"
+					/>
 				</Form>
 			</div>
 

@@ -42,7 +42,7 @@ export default function Playgrounds() {
 	const { playgrounds } = useLoaderData<typeof loader>()
 
 	return (
-		<div className="p-4">
+		<div className="md:p-4">
 			<Header title="Tornei" backLink="/" />
 
 			<h4 className="mt-4 text-xl">Nuovo Torneo</h4>

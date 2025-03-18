@@ -6,8 +6,9 @@ import {
 	type LoaderFunctionArgs,
 } from '@remix-run/node'
 import { Form, Link, redirect, useLoaderData } from '@remix-run/react'
-import { Pencil, Trophy } from 'lucide-react'
+import { Pencil, Trophy, X } from 'lucide-react'
 import invariant from 'tiny-invariant'
+import DialogAlert from '~/components/DialogAlert'
 import Header from '~/components/Header'
 import { Button } from '~/components/ui/button'
 import {
@@ -79,7 +80,7 @@ export default function PlaygroundDetails() {
 	const { playground } = useLoaderData<typeof loader>()
 
 	return (
-		<div className="p-4">
+		<div className="md:p-4">
 			<div className="flex items-center justify-between">
 				<Header
 					title={playground.name}
@@ -88,18 +89,21 @@ export default function PlaygroundDetails() {
 					home
 				/>
 				<Form
+					id="deletePlaygroundForm"
 					method="post"
 					action={`/data/playgrounds/${playground.id}/delete`}
 				>
-					<Button
-						type="submit"
-						variant="destructive"
-						onClick={() =>
-							confirm('Sei sicuro di voler eliminare questo torneo?')
+					<DialogAlert
+						trigger={
+							<Button type="button" variant="destructive">
+								<X className="h-5 w-5" />
+								<span className="hidden md:block">Cancella Torneo</span>
+							</Button>
 						}
-					>
-						Cancella Torneo
-					</Button>
+						title="Elimina torneo"
+						description="Sei sicuro di voler eliminare questo torneo?"
+						formId="deletePlaygroundForm"
+					/>
 				</Form>
 			</div>
 

@@ -189,7 +189,7 @@ export default function EditMatch() {
 	const actionData = useActionData<typeof action>()
 
 	return (
-		<div className="p-4">
+		<div className="md:p-4">
 			<Header
 				title="Modifica Risultato"
 				backLink="/matches"

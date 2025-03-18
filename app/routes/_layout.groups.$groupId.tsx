@@ -7,8 +7,9 @@ import {
 	type LoaderFunctionArgs,
 } from '@remix-run/node'
 import { Form, Link, useLoaderData } from '@remix-run/react'
-import { LayoutGrid, Pencil } from 'lucide-react'
+import { LayoutGrid, Pencil, X } from 'lucide-react'
 import invariant from 'tiny-invariant'
+import DialogAlert from '~/components/DialogAlert'
 import Header from '~/components/Header'
 import { Button } from '~/components/ui/button'
 import {
@@ -81,7 +82,7 @@ export default function GroupDetails() {
 	const { group } = useLoaderData<typeof loader>()
 
 	return (
-		<div className="p-4">
+		<div className="md:p-4">
 			<div className="flex items-center justify-between">
 				<Header
 					title={group.name}
@@ -90,18 +91,21 @@ export default function GroupDetails() {
 					home
 				/>
 				<Form
+					id="deleteGroupForm"
 					method="post"
 					action={`/data/groups/${group.id}/${group.playgroundId}/delete`}
 				>
-					<Button
-						type="submit"
-						variant="destructive"
-						onClick={() =>
-							confirm('Sei sicuro di voler eliminare questo girone?')
+					<DialogAlert
+						trigger={
+							<Button type="button" variant="destructive">
+								<X className="h-5 w-5" />
+								<span className="hidden md:block">Cancella Girone</span>
+							</Button>
 						}
-					>
-						Cancella Girone
-					</Button>
+						title="Elimina girone"
+						description="Sei sicuro di voler eliminare questo girone?"
+						formId="deleteGroupForm"
+					/>
 				</Form>
 			</div>
 

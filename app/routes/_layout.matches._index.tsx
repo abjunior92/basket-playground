@@ -57,7 +57,7 @@ export default function Matches() {
 	)
 
 	return (
-		<div className="p-4">
+		<div className="md:p-4">
 			<div className="mb-4 flex items-center justify-between">
 				<Header
 					title="Calendario Partite"
