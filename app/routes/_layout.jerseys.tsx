@@ -163,12 +163,12 @@ export default function JerseysPage() {
 									<CollapsibleContent asChild>
 										<TableRow>
 											<TableCell colSpan={4}>
-												<div className="rounded-md bg-gray-100 p-4">
+												<div className="rounded-lg bg-gray-100 p-4">
 													<h3 className="mb-2 text-sm font-bold">
 														Giocatori con questa taglia:
 													</h3>
 													{playersGrouped[size]?.length > 0 ? (
-														<ul className="list-inside list-disc text-sm">
+														<ul className="list-inside list-disc space-y-2 text-sm">
 															{playersGrouped[size].map((player) => (
 																<li key={player.id}>
 																	{player.name} {player.surname} -{' '}

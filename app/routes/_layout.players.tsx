@@ -212,26 +212,32 @@ export default function PlayerStatsPage() {
 									<CollapsibleContent asChild>
 										<TableRow>
 											<TableCell colSpan={9}>
-												<div className="mb-2 grid grid-cols-4">
-													<div className="text-center font-bold">Giorno</div>
-													<div className="text-center font-bold">Orario</div>
-													<div className="text-center font-bold">
-														Avversario
+												<div className="rounded-lg bg-gray-100 p-4">
+													<div className="mb-2 grid grid-cols-4">
+														<div className="text-center font-bold">Giorno</div>
+														<div className="text-center font-bold">Orario</div>
+														<div className="text-center font-bold">
+															Avversario
+														</div>
+														<div className="text-center font-bold">Punti</div>
 													</div>
-													<div className="text-center font-bold">Punti</div>
+													<Separator />
+													{player.matches.map((match) => (
+														<div
+															key={match.matchId}
+															className="grid grid-cols-4 py-1"
+														>
+															<div className="text-center">{match.day}</div>
+															<div className="text-center">
+																{match.timeSlot}
+															</div>
+															<div className="text-center">
+																{match.opponent}
+															</div>
+															<div className="text-center">{match.points}</div>
+														</div>
+													))}
 												</div>
-												<Separator />
-												{player.matches.map((match) => (
-													<div
-														key={match.matchId}
-														className="grid grid-cols-4 py-1"
-													>
-														<div className="text-center">{match.day}</div>
-														<div className="text-center">{match.timeSlot}</div>
-														<div className="text-center">{match.opponent}</div>
-														<div className="text-center">{match.points}</div>
-													</div>
-												))}
 											</TableCell>
 										</TableRow>
 									</CollapsibleContent>
