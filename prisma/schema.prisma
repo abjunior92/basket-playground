@@ -117,3 +117,10 @@ model PlayerMatchStats {
 
   @@unique([matchId, playerId])  // Definisce una combinazione unica di matchId e playerId
 }
+
+model JerseyStock {
+  id        String  @id @default(uuid())
+  size      Sizes   @unique
+  available Int     @default(0)
+  distributed Int   @default(0)
+}

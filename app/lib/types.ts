@@ -64,6 +64,7 @@ export type PlayerStatsType = {
 	team: string
 	teamId: string
 	paid: boolean
+	size: Sizes | null
 	totalPoints: number
 	isExpelled: boolean
 	warnings: number

@@ -8,6 +8,7 @@ import {
 } from '@remix-run/react'
 
 import './tailwind.css'
+import { Toaster } from '~/components/ui/toaster'
 
 export const links: LinksFunction = () => [
 	{ rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -33,6 +34,7 @@ const App = () => {
 			</head>
 			<body>
 				<Outlet />
+				<Toaster />
 				<ScrollRestoration />
 				<Scripts />
 			</body>

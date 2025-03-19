@@ -6,7 +6,13 @@ import {
 	redirect,
 	type LoaderFunctionArgs,
 } from '@remix-run/node'
-import { Form, useActionData, useLoaderData } from '@remix-run/react'
+import {
+	Form,
+	useActionData,
+	useFetcher,
+	useLoaderData,
+	useRevalidator,
+} from '@remix-run/react'
 import {
 	AlertCircle,
 	Ellipsis,
@@ -15,6 +21,7 @@ import {
 	ShieldUser,
 	X,
 } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import invariant from 'tiny-invariant'
 import DialogAlert from '~/components/DialogAlert'
 import Header from '~/components/Header'
@@ -22,7 +29,6 @@ import { Button } from '~/components/ui/button'
 import { Checkbox } from '~/components/ui/checkbox'
 import {
 	Dialog,
-	DialogClose,
 	DialogContent,
 	DialogDescription,
 	DialogFooter,
@@ -55,6 +61,7 @@ import {
 	TableHeader,
 	TableRow,
 } from '~/components/ui/table'
+import { useToast } from '~/hooks/use-toast'
 import {
 	playerLevelsMap,
 	playerLevelsTransform,
@@ -129,8 +136,33 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 export default function TeamDetails() {
 	const { team } = useLoaderData<typeof loader>()
 	const actionData = useActionData<typeof action>()
+	const fetcher = useFetcher<{ ok: boolean } | { error: string }>()
+	const revalidator = useRevalidator()
+	const { toast } = useToast()
+
+	const [open, setOpen] = useState<string | null>(null)
 
 	const isFull = team && team.players.length >= MAX_PLAYERS_PER_TEAM
+
+	useEffect(() => {
+		if (fetcher.data === undefined || fetcher.data === null) {
+			return
+		}
+
+		if ('ok' in fetcher.data) {
+			setOpen(null)
+			revalidator.revalidate()
+		}
+
+		if ('error' in fetcher.data) {
+			toast({
+				title: 'Errore',
+				description: fetcher.data.error,
+				variant: 'destructive',
+			})
+		}
+		fetcher.submit('', { method: 'post', action: '/data/reset-fetcher' })
+	}, [fetcher, revalidator, toast])
 
 	return (
 		<div className="md:p-4">
@@ -259,7 +291,12 @@ export default function TeamDetails() {
 								</TableCell>
 								<TableCell>{player.isExpelled ? '🟥' : '-'}</TableCell>
 								<TableCell>
-									<Dialog>
+									<Dialog
+										open={open === player.id}
+										onOpenChange={() =>
+											setOpen(open === player.id ? null : player.id)
+										}
+									>
 										<DialogTrigger asChild>
 											<Button
 												variant="secondary"
@@ -362,15 +399,14 @@ export default function TeamDetails() {
 												</div>
 											</div>
 											<DialogFooter>
-												<Form
+												<fetcher.Form
 													id="editPlayerForm"
 													method="post"
+													noValidate
 													action={`/data/players/${player.id}/${player.teamId}/edit`}
 												>
-													<DialogClose>
-														<Button type="submit">Salva</Button>
-													</DialogClose>
-												</Form>
+													<Button type="submit">Salva</Button>
+												</fetcher.Form>
 											</DialogFooter>
 										</DialogContent>
 									</Dialog>

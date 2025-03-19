@@ -5,6 +5,7 @@ import {
 	LogOut,
 	Medal,
 	PersonStanding,
+	Shirt,
 	Trophy,
 	UserCog,
 } from 'lucide-react'
@@ -89,5 +90,10 @@ const resources = [
 		href: '/rankings',
 		text: 'Classifiche',
 		icon: <Medal />,
+	},
+	{
+		href: '/jerseys',
+		text: 'Gestione maglie',
+		icon: <Shirt />,
 	},
 ]

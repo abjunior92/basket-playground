@@ -1,10 +1,15 @@
 import { PrismaClient } from '@prisma/client'
 import { type MetaFunction } from '@remix-run/node'
 import { Link, useLoaderData } from '@remix-run/react'
-import { ArrowUp, ChevronDown, ChevronUp, Pencil, Users2 } from 'lucide-react'
+import { ArrowUp, ChevronDown, Pencil, Users2 } from 'lucide-react'
 import { useState } from 'react'
 import Header from '~/components/Header'
 import { Button } from '~/components/ui/button'
+import {
+	Collapsible,
+	CollapsibleContent,
+	CollapsibleTrigger,
+} from '~/components/ui/collapsible'
 import { Input } from '~/components/ui/input'
 import { Separator } from '~/components/ui/separator'
 import {
@@ -15,7 +20,7 @@ import {
 	TableHeader,
 	TableRow,
 } from '~/components/ui/table'
-import { type PlayerStatsType } from '~/lib/types'
+import { playerSizesTransform, type PlayerStatsType } from '~/lib/types'
 import { cn } from '~/lib/utils'
 
 const prisma = new PrismaClient()
@@ -52,6 +57,7 @@ export const loader = async () => {
 		team: player.team.name,
 		teamId: player.teamId,
 		paid: player.paid,
+		size: player.size,
 		totalPoints: player.totalPoints,
 		isExpelled: player.isExpelled,
 		warnings: player.warnings,
@@ -76,12 +82,12 @@ const tableHeads: { label: string; key: keyof PlayerStatsType }[] = [
 	{ label: 'Anno di nascita', key: 'birthYear' },
 	{ label: 'Squadra', key: 'team' },
 	{ label: 'Iscrizione Pagata', key: 'paid' },
+	{ label: 'Taglia', key: 'size' },
 	{ label: 'Totale Punti', key: 'totalPoints' },
 ]
 
 export default function PlayerStatsPage() {
 	const { playerStats } = useLoaderData<typeof loader>()
-	const [expandedPlayer, setExpandedPlayer] = useState<string | null>(null)
 	const [search, setSearch] = useState('')
 	const [sortColumn, setSortColumn] = useState<keyof PlayerStatsType | null>(
 		null,
@@ -101,8 +107,8 @@ export default function PlayerStatsPage() {
 		const valueA = a[sortColumn]
 		const valueB = b[sortColumn]
 
-		if (valueA < valueB) return sortDirection === 'asc' ? -1 : 1
-		if (valueA > valueB) return sortDirection === 'asc' ? 1 : -1
+		if (valueA! < valueB!) return sortDirection === 'asc' ? -1 : 1
+		if (valueA! > valueB!) return sortDirection === 'asc' ? 1 : -1
 		return 0
 	})
 
@@ -118,7 +124,7 @@ export default function PlayerStatsPage() {
 
 	return (
 		<div className="space-y-4 p-4">
-			<Header title="Statistiche Giocatori" backLink="/" icon={<Users2 />} />
+			<Header title="Giocatori" backLink="/" icon={<Users2 />} />
 
 			<Input
 				type="text"
@@ -131,7 +137,7 @@ export default function PlayerStatsPage() {
 			<div className="overflow-hidden rounded-lg border border-gray-300">
 				<Table className="w-full border-collapse">
 					<TableHeader>
-						<TableRow className="bg-gray-100">
+						<TableRow className="bg-gray-100 text-center">
 							<TableHead></TableHead>
 							{tableHeads.map(({ label, key }) => (
 								<TableHead
@@ -141,14 +147,15 @@ export default function PlayerStatsPage() {
 										sortColumn === key ? 'text-primary' : ''
 									}`}
 								>
-									<div className="flex items-center gap-1">
+									<div className="flex items-center justify-center gap-1">
 										{label}
 
 										<span
 											className={cn('transition-transform', {
-												'rotate-180': sortDirection === 'desc',
-												visible: sortColumn === key,
-												invisible: sortColumn !== key,
+												'rotate-180':
+													sortDirection === 'desc' && sortColumn === key,
+												'opacity-1': sortColumn === key,
+												'opacity-25': sortColumn !== key,
 											})}
 										>
 											<ArrowUp className="h-4 w-4" />
@@ -161,76 +168,75 @@ export default function PlayerStatsPage() {
 					</TableHeader>
 					<TableBody>
 						{sortedPlayers.map((player) => (
-							<>
-								<TableRow
-									key={player.id}
-									role="button"
-									onClick={() =>
-										setExpandedPlayer(
-											expandedPlayer === player.id ? null : player.id,
-										)
-									}
-									className={cn('', {
-										'bg-red-500/20': player.isExpelled,
-										'hover:bg-red-500/30': player.isExpelled,
-										'bg-yellow-500/20': player.warnings === 1,
-										'hover:bg-yellow-500/30': player.warnings === 1,
-									})}
-								>
-									<TableCell className="text-center">
-										<Button
-											asChild
-											variant={'outline'}
-											onClick={(e) => {
-												e.stopPropagation()
-											}}
+							<Collapsible key={player.id} asChild>
+								<>
+									<CollapsibleTrigger asChild>
+										<TableRow
+											role="button"
+											className={cn('group text-center', {
+												'bg-red-500/20': player.isExpelled,
+												'hover:bg-red-500/30': player.isExpelled,
+												'bg-yellow-500/20': player.warnings === 1,
+												'hover:bg-yellow-500/30': player.warnings === 1,
+											})}
 										>
-											<Link to={`/teams/${player.teamId}`}>
-												<Pencil />
-											</Link>
-										</Button>
-									</TableCell>
-									<TableCell>{player.name}</TableCell>
-									<TableCell>{player.surname}</TableCell>
-									<TableCell>{player.birthYear}</TableCell>
-									<TableCell>{player.team}</TableCell>
-									<TableCell>{player.paid ? '✅' : '❌'}</TableCell>
-									<TableCell>{player.totalPoints}</TableCell>
-									<TableCell className="w-10">
-										<Button variant={'link'} size="icon">
-											{expandedPlayer === player.id ? (
-												<ChevronUp />
-											) : (
-												<ChevronDown />
-											)}
-										</Button>
-									</TableCell>
-								</TableRow>
-								{expandedPlayer === player.id && (
-									<TableRow>
-										<TableCell colSpan={7}>
-											<div className="mb-2 grid grid-cols-4">
-												<div className="text-center font-bold">Giorno</div>
-												<div className="text-center font-bold">Orario</div>
-												<div className="text-center font-bold">Avversario</div>
-												<div className="text-center font-bold">Punti</div>
-											</div>
-											<Separator />
-											{player.matches.map((match) => (
-												<div
-													key={match.matchId}
-													className="grid grid-cols-4 py-1"
+											<TableCell>
+												<Button
+													asChild
+													variant={'outline'}
+													onClick={(e) => {
+														e.stopPropagation()
+													}}
 												>
-													<div className="text-center">{match.day}</div>
-													<div className="text-center">{match.timeSlot}</div>
-													<div className="text-center">{match.opponent}</div>
-													<div className="text-center">{match.points}</div>
+													<Link to={`/teams/${player.teamId}`}>
+														<Pencil />
+													</Link>
+												</Button>
+											</TableCell>
+											<TableCell>{player.name}</TableCell>
+											<TableCell>{player.surname}</TableCell>
+											<TableCell>{player.birthYear}</TableCell>
+											<TableCell>{player.team}</TableCell>
+											<TableCell>{player.paid ? '✅' : '❌'}</TableCell>
+											<TableCell>
+												{player.size ? playerSizesTransform[player.size] : '-'}
+											</TableCell>
+											<TableCell>{player.totalPoints}</TableCell>
+											<TableCell className="w-10">
+												<Button variant={'link'} size="icon">
+													<ChevronDown className="transition-all duration-300 ease-in-out group-data-[state=open]:rotate-180" />
+												</Button>
+											</TableCell>
+										</TableRow>
+									</CollapsibleTrigger>
+									<CollapsibleContent asChild>
+										<TableRow>
+											<TableCell colSpan={9}>
+												<div className="mb-2 grid grid-cols-4">
+													<div className="text-center font-bold">Giorno</div>
+													<div className="text-center font-bold">Orario</div>
+													<div className="text-center font-bold">
+														Avversario
+													</div>
+													<div className="text-center font-bold">Punti</div>
 												</div>
-											))}
-										</TableCell>
-									</TableRow>
-								)}
-							</>
+												<Separator />
+												{player.matches.map((match) => (
+													<div
+														key={match.matchId}
+														className="grid grid-cols-4 py-1"
+													>
+														<div className="text-center">{match.day}</div>
+														<div className="text-center">{match.timeSlot}</div>
+														<div className="text-center">{match.opponent}</div>
+														<div className="text-center">{match.points}</div>
+													</div>
+												))}
+											</TableCell>
+										</TableRow>
+									</CollapsibleContent>
+								</>
+							</Collapsible>
 						))}
 					</TableBody>
 				</Table>
