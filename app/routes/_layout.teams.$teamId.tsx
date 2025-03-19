@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import { type Level, PrismaClient } from '@prisma/client'
 import {
 	type MetaFunction,
 	type ActionFunctionArgs,
@@ -55,7 +55,12 @@ import {
 	TableHeader,
 	TableRow,
 } from '~/components/ui/table'
-import { type PlayerLevels, playerLevelsMap } from '~/lib/types'
+import {
+	playerLevelsMap,
+	playerLevelsTransform,
+	playerSizesMap,
+	playerSizesTransform,
+} from '~/lib/types'
 
 const prisma = new PrismaClient()
 
@@ -82,7 +87,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 	const name = formData.get('name') as string
 	const surname = formData.get('surname') as string
 	const birthYear = parseInt(formData.get('birthYear') as string)
-	const level = formData.get('level') as PlayerLevels
+	const level = formData.get('level') as Level
 	const paid = formData.get('paid') === 'on'
 
 	const team = await prisma.team.findUnique({
@@ -226,6 +231,7 @@ export default function TeamDetails() {
 							<TableHead>Anno</TableHead>
 							<TableHead>Livello</TableHead>
 							<TableHead>Pagato</TableHead>
+							<TableHead>Taglia</TableHead>
 							<TableHead>Ammonizioni</TableHead>
 							<TableHead>Espulsione</TableHead>
 							<TableHead>Modifica</TableHead>
@@ -239,8 +245,11 @@ export default function TeamDetails() {
 								<TableCell>{player.name}</TableCell>
 								<TableCell>{player.surname}</TableCell>
 								<TableCell>{player.birthYear}</TableCell>
-								<TableCell>{player.level.replace('_', ' ')}</TableCell>
+								<TableCell>{playerLevelsTransform[player.level]}</TableCell>
 								<TableCell>{player.paid ? '✅' : '❌'}</TableCell>
+								<TableCell>
+									{player.size ? playerSizesTransform[player.size] : '-'}
+								</TableCell>
 								<TableCell>
 									{player.warnings === 0
 										? '-'
@@ -307,6 +316,28 @@ export default function TeamDetails() {
 														<SelectGroup>
 															<SelectLabel>Livello</SelectLabel>
 															{Array.from(playerLevelsMap.entries()).map(
+																([key, value]) => (
+																	<SelectItem key={key} value={key}>
+																		{value}
+																	</SelectItem>
+																),
+															)}
+														</SelectGroup>
+													</SelectContent>
+												</Select>
+												<Select
+													form="editPlayerForm"
+													name="size"
+													defaultValue={player.size ?? undefined}
+													required
+												>
+													<SelectTrigger>
+														<SelectValue placeholder="Seleziona la taglia assegnata" />
+													</SelectTrigger>
+													<SelectContent>
+														<SelectGroup>
+															<SelectLabel>Taglia</SelectLabel>
+															{Array.from(playerSizesMap.entries()).map(
 																([key, value]) => (
 																	<SelectItem key={key} value={key}>
 																		{value}

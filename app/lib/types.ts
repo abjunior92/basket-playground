@@ -1,21 +1,6 @@
-export type PlayerLevels =
-	| 'serie_b'
-	| 'serie_c'
-	| 'serie_d'
-	| 'prima_divisione'
-	| 'promozione'
-	| 'u15'
-	| 'u17'
-	| 'u19'
-	| 'u20'
-	| 'over'
-	| 'mai_giocato'
-	| 'free_agent'
-	| 'csi'
-	| 'campetto'
-	| 'basket2all'
+import { type Level, type Sizes } from '@prisma/client'
 
-export const playerLevelsMap = new Map<PlayerLevels, string>([
+export const playerLevelsMap = new Map<Level, string>([
 	['serie_b', 'Serie B'],
 	['serie_c', 'Serie C'],
 	['serie_d', 'Serie D'],
@@ -32,6 +17,44 @@ export const playerLevelsMap = new Map<PlayerLevels, string>([
 	['campetto', 'Campetto'],
 	['basket2all', 'Basket2All'],
 ])
+
+export const playerLevelsTransform: Record<Level, string> = {
+	serie_b: 'Serie B',
+	serie_c: 'Serie C',
+	serie_d: 'Serie D',
+	prima_divisione: 'Prima Divisione',
+	promozione: 'Promozione',
+	u15: 'U15',
+	u17: 'U17',
+	u19: 'U19',
+	u20: 'U20',
+	over: 'Over',
+	mai_giocato: 'Mai Giocato',
+	free_agent: 'Free Agent',
+	csi: 'CSI',
+	campetto: 'Campetto',
+	basket2all: 'Basket2All',
+}
+
+export const playerSizesMap = new Map<Sizes, string>([
+	['xsmall', 'XSmall'],
+	['small', 'Small'],
+	['medium', 'Medium'],
+	['large', 'Large'],
+	['xlarge', 'XLarge'],
+	['xxlarge', 'XXLarge'],
+	['xxxlarge', 'XXXLarge'],
+])
+
+export const playerSizesTransform: Record<Sizes, string> = {
+	xsmall: 'XSmall',
+	small: 'Small',
+	medium: 'Medium',
+	large: 'Large',
+	xlarge: 'XLarge',
+	xxlarge: 'XXLarge',
+	xxxlarge: 'XXXLarge',
+}
 
 export type PlayerStatsType = {
 	id: string
