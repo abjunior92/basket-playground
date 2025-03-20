@@ -15,6 +15,7 @@ import {
 } from '@remix-run/react'
 import {
 	AlertCircle,
+	Ambulance,
 	Ellipsis,
 	Pencil,
 	Plus,
@@ -102,7 +103,10 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 		include: { players: true },
 	})
 
-	if (team && team.players.length >= MAX_PLAYERS_PER_TEAM) {
+	if (
+		team &&
+		team.players.filter((p) => !p.retired).length >= MAX_PLAYERS_PER_TEAM
+	) {
 		return json(
 			{
 				error:
@@ -142,7 +146,9 @@ export default function TeamDetails() {
 
 	const [open, setOpen] = useState<string | null>(null)
 
-	const isFull = team && team.players.length >= MAX_PLAYERS_PER_TEAM
+	const isFull =
+		team &&
+		team.players.filter((p) => !p.retired).length >= MAX_PLAYERS_PER_TEAM
 
 	useEffect(() => {
 		if (fetcher.data === undefined || fetcher.data === null) {
@@ -266,6 +272,7 @@ export default function TeamDetails() {
 							<TableHead>Taglia</TableHead>
 							<TableHead>Ammonizioni</TableHead>
 							<TableHead>Espulsione</TableHead>
+							<TableHead>Ritirato</TableHead>
 							<TableHead>Modifica</TableHead>
 							<TableHead>Elimina</TableHead>
 							<TableHead>Altre azioni</TableHead>
@@ -290,6 +297,7 @@ export default function TeamDetails() {
 											: '🟨 🟨'}
 								</TableCell>
 								<TableCell>{player.isExpelled ? '🟥' : '-'}</TableCell>
+								<TableCell>{player.retired ? '🚑' : '-'}</TableCell>
 								<TableCell>
 									<Dialog
 										open={open === player.id}
@@ -442,24 +450,50 @@ export default function TeamDetails() {
 											</Button>
 										</DropdownMenuTrigger>
 										<DropdownMenuContent>
-											{player.warnings < 2 && (
-												<DropdownMenuItem>
-													<Form
-														method="post"
-														action={`/data/players/${player.id}/${player.teamId}/add-warning`}
+											<DropdownMenuItem>
+												<Form
+													method="post"
+													action={`/data/players/${player.id}/${player.teamId}/retire`}
+													className="w-full"
+												>
+													<Button
+														variant={player.retired ? 'outline' : 'destructive'}
+														type="submit"
+														aria-label={
+															player.retired
+																? 'Segna come disponibile'
+																: 'Segna come ritirato'
+														}
 														className="w-full"
 													>
-														<Button
-															variant="warning"
-															type="submit"
-															aria-label="Aggiungi ammonizione"
+														<Ambulance className="h-4 w-4" />
+														{player.retired
+															? 'Segna come disponibile'
+															: 'Segna come ritirato'}
+													</Button>
+												</Form>
+											</DropdownMenuItem>
+											{player.warnings < 2 && (
+												<>
+													<DropdownMenuSeparator />
+													<DropdownMenuItem>
+														<Form
+															method="post"
+															action={`/data/players/${player.id}/${player.teamId}/add-warning`}
 															className="w-full"
 														>
-															<Plus className="h-4 w-4" />
-															Aggiungi ammonizione
-														</Button>
-													</Form>
-												</DropdownMenuItem>
+															<Button
+																variant="warning"
+																type="submit"
+																aria-label="Aggiungi ammonizione"
+																className="w-full"
+															>
+																<Plus className="h-4 w-4" />
+																Aggiungi ammonizione
+															</Button>
+														</Form>
+													</DropdownMenuItem>
+												</>
 											)}
 											{player.warnings > 0 && (
 												<>

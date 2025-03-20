@@ -54,6 +54,7 @@ model Player {
   
   warnings     Int     @default(0)  // Numero di ammonizioni ricevute
   isExpelled   Boolean @default(false) // Espulsione dal torneo
+  retired     Boolean @default(false) // Giocatore ritirato dal torneo
 }
 
 enum Sizes {
