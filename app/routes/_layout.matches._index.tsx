@@ -41,12 +41,6 @@ export const loader = async () => {
 		orderBy: [{ day: 'asc' }, { timeSlot: 'asc' }],
 	})
 
-	return json(matches)
-}
-
-export default function Matches() {
-	const matches = useLoaderData<typeof loader>()
-
 	// Raggruppiamo le partite per giorno
 	const matchesByDay = matches.reduce(
 		(acc, match) => {
@@ -56,6 +50,12 @@ export default function Matches() {
 		},
 		{} as Record<number, typeof matches>,
 	)
+
+	return json({ matchesByDay })
+}
+
+export default function Matches() {
+	const { matchesByDay } = useLoaderData<typeof loader>()
 
 	return (
 		<div className="md:p-4">
