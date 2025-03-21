@@ -4,9 +4,11 @@ import {
 	type ActionFunctionArgs,
 	json,
 	redirect,
+	type LoaderFunctionArgs,
 } from '@remix-run/node'
 import { Form, useActionData, useLoaderData } from '@remix-run/react'
 import { Plus } from 'lucide-react'
+import invariant from 'tiny-invariant'
 import Header from '~/components/Header'
 import { Button } from '~/components/ui/button'
 import {
@@ -28,27 +30,27 @@ export const meta: MetaFunction = () => {
 	]
 }
 
-export const loader = async () => {
-	const playgrounds = await prisma.playground.findMany()
+export const loader = async ({ params }: LoaderFunctionArgs) => {
+	invariant(params.playgroundId, 'playgroundId is required')
 	const groups = await prisma.group.findMany({
 		include: {
 			teams: true,
 		},
 	})
 
-	return json({ playgrounds, groups })
+	return json({ groups })
 }
 
-export const action = async ({ request }: ActionFunctionArgs) => {
+export const action = async ({ request, params }: ActionFunctionArgs) => {
+	invariant(params.playgroundId, 'playgroundId is required')
 	const formData = await request.formData()
-	const playgroundId = formData.get('playgroundId') as string
 	const day = Number(formData.get('day') as string)
 	const timeSlot = formData.get('timeSlot') as string
 	const field = formData.get('field') as string
 	const team1Id = formData.get('team1Id') as string
 	const team2Id = formData.get('team2Id') as string
 
-	if (!playgroundId || !day || !timeSlot || !field || !team1Id || !team2Id) {
+	if (!day || !timeSlot || !field || !team1Id || !team2Id) {
 		return json({ error: 'Tutti i campi sono obbligatori' }, { status: 400 })
 	}
 
@@ -74,10 +76,17 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 	}
 
 	await prisma.match.create({
-		data: { playgroundId, day, timeSlot, field, team1Id, team2Id },
+		data: {
+			playgroundId: params.playgroundId,
+			day,
+			timeSlot,
+			field,
+			team1Id,
+			team2Id,
+		},
 	})
 
-	return redirect('/matches')
+	return redirect(`/playground/${params.playgroundId}/matches`)
 }
 
 const getTimeSlots = () => {
@@ -111,7 +120,7 @@ const getTimeSlots = () => {
 }
 
 export default function NewMatch() {
-	const { playgrounds, groups } = useLoaderData<typeof loader>()
+	const { groups } = useLoaderData<typeof loader>()
 	const actionData = useActionData<typeof action>()
 
 	const timeSlots = getTimeSlots()
@@ -121,25 +130,6 @@ export default function NewMatch() {
 			<Header title="Nuova Partita" backLink="/matches" icon={<Plus />} />
 
 			<Form method="post" className="space-y-4">
-				<div>
-					<label htmlFor="playgroundId">Torneo:</label>
-					<Select name="playgroundId">
-						<SelectTrigger>
-							<SelectValue placeholder="Seleziona un torneo" />
-						</SelectTrigger>
-						<SelectContent>
-							<SelectGroup>
-								<SelectLabel>Torneo</SelectLabel>
-								{playgrounds.map((p) => (
-									<SelectItem key={p.id} value={p.id}>
-										{p.name}
-									</SelectItem>
-								))}
-							</SelectGroup>
-						</SelectContent>
-					</Select>
-				</div>
-
 				<div>
 					<label htmlFor="day">Giorno:</label>
 					<Select name="day">

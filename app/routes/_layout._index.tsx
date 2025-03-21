@@ -1,16 +1,11 @@
+import { PrismaClient } from '@prisma/client'
 import { type LoaderFunctionArgs, type MetaFunction } from '@remix-run/node'
-import { Form, Link } from '@remix-run/react'
-import {
-	CalendarCog,
-	LogOut,
-	Medal,
-	PersonStanding,
-	Shirt,
-	Trophy,
-	UserCog,
-} from 'lucide-react'
+import { Form, Link, useLoaderData } from '@remix-run/react'
+import { Award, LogOut, Trophy, UserCog } from 'lucide-react'
 import { Button } from '~/components/ui/button'
 import { checkUserIsLoggedIn } from '~/utils/helpers'
+
+const prisma = new PrismaClient()
 
 export const meta: MetaFunction = () => {
 	return [
@@ -21,18 +16,23 @@ export const meta: MetaFunction = () => {
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
 	await checkUserIsLoggedIn(request)
-	return null
+
+	const playgrounds = await prisma.playground.findMany()
+	return { playgrounds }
 }
 
 export default function Index() {
+	const { playgrounds } = useLoaderData<typeof loader>()
+
 	return (
 		<div className="flex h-screen items-center justify-center">
 			<div className="flex flex-col items-center gap-8">
 				<header className="flex flex-col items-center">
-					<h1 className="leading text-2xl font-bold text-gray-800 dark:text-gray-100">
-						Welcome to Playgrounds
+					<h1 className="leading text-3xl font-bold text-gray-800 dark:text-gray-100">
+						Welcome to Playgrounds 🏀
 					</h1>
 				</header>
+				<h2 className="mt-4 text-xl font-bold">Menù Admin</h2>
 				<nav className="flex flex-col items-center justify-center">
 					<ul className="space-y-4">
 						{resources.map(({ href, text, icon }) => (
@@ -47,6 +47,27 @@ export default function Index() {
 									<div className="flex items-center space-x-2">
 										<span>{icon}</span>
 										<span>{text}</span>
+									</div>
+								</Link>
+							</li>
+						))}
+					</ul>
+				</nav>
+				<h2 className="mt-4 text-xl font-bold">Lista Tornei</h2>
+				<nav className="flex flex-col items-center justify-center">
+					<ul className="space-y-4">
+						{playgrounds.map(({ id, name }) => (
+							<li
+								key={id}
+								className="rounded-3xl border bg-gray-200 transition-colors duration-300 ease-in-out hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800"
+							>
+								<Link
+									className="group flex items-center justify-start gap-3 p-3 leading-normal"
+									to={`/playground/${id}`}
+								>
+									<div className="flex items-center space-x-2">
+										<Award className="h-5 w-5" />
+										<span>{name}</span>
 									</div>
 								</Link>
 							</li>
@@ -75,25 +96,5 @@ const resources = [
 		href: '/tournament',
 		text: 'Panoramica tornei',
 		icon: <Trophy />,
-	},
-	{
-		href: '/matches',
-		text: 'Calendario partite',
-		icon: <CalendarCog />,
-	},
-	{
-		href: '/players',
-		text: 'Giocatori',
-		icon: <PersonStanding />,
-	},
-	{
-		href: '/rankings',
-		text: 'Classifiche',
-		icon: <Medal />,
-	},
-	{
-		href: '/jerseys',
-		text: 'Gestione maglie',
-		icon: <Shirt />,
 	},
 ]

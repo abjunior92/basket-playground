@@ -1,7 +1,8 @@
 import { PrismaClient } from '@prisma/client'
-import { type MetaFunction } from '@remix-run/node'
-import { useLoaderData } from '@remix-run/react'
+import { type LoaderFunctionArgs, type MetaFunction } from '@remix-run/node'
+import { useLoaderData, useParams } from '@remix-run/react'
 import { Medal } from 'lucide-react'
+import invariant from 'tiny-invariant'
 import Header from '~/components/Header'
 import { Badge } from '~/components/ui/badge'
 import {
@@ -25,8 +26,10 @@ export const meta: MetaFunction = () => {
 	]
 }
 
-export const loader = async () => {
+export const loader = async ({ params }: LoaderFunctionArgs) => {
+	invariant(params.playgroundId, 'playgroundId is required')
 	const teams = await prisma.team.findMany({
+		where: { group: { playgroundId: params.playgroundId } },
 		include: {
 			group: true,
 			matchesAsTeam1: {
@@ -112,10 +115,15 @@ export const loader = async () => {
 
 export default function Standings() {
 	const { topPlayers, groups } = useLoaderData<typeof loader>()
+	const params = useParams()
 
 	return (
 		<div className="md:p-4">
-			<Header title="Classifiche" backLink="/" icon={<Medal />} />
+			<Header
+				title="Classifiche"
+				backLink={`/playground/${params.playgroundId}`}
+				icon={<Medal />}
+			/>
 			<Tabs defaultValue="groups" className="mt-4 w-full">
 				<TabsList>
 					<TabsTrigger value="groups">Classifica Gironi</TabsTrigger>

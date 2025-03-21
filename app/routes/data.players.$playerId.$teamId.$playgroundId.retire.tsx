@@ -7,21 +7,21 @@ const prisma = new PrismaClient()
 export const action = async ({ params }: ActionFunctionArgs) => {
 	invariant(params.playerId, 'playerId is required')
 	invariant(params.teamId, 'teamId is required')
+	invariant(params.playgroundId, 'playgroundId is required')
 
 	const player = await prisma.player.findUnique({
 		where: { id: params.playerId },
-		select: { warnings: true, isExpelled: true },
+		select: { retired: true },
 	})
 
-	if (player && !player.isExpelled) {
+	if (player) {
 		await prisma.player.update({
 			where: { id: params.playerId },
 			data: {
-				warnings: { increment: 1 },
-				isExpelled: player.warnings + 1 >= 2 ? true : false,
+				retired: !player.retired,
 			},
 		})
 	}
 
-	return redirect(`/teams/${params.teamId}`)
+	return redirect(`/playgrounds/${params.playgroundId}/teams/${params.teamId}`)
 }

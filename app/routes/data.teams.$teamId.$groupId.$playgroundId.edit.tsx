@@ -8,6 +8,7 @@ const prisma = new PrismaClient()
 export const action = async ({ request, params }: ActionFunctionArgs) => {
 	invariant(params.teamId, 'teamId is required')
 	invariant(params.groupId, 'groupId is required')
+	invariant(params.playgroundId, 'playgroundId is required')
 	const formData = await request.formData()
 	const name = formData.get('name') as string
 	const refPhoneNumber = formData.get('refPhoneNumber') as string
@@ -17,5 +18,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 		data: { name, refPhoneNumber },
 	})
 
-	return redirect(`/groups/${params.groupId}`)
+	return redirect(
+		`/playgrounds/${params.playgroundId}/groups/${params.groupId}`,
+	)
 }

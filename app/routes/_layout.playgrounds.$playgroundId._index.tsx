@@ -3,11 +3,10 @@ import {
 	type MetaFunction,
 	type ActionFunctionArgs,
 	json,
-	redirect,
 	type LoaderFunctionArgs,
 } from '@remix-run/node'
-import { Form, Link, useLoaderData } from '@remix-run/react'
-import { LayoutGrid, Pencil, X } from 'lucide-react'
+import { Form, Link, redirect, useLoaderData } from '@remix-run/react'
+import { Pencil, Trophy, X } from 'lucide-react'
 import invariant from 'tiny-invariant'
 import DialogAlert from '~/components/DialogAlert'
 import Header from '~/components/Header'
@@ -34,98 +33,93 @@ import {
 const prisma = new PrismaClient()
 
 export const meta: MetaFunction = () => {
-	return [{ title: 'Girone' }, { name: 'description', content: 'Girone' }]
+	return [{ title: 'Torneo' }, { name: 'description', content: 'Torneo' }]
 }
 
 export const loader = async ({ params }: LoaderFunctionArgs) => {
-	const group = await prisma.group.findUnique({
-		where: { id: params.groupId },
+	invariant(params.playgroundId, 'playgroundId is required')
+	const playground = await prisma.playground.findUnique({
+		where: { id: params.playgroundId },
 		include: {
-			teams: {
+			groups: {
 				include: {
-					players: true,
+					teams: {
+						include: {
+							players: true,
+						},
+					},
 				},
 			},
 		},
 	})
 
-	if (!group) throw new Response('Not Found', { status: 404 })
+	if (!playground) throw new Response('Not Found', { status: 404 })
 
-	return json({ group })
+	return json({ playground })
 }
 
 export const action = async ({ request, params }: ActionFunctionArgs) => {
-	invariant(params.groupId, 'groupId is required')
+	invariant(params.playgroundId, 'playgroundId is required')
 	const formData = await request.formData()
 	const name = formData.get('name') as string
-	const refPhoneNumber = formData.get('refPhoneNumber') as string
 
 	if (!name) {
-		return json(
-			{ error: 'Il nome della squadra è obbligatorio' },
-			{ status: 400 },
-		)
+		return json({ error: 'Il nome del girone è obbligatorio' }, { status: 400 })
 	}
 
-	await prisma.team.create({
+	await prisma.group.create({
 		data: {
 			name,
-			refPhoneNumber,
-			groupId: params.groupId,
+			playgroundId: params.playgroundId,
 		},
 	})
 
-	return redirect(`/groups/${params.groupId}`)
+	return redirect(`/playgrounds/${params.playgroundId}`)
 }
 
-export default function GroupDetails() {
-	const { group } = useLoaderData<typeof loader>()
+export default function PlaygroundDetails() {
+	const { playground } = useLoaderData<typeof loader>()
 
 	return (
 		<div className="md:p-4">
 			<div className="flex items-center justify-between">
 				<Header
-					title={group.name}
-					backLink={`/playgrounds/${group.playgroundId}`}
-					icon={<LayoutGrid />}
+					title={playground.name}
+					backLink="/playgrounds"
+					icon={<Trophy />}
 					home
 				/>
 				<Form
-					id="deleteGroupForm"
+					id="deletePlaygroundForm"
 					method="post"
-					action={`/data/groups/${group.id}/${group.playgroundId}/delete`}
+					action={`/data/playgrounds/${playground.id}/delete`}
 				>
 					<DialogAlert
 						trigger={
 							<Button type="button" variant="destructive">
 								<X className="h-5 w-5" />
-								<span className="hidden md:block">Cancella Girone</span>
+								<span className="hidden md:block">Cancella Torneo</span>
 							</Button>
 						}
-						title="Elimina girone"
-						description="Sei sicuro di voler eliminare questo girone?"
-						formId="deleteGroupForm"
+						title="Elimina torneo"
+						description="Sei sicuro di voler eliminare questo torneo?"
+						formId="deletePlaygroundForm"
 					/>
 				</Form>
 			</div>
 
-			<h4 className="mt-4 text-xl">Nuova Squadra</h4>
+			<h4 className="mt-4 text-xl">Nuovo Girone</h4>
 			<Form method="post" className="mt-2 space-y-4">
 				<Input
 					type="text"
 					name="name"
-					placeholder="Inserisci il nome della squadra"
+					placeholder="Inserisci il nome del girone"
 					required
 				/>
-				<Input
-					type="tel"
-					name="refPhoneNumber"
-					placeholder="Inserisci il numero di telefono di riferimento della squadra"
-				/>
-				<Button type="submit">Aggiungi Squadra</Button>
+				<Button type="submit">Aggiungi Girone</Button>
 			</Form>
 
-			<h2 className="mt-12 text-xl">Lista Squadre</h2>
+			<h2 className="mt-12 text-xl">Lista Gironi</h2>
 
 			<div className="mt-4 overflow-hidden rounded-lg border border-gray-300">
 				<Table className="w-full border-collapse">
@@ -133,25 +127,22 @@ export default function GroupDetails() {
 						<TableRow className="bg-gray-100">
 							<TableHead>Nome</TableHead>
 							<TableHead>Squadre</TableHead>
-							<TableHead>Telefono riferimento</TableHead>
 							<TableHead>Modifica</TableHead>
 						</TableRow>
 					</TableHeader>
 					<TableBody>
-						{group.teams.map((team) => (
-							<TableRow key={team.id}>
+						{playground.groups.map((group) => (
+							<TableRow key={group.id}>
 								<TableCell className="text-center">
-									<Link to={`/teams/${team.id}`} className="text-blue-500">
-										{team.name}
+									<Link
+										to={`/playgrounds/${playground.id}/groups/${group.id}`}
+										className="text-blue-500"
+									>
+										{group.name}
 									</Link>
 								</TableCell>
 								<TableCell>
-									{team.players
-										.map((player) => `${player.name} ${player.surname}`)
-										.join(', ')}
-								</TableCell>
-								<TableCell className="text-center">
-									{team.refPhoneNumber}
+									{group.teams.map((team) => team.name).join(', ')}
 								</TableCell>
 								<TableCell className="text-center">
 									<Dialog>
@@ -166,30 +157,23 @@ export default function GroupDetails() {
 										</DialogTrigger>
 										<DialogContent>
 											<DialogHeader>
-												<DialogTitle>Modifica squadra</DialogTitle>
+												<DialogTitle>Modifica girone</DialogTitle>
 											</DialogHeader>
 											<div className="grid gap-4 py-4">
 												<Input
-													form="editTeamForm"
+													form="editGroupForm"
 													type="text"
 													name="name"
-													placeholder="Inserisci il nome della squadra"
-													defaultValue={team.name}
+													placeholder="Inserisci il nome del girone"
+													defaultValue={group.name}
 													required
-												/>
-												<Input
-													form="editTeamForm"
-													type="tel"
-													name="refPhoneNumber"
-													placeholder="Inserisci il numero di telefono di riferimento della squadra"
-													defaultValue={team.refPhoneNumber ?? ''}
 												/>
 											</div>
 											<DialogFooter>
 												<Form
-													id="editTeamForm"
+													id="editGroupForm"
 													method="post"
-													action={`/data/teams/${team.id}/${group.id}/edit`}
+													action={`/data/groups/${group.id}/${group.playgroundId}/edit`}
 												>
 													<DialogClose>
 														<Button type="submit">Salva</Button>

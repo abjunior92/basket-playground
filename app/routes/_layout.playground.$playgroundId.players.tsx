@@ -1,8 +1,9 @@
 import { PrismaClient } from '@prisma/client'
-import { type MetaFunction } from '@remix-run/node'
-import { Link, useLoaderData } from '@remix-run/react'
+import { type LoaderFunctionArgs, type MetaFunction } from '@remix-run/node'
+import { Link, useLoaderData, useParams } from '@remix-run/react'
 import { ArrowUp, ChevronDown, Pencil, Users2 } from 'lucide-react'
 import { useState } from 'react'
+import invariant from 'tiny-invariant'
 import Header from '~/components/Header'
 import { Button } from '~/components/ui/button'
 import {
@@ -32,8 +33,13 @@ export const meta: MetaFunction = () => {
 	]
 }
 
-export const loader = async () => {
+export const loader = async ({ params }: LoaderFunctionArgs) => {
+	invariant(params.playgroundId, 'playgroundId is required')
+
 	const players = await prisma.player.findMany({
+		where: {
+			playgroundId: params.playgroundId,
+		},
 		include: {
 			matchStats: {
 				include: {
@@ -88,6 +94,7 @@ const tableHeads: { label: string; key: keyof PlayerStatsType }[] = [
 
 export default function PlayerStatsPage() {
 	const { playerStats } = useLoaderData<typeof loader>()
+	const params = useParams()
 	const [search, setSearch] = useState('')
 	const [sortColumn, setSortColumn] = useState<keyof PlayerStatsType | null>(
 		null,
@@ -124,7 +131,11 @@ export default function PlayerStatsPage() {
 
 	return (
 		<div className="space-y-4 p-4">
-			<Header title="Giocatori" backLink="/" icon={<Users2 />} />
+			<Header
+				title="Giocatori"
+				backLink={`/playground/${params.playgroundId}`}
+				icon={<Users2 />}
+			/>
 
 			<Input
 				type="text"

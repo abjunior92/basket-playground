@@ -77,6 +77,8 @@ export const meta: MetaFunction = () => {
 }
 
 export const loader = async ({ params }: LoaderFunctionArgs) => {
+	invariant(params.playgroundId, 'playgroundId is required')
+	invariant(params.teamId, 'teamId is required')
 	const team = await prisma.team.findUnique({
 		where: { id: params.teamId },
 		include: { players: true },
@@ -90,6 +92,7 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 const MAX_PLAYERS_PER_TEAM = 5
 
 export const action = async ({ request, params }: ActionFunctionArgs) => {
+	invariant(params.playgroundId, 'playgroundId is required')
 	invariant(params.teamId, 'teamId is required')
 	const formData = await request.formData()
 	const name = formData.get('name') as string
@@ -131,10 +134,11 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 			level,
 			paid,
 			teamId: params.teamId,
+			playgroundId: params.playgroundId,
 		},
 	})
 
-	return redirect(`/teams/${params.teamId}`)
+	return redirect(`/playgrounds/${params.playgroundId}/teams/${params.teamId}`)
 }
 
 export default function TeamDetails() {
@@ -175,14 +179,14 @@ export default function TeamDetails() {
 			<div className="flex items-center justify-between">
 				<Header
 					title={team.name}
-					backLink={`/groups/${team.groupId}`}
+					backLink={`/playgrounds/${team.playgroundId}/groups/${team.groupId}`}
 					icon={<ShieldUser />}
 					home
 				/>
 				<Form
 					id="deleteTeamForm"
 					method="post"
-					action={`/data/teams/${team.id}/${team.groupId}/delete`}
+					action={`/data/teams/${team.id}/${team.groupId}/${team.playgroundId}/delete`}
 				>
 					<DialogAlert
 						trigger={
@@ -411,7 +415,7 @@ export default function TeamDetails() {
 													id="editPlayerForm"
 													method="post"
 													noValidate
-													action={`/data/players/${player.id}/${player.teamId}/edit`}
+													action={`/data/players/${player.id}/${player.teamId}/${player.playgroundId}/edit`}
 												>
 													<Button type="submit">Salva</Button>
 												</fetcher.Form>
@@ -423,7 +427,7 @@ export default function TeamDetails() {
 									<Form
 										id="deletePlayerForm"
 										method="post"
-										action={`/data/players/${player.id}/${player.teamId}/delete`}
+										action={`/data/players/${player.id}/${player.teamId}/${player.playgroundId}/delete`}
 									>
 										<DialogAlert
 											trigger={
@@ -453,7 +457,7 @@ export default function TeamDetails() {
 											<DropdownMenuItem>
 												<Form
 													method="post"
-													action={`/data/players/${player.id}/${player.teamId}/retire`}
+													action={`/data/players/${player.id}/${player.teamId}/${player.playgroundId}/retire`}
 													className="w-full"
 												>
 													<Button
@@ -479,7 +483,7 @@ export default function TeamDetails() {
 													<DropdownMenuItem>
 														<Form
 															method="post"
-															action={`/data/players/${player.id}/${player.teamId}/add-warning`}
+															action={`/data/players/${player.id}/${player.teamId}/${player.playgroundId}/add-warning`}
 															className="w-full"
 														>
 															<Button
@@ -501,7 +505,7 @@ export default function TeamDetails() {
 													<DropdownMenuItem>
 														<Form
 															method="post"
-															action={`/data/players/${player.id}/${player.teamId}/remove-warning`}
+															action={`/data/players/${player.id}/${player.teamId}/${player.playgroundId}/remove-warning`}
 															className="w-full"
 														>
 															<Button
@@ -523,7 +527,7 @@ export default function TeamDetails() {
 													<DropdownMenuItem>
 														<Form
 															method="post"
-															action={`/data/players/${player.id}/${player.teamId}/add-expulsion`}
+															action={`/data/players/${player.id}/${player.teamId}/${player.playgroundId}/add-expulsion`}
 															className="w-full"
 														>
 															<Button
@@ -545,7 +549,7 @@ export default function TeamDetails() {
 													<DropdownMenuItem>
 														<Form
 															method="post"
-															action={`/data/players/${player.id}/${player.teamId}/remove-expulsion`}
+															action={`/data/players/${player.id}/${player.teamId}/${player.playgroundId}/remove-expulsion`}
 															className="w-full"
 														>
 															<Button

@@ -1,7 +1,13 @@
 import { PrismaClient, type Sizes } from '@prisma/client'
-import { json, type MetaFunction } from '@remix-run/node'
+import {
+	type ActionFunctionArgs,
+	json,
+	type LoaderFunctionArgs,
+	type MetaFunction,
+} from '@remix-run/node'
 import { Form, useLoaderData } from '@remix-run/react'
 import { ChevronDown, Shirt } from 'lucide-react'
+import invariant from 'tiny-invariant'
 import Header from '~/components/Header'
 import { Button } from '~/components/ui/button'
 import {
@@ -38,8 +44,11 @@ export const meta: MetaFunction = () => {
 	]
 }
 
-export const loader = async () => {
-	const jerseys = await prisma.jerseyStock.findMany()
+export const loader = async ({ params }: LoaderFunctionArgs) => {
+	invariant(params.playgroundId, 'playgroundId is required')
+	const jerseys = await prisma.jerseyStock.findMany({
+		where: { playgroundId: params.playgroundId },
+	})
 
 	const playersBySize = await prisma.player.findMany({
 		select: {
@@ -54,6 +63,7 @@ export const loader = async () => {
 		},
 		where: {
 			size: { not: null }, // Consideriamo solo i giocatori con una taglia assegnata
+			playgroundId: params.playgroundId,
 		},
 	})
 
@@ -78,7 +88,8 @@ export const loader = async () => {
 	return json({ jerseys, playersGrouped })
 }
 
-export const action = async ({ request }: { request: Request }) => {
+export const action = async ({ request, params }: ActionFunctionArgs) => {
+	invariant(params.playgroundId, 'playgroundId is required')
 	const formData = await request.formData()
 	const size = formData.get('size') as Sizes
 	const available = Number(formData.get('available') as string)
@@ -88,9 +99,14 @@ export const action = async ({ request }: { request: Request }) => {
 	}
 
 	await prisma.jerseyStock.upsert({
-		where: { size },
+		where: { playgroundId_size: { playgroundId: params.playgroundId, size } },
 		update: { available },
-		create: { size, available, distributed: 0 },
+		create: {
+			size,
+			available,
+			distributed: 0,
+			playgroundId: params.playgroundId,
+		},
 	})
 
 	return json({ success: true })

@@ -1,7 +1,12 @@
 import { PrismaClient } from '@prisma/client'
-import { json, type MetaFunction } from '@remix-run/node'
-import { Link, useLoaderData } from '@remix-run/react'
+import {
+	json,
+	type LoaderFunctionArgs,
+	type MetaFunction,
+} from '@remix-run/node'
+import { Link, useLoaderData, useParams } from '@remix-run/react'
 import { CalendarRange, Pencil, Plus } from 'lucide-react'
+import invariant from 'tiny-invariant'
 import Header from '~/components/Header'
 import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
@@ -24,8 +29,12 @@ export const meta: MetaFunction = () => {
 	]
 }
 
-export const loader = async () => {
+export const loader = async ({ params }: LoaderFunctionArgs) => {
+	invariant(params.playgroundId, 'playgroundId is required')
 	const matches = await prisma.match.findMany({
+		where: {
+			playgroundId: params.playgroundId,
+		},
 		include: {
 			team1: {
 				include: {
@@ -56,18 +65,19 @@ export const loader = async () => {
 
 export default function Matches() {
 	const { matchesByDay } = useLoaderData<typeof loader>()
+	const params = useParams()
 
 	return (
 		<div className="md:p-4">
 			<div className="mb-4 flex items-center justify-between">
 				<Header
 					title="Calendario Partite"
-					backLink="/"
+					backLink={`/playground/${params.playgroundId}`}
 					icon={<CalendarRange />}
 				/>
 
 				<Button asChild>
-					<Link to="/matches/new">
+					<Link to={`/playground/${params.playgroundId}/matches/new`}>
 						<Plus className="h-5 w-5" />
 						<span className="hidden md:block">Aggiungi Partita</span>
 					</Link>
@@ -137,7 +147,9 @@ export default function Matches() {
 											</TableCell>
 											<TableCell>
 												<Button asChild variant="outline">
-													<Link to={`/matches/${match.id}/edit`}>
+													<Link
+														to={`/playground/${params.playgroundId}/matches/${match.id}/edit`}
+													>
 														<Pencil />
 													</Link>
 												</Button>

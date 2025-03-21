@@ -8,9 +8,13 @@ const prisma = new PrismaClient()
 export const action = async ({ params }: ActionFunctionArgs) => {
 	invariant(params.teamId, 'teamId is required')
 	invariant(params.groupId, 'groupId is required')
+	invariant(params.playgroundId, 'playgroundId is required')
+
 	await prisma.team.delete({
 		where: { id: params.teamId },
 	})
 
-	return redirect(`/groups/${params.groupId}`)
+	return redirect(
+		`/playgrounds/${params.playgroundId}/groups/${params.groupId}`,
+	)
 }

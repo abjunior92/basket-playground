@@ -24,6 +24,8 @@ export const meta: MetaFunction = () => {
 }
 
 export const loader = async ({ params }: LoaderFunctionArgs) => {
+	invariant(params.playgroundId, 'playgroundId is required')
+	invariant(params.matchId, 'matchId is required')
 	const match = await prisma.match.findUnique({
 		where: { id: params.matchId },
 		include: {
@@ -46,6 +48,7 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 }
 
 export const action = async ({ request, params }: ActionFunctionArgs) => {
+	invariant(params.playgroundId, 'playgroundId is required')
 	invariant(params.matchId, 'matchId is required')
 	const formData = await request.formData()
 	const score1 = Number(formData.get('score1') || '0')
@@ -58,7 +61,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 		score1 > score2 ? team1Id : score2 > score1 ? team2Id : null
 
 	await prisma.match.update({
-		where: { id: params.matchId },
+		where: { id: params.matchId, playgroundId: params.playgroundId },
 		data: { score1, score2, winner: winnerTeamId },
 	})
 
@@ -114,7 +117,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 
 		// Aggiorniamo il totale dei punti segnati dal giocatore
 		await prisma.player.update({
-			where: { id: stat.playerId },
+			where: { id: stat.playerId, playgroundId: params.playgroundId },
 			data: {
 				// Sottrai il vecchio punteggio
 				totalPoints: { decrement: previousPoints },
@@ -123,7 +126,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 
 		// Poi aggiungiamo il nuovo punteggio
 		await prisma.player.update({
-			where: { id: stat.playerId },
+			where: { id: stat.playerId, playgroundId: params.playgroundId },
 			data: {
 				// Aggiungi il nuovo punteggio
 				totalPoints: { increment: stat.points },
@@ -159,7 +162,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 		)
 	}
 
-	return redirect('/matches')
+	return redirect(`/playground/${params.playgroundId}/matches`)
 }
 
 const countTeam1 = (formData: FormData) => {

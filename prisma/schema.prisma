@@ -15,6 +15,9 @@ model Playground {
   name    String
   groups  Group[]
   matches Match[]
+  jerseys JerseyStock[]
+  players Player[]
+  teams  Team[]
 }
 
 model Group {
@@ -30,6 +33,10 @@ model Team {
   name     String
   group    Group   @relation(fields: [groupId], references: [id])
   groupId  String
+
+  // Riferimento diretto al playground
+  playground   Playground @relation(fields: [playgroundId], references: [id])
+  playgroundId String
 
   matchesAsTeam1 Match[] @relation(name: "Team1Matches")
   matchesAsTeam2 Match[] @relation(name: "Team2Matches")
@@ -51,6 +58,10 @@ model Player {
   teamId       String
   matchStats PlayerMatchStats[]
   size         Sizes?
+
+  // Riferimento diretto al playground
+  playground   Playground @relation(fields: [playgroundId], references: [id])
+  playgroundId String
   
   warnings     Int     @default(0)  // Numero di ammonizioni ricevute
   isExpelled   Boolean @default(false) // Espulsione dal torneo
@@ -121,7 +132,11 @@ model PlayerMatchStats {
 
 model JerseyStock {
   id        String  @id @default(uuid())
+  playground  Playground @relation(fields: [playgroundId], references: [id])
+  playgroundId String
   size      Sizes   @unique
   available Int     @default(0)
   distributed Int   @default(0)
+
+  @@unique([playgroundId, size]) // Evita doppioni per lo stesso playground
 }
