@@ -18,6 +18,7 @@ import {
 	TableHeader,
 	TableRow,
 } from '~/components/ui/table'
+import { colorGroupClasses } from '~/lib/types'
 import { cn } from '~/lib/utils'
 
 const prisma = new PrismaClient()
@@ -112,7 +113,11 @@ export default function Matches() {
 														{isTeam1Winner && '🏆 '}
 														{match.team1.name}
 													</span>
-													<Badge variant={'secondary'}>
+													<Badge
+														className={
+															colorGroupClasses[match.team1.group.color]
+														}
+													>
 														{match.team1.group.name}
 													</Badge>
 												</div>
@@ -123,7 +128,11 @@ export default function Matches() {
 														{isTeam2Winner && '🏆 '}
 														{match.team2.name}
 													</span>
-													<Badge variant={'secondary'}>
+													<Badge
+														className={
+															colorGroupClasses[match.team2.group.color]
+														}
+													>
 														{match.team2.group.name}
 													</Badge>
 												</div>

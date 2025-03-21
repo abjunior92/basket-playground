@@ -23,9 +23,26 @@ model Playground {
 model Group {
   id       String   @id @default(uuid())
   name     String
+  color    ColorGroup   @unique
   playground   Playground   @relation(fields: [playgroundId], references: [id])
   playgroundId String
   teams  Team[]
+}
+
+enum ColorGroup {
+  red
+  blue
+  green
+  light_green
+  yellow
+  purple
+  orange
+  pink
+  gray
+  black
+  white
+  brown
+  cyan
 }
 
 model Team {

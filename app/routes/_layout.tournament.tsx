@@ -3,6 +3,9 @@ import { json, type MetaFunction } from '@remix-run/node'
 import { useLoaderData } from '@remix-run/react'
 import { Trophy, User } from 'lucide-react'
 import Header from '~/components/Header'
+import { Badge } from '~/components/ui/badge'
+import { colorGroupClasses } from '~/lib/types'
+import { cn } from '~/lib/utils'
 
 const prisma = new PrismaClient()
 
@@ -56,7 +59,14 @@ export default function TournamentOverview() {
 									key={group.id}
 									className="mt-4 border-l-2 border-gray-300 pl-4"
 								>
-									<h3 className="text-lg font-medium">{group.name}</h3>
+									<Badge
+										className={cn(
+											'mb-2 text-lg',
+											colorGroupClasses[group.color],
+										)}
+									>
+										{group.name}
+									</Badge>
 
 									{group.teams.length === 0 ? (
 										<p className="mt-2">Nessuna squadra in questo girone</p>

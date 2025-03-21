@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import { type ColorGroup, PrismaClient } from '@prisma/client'
 import { type LoaderFunctionArgs, type MetaFunction } from '@remix-run/node'
 import { useLoaderData, useParams } from '@remix-run/react'
 import { Medal } from 'lucide-react'
@@ -14,7 +14,7 @@ import {
 	TableRow,
 } from '~/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
-import { type TeamWithStatsType } from '~/lib/types'
+import { colorGroupClasses, type TeamWithStatsType } from '~/lib/types'
 import { cn } from '~/lib/utils'
 
 const prisma = new PrismaClient()
@@ -90,11 +90,11 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 				pointsGroup: matchesWon * 2,
 			}
 
-			if (!acc[team.group.name]) {
-				acc[team.group.name] = []
+			if (!acc[`${team.group.name}_${team.group.color}`]) {
+				acc[`${team.group.name}_${team.group.color}`] = []
 			}
 
-			acc[team.group.name]?.push(teamData)
+			acc[`${team.group.name}_${team.group.color}`]?.push(teamData)
 			return acc
 		},
 		{} as Record<string, TeamWithStatsType[]>,
@@ -131,45 +131,53 @@ export default function Standings() {
 				</TabsList>
 
 				<TabsContent value="groups">
-					{Object.entries(groups).map(([groupName, teams]) => (
-						<div key={groupName} className="mt-4">
-							<Badge variant={'secondary'} className="mb-2 text-lg">
-								{groupName}
-							</Badge>
-							<div className="overflow-hidden rounded-lg border border-gray-300">
-								<Table className="w-full border-collapse">
-									<TableHeader>
-										<TableRow className="bg-gray-100">
-											<TableHead>Nome squadra</TableHead>
-											<TableHead>Punti girone</TableHead>
-											<TableHead>Partite vinte</TableHead>
-											<TableHead>Partite giocate</TableHead>
-											<TableHead>Punti fatti</TableHead>
-											<TableHead>Punti subiti</TableHead>
-											<TableHead>%</TableHead>
-											<TableHead>+/-</TableHead>
-										</TableRow>
-									</TableHeader>
-									<TableBody>
-										{teams.map((team) => {
-											return (
-												<TableRow key={team.id} className="text-center">
-													<TableCell>{team.name}</TableCell>
-													<TableCell>{team.pointsGroup}</TableCell>
-													<TableCell>{team.matchesWon}</TableCell>
-													<TableCell>{team.matchesPlayed}</TableCell>
-													<TableCell>{team.pointsScored}</TableCell>
-													<TableCell>{team.pointsConceded}</TableCell>
-													<TableCell>{team.winPercentage}</TableCell>
-													<TableCell>{team.pointsDifference}</TableCell>
-												</TableRow>
-											)
-										})}
-									</TableBody>
-								</Table>
+					{Object.entries(groups).map(([groupName, teams]) => {
+						const [name, color] = groupName.split('_')
+						return (
+							<div key={groupName} className="mt-4">
+								<Badge
+									className={cn(
+										'mb-2 text-lg',
+										colorGroupClasses[color as ColorGroup],
+									)}
+								>
+									{name}
+								</Badge>
+								<div className="overflow-hidden rounded-lg border border-gray-300">
+									<Table className="w-full border-collapse">
+										<TableHeader>
+											<TableRow className="bg-gray-100">
+												<TableHead>Nome squadra</TableHead>
+												<TableHead>Punti girone</TableHead>
+												<TableHead>Partite vinte</TableHead>
+												<TableHead>Partite giocate</TableHead>
+												<TableHead>Punti fatti</TableHead>
+												<TableHead>Punti subiti</TableHead>
+												<TableHead>%</TableHead>
+												<TableHead>+/-</TableHead>
+											</TableRow>
+										</TableHeader>
+										<TableBody>
+											{teams.map((team) => {
+												return (
+													<TableRow key={team.id} className="text-center">
+														<TableCell>{team.name}</TableCell>
+														<TableCell>{team.pointsGroup}</TableCell>
+														<TableCell>{team.matchesWon}</TableCell>
+														<TableCell>{team.matchesPlayed}</TableCell>
+														<TableCell>{team.pointsScored}</TableCell>
+														<TableCell>{team.pointsConceded}</TableCell>
+														<TableCell>{team.winPercentage}</TableCell>
+														<TableCell>{team.pointsDifference}</TableCell>
+													</TableRow>
+												)
+											})}
+										</TableBody>
+									</Table>
+								</div>
 							</div>
-						</div>
-					))}
+						)
+					})}
 				</TabsContent>
 
 				<TabsContent value="players">
@@ -199,7 +207,9 @@ export default function Standings() {
 										</TableCell>
 										<TableCell>{player.team.name}</TableCell>
 										<TableCell>
-											<Badge variant={'secondary'}>
+											<Badge
+												className={colorGroupClasses[player.team.group.color]}
+											>
 												{player.team.group.name}
 											</Badge>
 										</TableCell>

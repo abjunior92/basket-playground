@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import { type ColorGroup, PrismaClient } from '@prisma/client'
 import {
 	type MetaFunction,
 	type ActionFunctionArgs,
@@ -10,6 +10,7 @@ import { Pencil, Trophy, X } from 'lucide-react'
 import invariant from 'tiny-invariant'
 import DialogAlert from '~/components/DialogAlert'
 import Header from '~/components/Header'
+import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
 import {
 	Dialog,
@@ -22,6 +23,15 @@ import {
 } from '~/components/ui/dialog'
 import { Input } from '~/components/ui/input'
 import {
+	Select,
+	SelectContent,
+	SelectGroup,
+	SelectItem,
+	SelectLabel,
+	SelectTrigger,
+	SelectValue,
+} from '~/components/ui/select'
+import {
 	Table,
 	TableBody,
 	TableCell,
@@ -29,6 +39,12 @@ import {
 	TableHeader,
 	TableRow,
 } from '~/components/ui/table'
+import {
+	colorGroupClasses,
+	colorGroupMap,
+	colorGroupTransform,
+} from '~/lib/types'
+import { cn } from '~/lib/utils'
 
 const prisma = new PrismaClient()
 
@@ -62,14 +78,19 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 	invariant(params.playgroundId, 'playgroundId is required')
 	const formData = await request.formData()
 	const name = formData.get('name') as string
+	const color = formData.get('color') as ColorGroup
 
-	if (!name) {
-		return json({ error: 'Il nome del girone è obbligatorio' }, { status: 400 })
+	if (!name || !color) {
+		return json(
+			{ error: 'Il nome e il colore del girone sono obbligatori' },
+			{ status: 400 },
+		)
 	}
 
 	await prisma.group.create({
 		data: {
 			name,
+			color,
 			playgroundId: params.playgroundId,
 		},
 	})
@@ -116,6 +137,29 @@ export default function PlaygroundDetails() {
 					placeholder="Inserisci il nome del girone"
 					required
 				/>
+				<Select name="color" required>
+					<SelectTrigger>
+						<SelectValue placeholder="Seleziona il colore del girone" />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectGroup>
+							<SelectLabel>Colore gruppo</SelectLabel>
+							{Array.from(colorGroupMap.entries()).map(([key]) => (
+								<SelectItem key={key} value={key}>
+									<div className="flex items-center space-x-2">
+										<div
+											className={cn(
+												'h-4 w-24 rounded-full border border-gray-200',
+												colorGroupClasses[key],
+											)}
+										/>
+										<span>{colorGroupTransform[key]}</span>
+									</div>
+								</SelectItem>
+							))}
+						</SelectGroup>
+					</SelectContent>
+				</Select>
 				<Button type="submit">Aggiungi Girone</Button>
 			</Form>
 
@@ -138,7 +182,9 @@ export default function PlaygroundDetails() {
 										to={`/playgrounds/${playground.id}/groups/${group.id}`}
 										className="text-blue-500"
 									>
-										{group.name}
+										<Badge className={colorGroupClasses[group.color]}>
+											{group.name}
+										</Badge>
 									</Link>
 								</TableCell>
 								<TableCell>

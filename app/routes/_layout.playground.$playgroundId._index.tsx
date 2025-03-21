@@ -61,7 +61,7 @@ export default function Index() {
 				</nav>
 
 				<Link to="/">
-					<Button>
+					<Button variant="secondary">
 						<Home className="h-5 w-5" />
 						Home
 					</Button>
