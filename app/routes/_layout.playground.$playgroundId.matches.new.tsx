@@ -20,6 +20,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '~/components/ui/select'
+import { getTimeSlots } from '~/lib/utils'
 
 const prisma = new PrismaClient()
 
@@ -33,12 +34,13 @@ export const meta: MetaFunction = () => {
 export const loader = async ({ params }: LoaderFunctionArgs) => {
 	invariant(params.playgroundId, 'playgroundId is required')
 	const groups = await prisma.group.findMany({
+		where: { playgroundId: params.playgroundId },
 		include: {
 			teams: true,
 		},
 	})
 
-	return json({ groups })
+	return { groups }
 }
 
 export const action = async ({ request, params }: ActionFunctionArgs) => {
@@ -57,6 +59,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 	// Controllo se la squadra gioca già in quello slot
 	const existingMatch = await prisma.match.findFirst({
 		where: {
+			playgroundId: params.playgroundId,
 			day,
 			timeSlot,
 			OR: [
@@ -87,36 +90,6 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 	})
 
 	return redirect(`/playground/${params.playgroundId}/matches`)
-}
-
-const getTimeSlots = () => {
-	const timeSlots = []
-	let hour = 18
-	let minute = 0
-
-	while (hour < 22 || (hour === 22 && minute <= 35)) {
-		const start = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`
-
-		// Aggiungi 15 minuti per ottenere l'orario di fine
-		minute += 15
-		if (minute >= 60) {
-			minute = 0
-			hour++
-		}
-
-		const end = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`
-
-		timeSlots.push(`${start} > ${end}`)
-
-		// Aggiungi la pausa di 5 minuti
-		minute += 5
-		if (minute >= 60) {
-			minute = 0
-			hour++
-		}
-	}
-
-	return timeSlots
 }
 
 export default function NewMatch() {
