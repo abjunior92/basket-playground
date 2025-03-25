@@ -19,7 +19,7 @@ import {
 	TableRow,
 } from '~/components/ui/table'
 import { colorGroupClasses } from '~/lib/types'
-import { cn } from '~/lib/utils'
+import { cn, getDayLabel } from '~/lib/utils'
 
 const prisma = new PrismaClient()
 
@@ -86,7 +86,7 @@ export default function Matches() {
 			</div>
 			{Object.keys(matchesByDay).map((day) => (
 				<div key={day} className="mb-6">
-					<h2 className="mb-2 text-xl font-semibold">Giorno {day}</h2>
+					<h2 className="mb-2 text-xl font-semibold">{getDayLabel(day)}</h2>
 					<div className="overflow-hidden rounded-lg border border-gray-300">
 						<Table className="w-full border-collapse">
 							<TableHeader>

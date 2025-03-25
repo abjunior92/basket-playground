@@ -20,7 +20,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '~/components/ui/select'
-import { getTimeSlots } from '~/lib/utils'
+import { getDayLabel, getTimeSlots } from '~/lib/utils'
 
 const prisma = new PrismaClient()
 
@@ -117,9 +117,9 @@ export default function NewMatch() {
 						<SelectContent>
 							<SelectGroup>
 								<SelectLabel>Giorno</SelectLabel>
-								{['1', '2', '3', '4', '5', '6'].map((d) => (
+								{['1', '2', '3', '4', '5', '6', '7'].map((d) => (
 									<SelectItem key={d} value={d}>
-										Giorno {d}
+										{getDayLabel(d)}
 									</SelectItem>
 								))}
 							</SelectGroup>

@@ -34,3 +34,34 @@ export const getTimeSlots = () => {
 
 	return timeSlots
 }
+
+export const getDayLabel = (day: string) => {
+	let label
+
+	switch (day) {
+		case '1':
+			label = 'Domenica'
+			break
+		case '2':
+			label = 'Lunedì'
+			break
+		case '3':
+			label = 'Martedì'
+			break
+		case '4':
+			label = 'Mercoledì'
+			break
+		case '5':
+			label = 'Giovedì'
+			break
+		case '6':
+			label = 'Venerdì (Recuperi)'
+			break
+		case '7':
+			label = 'Domenica (Finali)'
+			break
+		default:
+			break
+	}
+	return label
+}
