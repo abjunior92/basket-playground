@@ -6,7 +6,7 @@ import {
 	redirect,
 	type LoaderFunctionArgs,
 } from '@remix-run/node'
-import { Form, useActionData, useLoaderData } from '@remix-run/react'
+import { Form, useActionData, useLoaderData, useParams } from '@remix-run/react'
 import { Plus } from 'lucide-react'
 import invariant from 'tiny-invariant'
 import Header from '~/components/Header'
@@ -122,12 +122,17 @@ const getTimeSlots = () => {
 export default function NewMatch() {
 	const { groups } = useLoaderData<typeof loader>()
 	const actionData = useActionData<typeof action>()
+	const params = useParams()
 
 	const timeSlots = getTimeSlots()
 
 	return (
 		<div className="flex flex-col space-y-4 p-4">
-			<Header title="Nuova Partita" backLink="/matches" icon={<Plus />} />
+			<Header
+				title="Nuova Partita"
+				backLink={`/playground/${params.playgroundId}/matches`}
+				icon={<Plus />}
+			/>
 
 			<Form method="post" className="space-y-4">
 				<div>

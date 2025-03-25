@@ -195,7 +195,7 @@ export default function EditMatch() {
 		<div className="md:p-4">
 			<Header
 				title="Modifica Risultato"
-				backLink="/matches"
+				backLink={`/playground/${match.playgroundId}/matches`}
 				icon={<Pencil />}
 			/>
 			<h4 className="mt-4 flex justify-between text-xl">
