@@ -1,7 +1,14 @@
 import { PrismaClient } from '@prisma/client'
 import { type LoaderFunctionArgs, type MetaFunction } from '@remix-run/node'
 import { Link, useLoaderData } from '@remix-run/react'
-import { CalendarCog, Home, Medal, PersonStanding, Shirt } from 'lucide-react'
+import {
+	CalendarCog,
+	Home,
+	Medal,
+	PersonStanding,
+	Shirt,
+	Swords,
+} from 'lucide-react'
 import invariant from 'tiny-invariant'
 import { Button } from '~/components/ui/button'
 import { checkUserIsLoggedIn } from '~/utils/helpers'
@@ -86,6 +93,11 @@ const resources = [
 		href: '/rankings',
 		text: 'Classifiche',
 		icon: <Medal />,
+	},
+	{
+		href: '/three-points-challenge',
+		text: 'Gara da 3 punti',
+		icon: <Swords />,
 	},
 	{
 		href: '/jerseys',

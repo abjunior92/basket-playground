@@ -18,6 +18,7 @@ model Playground {
   jerseys JerseyStock[]
   players Player[]
   teams  Team[]
+  threePointChallengeParticipants ThreePointChallengeParticipant[]
 }
 
 model Group {
@@ -83,6 +84,7 @@ model Player {
   warnings     Int     @default(0)  // Numero di ammonizioni ricevute
   isExpelled   Boolean @default(false) // Espulsione dal torneo
   retired     Boolean @default(false) // Giocatore ritirato dal torneo
+  threePointChallengeParticipants ThreePointChallengeParticipant[]
 }
 
 enum Sizes {
@@ -156,4 +158,18 @@ model JerseyStock {
   distributed Int   @default(0)
 
   @@unique([playgroundId, size]) // Evita doppioni per lo stesso playground
+}
+
+model ThreePointChallengeParticipant {
+  id           String   @id @default(uuid())
+  name         String
+  surname      String
+  score        Int      @default(0)
+  fee          Int
+  
+  player       Player?   @relation(fields: [playerId], references: [id])
+  playerId     String?   
+
+  playground   Playground @relation(fields: [playgroundId], references: [id])
+  playgroundId String
 }

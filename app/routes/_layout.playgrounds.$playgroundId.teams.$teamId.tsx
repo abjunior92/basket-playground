@@ -311,7 +311,7 @@ export default function TeamDetails() {
 									>
 										<DialogTrigger asChild>
 											<Button
-												variant="secondary"
+												variant="outline"
 												size={'icon'}
 												type="button"
 												aria-label="Modifica giocatore"

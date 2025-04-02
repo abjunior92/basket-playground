@@ -123,7 +123,7 @@ export default function JerseysPage() {
 				<h2 className="text-lg">
 					Imposta uno stock delle maglie disponibili per ogni taglia
 				</h2>
-				<Form method="post" className="mb-4 flex gap-2">
+				<Form method="post" className="mb-4 flex flex-col gap-2 md:flex-row">
 					<Select name="size" required>
 						<SelectTrigger>
 							<SelectValue placeholder="Seleziona la taglia assegnata" />
