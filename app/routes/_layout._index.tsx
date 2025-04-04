@@ -56,22 +56,26 @@ export default function Index() {
 				<h2 className="mt-4 text-xl font-bold">Lista Tornei</h2>
 				<nav className="flex flex-col items-center justify-center">
 					<ul className="space-y-4">
-						{playgrounds.map(({ id, name }) => (
-							<li
-								key={id}
-								className="rounded-3xl border bg-gray-200 transition-colors duration-300 ease-in-out hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800"
-							>
-								<Link
-									className="group flex items-center justify-start gap-3 p-3 leading-normal"
-									to={`/playground/${id}`}
+						{playgrounds.length > 0 ? (
+							playgrounds.map(({ id, name }) => (
+								<li
+									key={id}
+									className="rounded-3xl border bg-gray-200 transition-colors duration-300 ease-in-out hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800"
 								>
-									<div className="flex items-center space-x-2">
-										<Award className="h-5 w-5" />
-										<span>{name}</span>
-									</div>
-								</Link>
-							</li>
-						))}
+									<Link
+										className="group flex items-center justify-start gap-3 p-3 leading-normal"
+										to={`/playground/${id}`}
+									>
+										<div className="flex items-center space-x-2">
+											<Award className="h-5 w-5" />
+											<span>{name}</span>
+										</div>
+									</Link>
+								</li>
+							))
+						) : (
+							<li>Nessun torneo disponibile</li>
+						)}
 					</ul>
 				</nav>
 
