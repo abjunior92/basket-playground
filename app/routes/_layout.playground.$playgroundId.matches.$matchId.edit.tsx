@@ -7,10 +7,17 @@ import {
 	redirect,
 } from '@remix-run/node'
 import { Form, useActionData, useLoaderData } from '@remix-run/react'
-import { Pencil } from 'lucide-react'
+import { Ambulance, Ellipsis, Minus, Pencil, Plus } from 'lucide-react'
 import invariant from 'tiny-invariant'
 import Header from '~/components/Header'
 import { Button } from '~/components/ui/button'
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from '~/components/ui/dropdown-menu'
 import { Input } from '~/components/ui/input'
 import {
 	Select,
@@ -40,8 +47,8 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 	const match = await prisma.match.findUnique({
 		where: { id: params.matchId },
 		include: {
-			team1: { include: { players: true } },
-			team2: { include: { players: true } },
+			team1: { include: { players: { orderBy: { name: 'asc' } } } },
+			team2: { include: { players: { orderBy: { name: 'asc' } } } },
 			playerStats: true,
 		},
 	})
@@ -299,14 +306,14 @@ export default function EditMatch() {
 						<Separator className="mb-4 mt-6" />
 
 						<div className="flex w-full justify-center">
-							<h4 className="text-xl font-bold">Giocatori</h4>
+							<h4 className="text-xl font-bold">Punti giocatori</h4>
 						</div>
 
 						<div className="flex justify-between">
 							<div className="flex flex-col space-y-2">
 								{match.team1.players.map((player) => (
 									<div key={player.id}>
-										<label>
+										<label htmlFor={`player-${player.id}`}>
 											{player.warnings === 1 && '🟨 '}
 											{player.isExpelled && '🟥 '}
 											{player.name} {player.surname}:
@@ -315,13 +322,142 @@ export default function EditMatch() {
 												name={`team1Players[]`}
 												defaultValue={player.id}
 											/>
-											<Input
-												type="number"
-												name={`player-${player.id}`}
-												className="w-24 md:w-64"
-												inputMode="numeric"
-												defaultValue={playerStatsMap.get(player.id) ?? 0}
-											/>
+											<div className="flex items-center space-x-2">
+												<Input
+													type="number"
+													name={`player-${player.id}`}
+													className="w-16 md:w-64"
+													inputMode="numeric"
+													defaultValue={playerStatsMap.get(player.id) ?? 0}
+												/>
+
+												<DropdownMenu>
+													<DropdownMenuTrigger asChild>
+														<Button
+															variant="outline"
+															type="button"
+															aria-label="Azioni"
+														>
+															<Ellipsis className="h-4 w-4" />
+														</Button>
+													</DropdownMenuTrigger>
+													<DropdownMenuContent>
+														<DropdownMenuItem>
+															<Form
+																method="post"
+																action={`/data/players/${player.id}/${player.teamId}/${player.playgroundId}/retire?matchId=${match.id}`}
+																className="w-full"
+															>
+																<Button
+																	variant={
+																		player.retired ? 'outline' : 'destructive'
+																	}
+																	type="submit"
+																	aria-label={
+																		player.retired
+																			? 'Segna come disponibile'
+																			: 'Segna come ritirato'
+																	}
+																	className="w-full"
+																>
+																	<Ambulance className="h-4 w-4" />
+																	{player.retired
+																		? 'Segna come disponibile'
+																		: 'Segna come ritirato'}
+																</Button>
+															</Form>
+														</DropdownMenuItem>
+														{player.warnings < 2 && (
+															<>
+																<DropdownMenuSeparator />
+																<DropdownMenuItem>
+																	<Form
+																		method="post"
+																		action={`/data/players/${player.id}/${player.teamId}/${player.playgroundId}/add-warning?matchId=${match.id}`}
+																		className="w-full"
+																	>
+																		<Button
+																			variant="warning"
+																			type="submit"
+																			aria-label="Aggiungi ammonizione"
+																			className="w-full"
+																		>
+																			<Plus className="h-4 w-4" />
+																			Aggiungi ammonizione
+																		</Button>
+																	</Form>
+																</DropdownMenuItem>
+															</>
+														)}
+														{player.warnings > 0 && (
+															<>
+																<DropdownMenuSeparator />
+																<DropdownMenuItem>
+																	<Form
+																		method="post"
+																		action={`/data/players/${player.id}/${player.teamId}/${player.playgroundId}/remove-warning?matchId=${match.id}`}
+																		className="w-full"
+																	>
+																		<Button
+																			variant="secondary"
+																			type="submit"
+																			aria-label="Rimuovi ammonizione"
+																			className="w-full"
+																		>
+																			<Minus className="h-4 w-4" />
+																			Rimuovi ammonizione
+																		</Button>
+																	</Form>
+																</DropdownMenuItem>
+															</>
+														)}
+														{!player.isExpelled && (
+															<>
+																<DropdownMenuSeparator />
+																<DropdownMenuItem>
+																	<Form
+																		method="post"
+																		action={`/data/players/${player.id}/${player.teamId}/${player.playgroundId}/add-expulsion?matchId=${match.id}`}
+																		className="w-full"
+																	>
+																		<Button
+																			variant="destructive"
+																			type="submit"
+																			aria-label="Espelli giocatore"
+																			className="w-full"
+																		>
+																			<Plus className="h-4 w-4" />
+																			Espelli giocatore
+																		</Button>
+																	</Form>
+																</DropdownMenuItem>
+															</>
+														)}
+														{player.isExpelled && (
+															<>
+																<DropdownMenuSeparator />
+																<DropdownMenuItem>
+																	<Form
+																		method="post"
+																		action={`/data/players/${player.id}/${player.teamId}/${player.playgroundId}/remove-expulsion?matchId=${match.id}`}
+																		className="w-full"
+																	>
+																		<Button
+																			variant="secondary"
+																			type="submit"
+																			aria-label="Rimuovi espulsione"
+																			className="w-full"
+																		>
+																			<Minus className="h-4 w-4" />
+																			Rimuovi espulsione
+																		</Button>
+																	</Form>
+																</DropdownMenuItem>
+															</>
+														)}
+													</DropdownMenuContent>
+												</DropdownMenu>
+											</div>
 										</label>
 									</div>
 								))}
@@ -336,7 +472,7 @@ export default function EditMatch() {
 							<div className="flex flex-col space-y-2">
 								{match.team2.players.map((player) => (
 									<div key={player.id} className="place-self-end">
-										<label>
+										<label htmlFor={`player-${player.id}`}>
 											{player.warnings === 1 && '🟨 '}
 											{player.isExpelled && '🟥 '}
 											{player.name} {player.surname}:
@@ -345,13 +481,141 @@ export default function EditMatch() {
 												name={`team2Players[]`}
 												defaultValue={player.id}
 											/>
-											<Input
-												type="number"
-												name={`player-${player.id}`}
-												className="w-24 place-self-end md:w-64"
-												inputMode="numeric"
-												defaultValue={playerStatsMap.get(player.id) ?? 0}
-											/>
+											<div className="flex items-center justify-end space-x-2">
+												<Input
+													type="number"
+													name={`player-${player.id}`}
+													className="w-16 place-self-end md:w-64"
+													inputMode="numeric"
+													defaultValue={playerStatsMap.get(player.id) ?? 0}
+												/>
+												<DropdownMenu>
+													<DropdownMenuTrigger asChild>
+														<Button
+															variant="outline"
+															type="button"
+															aria-label="Azioni"
+														>
+															<Ellipsis className="h-4 w-4" />
+														</Button>
+													</DropdownMenuTrigger>
+													<DropdownMenuContent>
+														<DropdownMenuItem>
+															<Form
+																method="post"
+																action={`/data/players/${player.id}/${player.teamId}/${player.playgroundId}/retire?matchId=${match.id}`}
+																className="w-full"
+															>
+																<Button
+																	variant={
+																		player.retired ? 'outline' : 'destructive'
+																	}
+																	type="submit"
+																	aria-label={
+																		player.retired
+																			? 'Segna come disponibile'
+																			: 'Segna come ritirato'
+																	}
+																	className="w-full"
+																>
+																	<Ambulance className="h-4 w-4" />
+																	{player.retired
+																		? 'Segna come disponibile'
+																		: 'Segna come ritirato'}
+																</Button>
+															</Form>
+														</DropdownMenuItem>
+														{player.warnings < 2 && (
+															<>
+																<DropdownMenuSeparator />
+																<DropdownMenuItem>
+																	<Form
+																		method="post"
+																		action={`/data/players/${player.id}/${player.teamId}/${player.playgroundId}/add-warning?matchId=${match.id}`}
+																		className="w-full"
+																	>
+																		<Button
+																			variant="warning"
+																			type="submit"
+																			aria-label="Aggiungi ammonizione"
+																			className="w-full"
+																		>
+																			<Plus className="h-4 w-4" />
+																			Aggiungi ammonizione
+																		</Button>
+																	</Form>
+																</DropdownMenuItem>
+															</>
+														)}
+														{player.warnings > 0 && (
+															<>
+																<DropdownMenuSeparator />
+																<DropdownMenuItem>
+																	<Form
+																		method="post"
+																		action={`/data/players/${player.id}/${player.teamId}/${player.playgroundId}/remove-warning?matchId=${match.id}`}
+																		className="w-full"
+																	>
+																		<Button
+																			variant="secondary"
+																			type="submit"
+																			aria-label="Rimuovi ammonizione"
+																			className="w-full"
+																		>
+																			<Minus className="h-4 w-4" />
+																			Rimuovi ammonizione
+																		</Button>
+																	</Form>
+																</DropdownMenuItem>
+															</>
+														)}
+														{!player.isExpelled && (
+															<>
+																<DropdownMenuSeparator />
+																<DropdownMenuItem>
+																	<Form
+																		method="post"
+																		action={`/data/players/${player.id}/${player.teamId}/${player.playgroundId}/add-expulsion?matchId=${match.id}`}
+																		className="w-full"
+																	>
+																		<Button
+																			variant="destructive"
+																			type="submit"
+																			aria-label="Espelli giocatore"
+																			className="w-full"
+																		>
+																			<Plus className="h-4 w-4" />
+																			Espelli giocatore
+																		</Button>
+																	</Form>
+																</DropdownMenuItem>
+															</>
+														)}
+														{player.isExpelled && (
+															<>
+																<DropdownMenuSeparator />
+																<DropdownMenuItem>
+																	<Form
+																		method="post"
+																		action={`/data/players/${player.id}/${player.teamId}/${player.playgroundId}/remove-expulsion?matchId=${match.id}`}
+																		className="w-full"
+																	>
+																		<Button
+																			variant="secondary"
+																			type="submit"
+																			aria-label="Rimuovi espulsione"
+																			className="w-full"
+																		>
+																			<Minus className="h-4 w-4" />
+																			Rimuovi espulsione
+																		</Button>
+																	</Form>
+																</DropdownMenuItem>
+															</>
+														)}
+													</DropdownMenuContent>
+												</DropdownMenu>
+											</div>
 										</label>
 									</div>
 								))}

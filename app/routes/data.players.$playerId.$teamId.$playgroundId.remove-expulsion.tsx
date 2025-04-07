@@ -4,10 +4,13 @@ import invariant from 'tiny-invariant'
 
 const prisma = new PrismaClient()
 
-export const action = async ({ params }: ActionFunctionArgs) => {
+export const action = async ({ params, request }: ActionFunctionArgs) => {
 	invariant(params.playerId, 'playerId is required')
 	invariant(params.teamId, 'teamId is required')
 	invariant(params.playgroundId, 'playgroundId is required')
+
+	const url = new URL(request.url)
+	const matchId = url.searchParams.get('matchId')
 
 	const player = await prisma.player.findUnique({
 		where: { id: params.playerId },
@@ -22,6 +25,12 @@ export const action = async ({ params }: ActionFunctionArgs) => {
 				isExpelled: false,
 			},
 		})
+	}
+
+	if (matchId) {
+		return redirect(
+			`/playground/${params.playgroundId}/matches/${matchId}/edit`,
+		)
 	}
 
 	return redirect(`/playgrounds/${params.playgroundId}/teams/${params.teamId}`)

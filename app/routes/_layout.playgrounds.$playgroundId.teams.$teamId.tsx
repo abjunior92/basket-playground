@@ -17,6 +17,7 @@ import {
 	AlertCircle,
 	Ambulance,
 	Ellipsis,
+	Minus,
 	Pencil,
 	Plus,
 	ShieldUser,
@@ -81,7 +82,7 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 	invariant(params.teamId, 'teamId is required')
 	const team = await prisma.team.findUnique({
 		where: { id: params.teamId },
-		include: { players: true },
+		include: { players: { orderBy: { name: 'asc' } } },
 	})
 
 	if (!team) throw new Response('Not Found', { status: 404 })
@@ -514,7 +515,7 @@ export default function TeamDetails() {
 																aria-label="Rimuovi ammonizione"
 																className="w-full"
 															>
-																<Plus className="h-4 w-4" />
+																<Minus className="h-4 w-4" />
 																Rimuovi ammonizione
 															</Button>
 														</Form>
@@ -558,7 +559,7 @@ export default function TeamDetails() {
 																aria-label="Rimuovi espulsione"
 																className="w-full"
 															>
-																<Plus className="h-4 w-4" />
+																<Minus className="h-4 w-4" />
 																Rimuovi espulsione
 															</Button>
 														</Form>
