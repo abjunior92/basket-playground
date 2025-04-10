@@ -6,10 +6,11 @@ import {
 	redirect,
 	type LoaderFunctionArgs,
 } from '@remix-run/node'
-import { Form, Link, useLoaderData } from '@remix-run/react'
+import { Form, Link, useActionData, useLoaderData } from '@remix-run/react'
 import { LayoutGrid, Pencil, X } from 'lucide-react'
 import invariant from 'tiny-invariant'
 import DialogAlert from '~/components/DialogAlert'
+import ErrorMessage from '~/components/ErrorMessage'
 import Header from '~/components/Header'
 import { Button } from '~/components/ui/button'
 import {
@@ -63,6 +64,18 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 	const name = formData.get('name') as string
 	const refPhoneNumber = formData.get('refPhoneNumber') as string
 
+	const existingTeam = await prisma.team.findFirst({
+		where: {
+			playgroundId: params.playgroundId,
+			name,
+			groupId: params.groupId,
+		},
+	})
+
+	if (existingTeam) {
+		return json({ error: 'Squadra già esistente!' }, { status: 400 })
+	}
+
 	if (!name) {
 		return json(
 			{ error: 'Il nome della squadra è obbligatorio' },
@@ -86,6 +99,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 
 export default function GroupDetails() {
 	const { group } = useLoaderData<typeof loader>()
+	const actionData = useActionData<typeof action>()
 
 	return (
 		<div className="md:p-4">
@@ -128,7 +142,10 @@ export default function GroupDetails() {
 					name="refPhoneNumber"
 					placeholder="Inserisci il numero di telefono di riferimento della squadra"
 				/>
-				<Button type="submit">Aggiungi Squadra</Button>
+				<div className="flex items-center gap-x-2">
+					<Button type="submit">Aggiungi Squadra</Button>
+					{actionData?.error && <ErrorMessage message={actionData.error} />}
+				</div>
 			</Form>
 
 			<h2 className="mt-12 text-xl">Lista Squadre</h2>
@@ -149,7 +166,7 @@ export default function GroupDetails() {
 								<TableCell className="text-center">
 									<Link
 										to={`/playgrounds/${group.playgroundId}/teams/${team.id}`}
-										className="text-blue-500"
+										className="text-blue-500 underline underline-offset-6"
 									>
 										{team.name}
 									</Link>

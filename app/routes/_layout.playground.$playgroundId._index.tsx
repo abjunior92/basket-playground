@@ -51,7 +51,7 @@ export default function Index() {
 						{resources.map(({ href, text, icon }) => (
 							<li
 								key={href}
-								className="rounded-3xl border border-gray-200 transition-colors duration-300 ease-in-out hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800"
+								className="rounded-3xl border-2 border-white bg-black/80 text-white transition-colors duration-300 ease-in-out hover:bg-black/90"
 							>
 								<Link
 									className="group flex items-center justify-start gap-3 p-3 leading-normal"
@@ -67,12 +67,12 @@ export default function Index() {
 					</ul>
 				</nav>
 
-				<Link to="/">
-					<Button variant="secondary">
+				<Button asChild variant="outline">
+					<Link to="/">
 						<Home className="h-5 w-5" />
 						Home
-					</Button>
-				</Link>
+					</Link>
+				</Button>
 			</div>
 		</div>
 	)

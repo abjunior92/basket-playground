@@ -4,7 +4,14 @@ import {
 	type ActionFunctionArgs,
 	json,
 } from '@remix-run/node'
-import { Form, Link, redirect, useLoaderData } from '@remix-run/react'
+import {
+	Form,
+	Link,
+	redirect,
+	useActionData,
+	useLoaderData,
+} from '@remix-run/react'
+import ErrorMessage from '~/components/ErrorMessage'
 import Header from '~/components/Header'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
@@ -24,11 +31,16 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 	const formData = await request.formData()
 	const name = formData.get('name') as string
 
+	const existingPlayground = await prisma.playground.findFirst({
+		where: { name },
+	})
+
+	if (existingPlayground) {
+		return json({ error: 'Torneo già esistente!' }, { status: 400 })
+	}
+
 	if (!name) {
-		return json(
-			{ error: 'Il nome del playground è obbligatorio' },
-			{ status: 400 },
-		)
+		return json({ error: 'Il nome del torneo è obbligatorio' }, { status: 400 })
 	}
 
 	await prisma.playground.create({
@@ -40,6 +52,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
 export default function Playgrounds() {
 	const { playgrounds } = useLoaderData<typeof loader>()
+	const actionData = useActionData<typeof action>()
 
 	return (
 		<div className="md:p-4">
@@ -53,16 +66,19 @@ export default function Playgrounds() {
 					placeholder="Inserisci il nome del torneo"
 					required
 				/>
-				<Button type="submit">Aggiungi Torneo</Button>
+				<div className="flex items-center gap-x-2">
+					<Button type="submit">Aggiungi Torneo</Button>
+					{actionData?.error && <ErrorMessage message={actionData.error} />}
+				</div>
 			</Form>
 
 			<h4 className="mt-12 text-xl">Lista Tornei</h4>
 			<ul className="mt-4">
 				{playgrounds.map((playground) => (
-					<li key={playground.id} className="mb-2">
+					<li key={playground.id} className="mb-2 list-inside list-disc">
 						<Link
 							to={`/playgrounds/${playground.id}`}
-							className="text-blue-500"
+							className="text-blue-500 underline underline-offset-6"
 						>
 							{playground.name}
 						</Link>

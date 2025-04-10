@@ -9,6 +9,7 @@ import {
 import { Form, useActionData, useLoaderData } from '@remix-run/react'
 import { Ambulance, Ellipsis, Minus, Pencil, Plus } from 'lucide-react'
 import invariant from 'tiny-invariant'
+import ErrorMessage from '~/components/ErrorMessage'
 import Header from '~/components/Header'
 import { Button } from '~/components/ui/button'
 import {
@@ -303,7 +304,7 @@ export default function EditMatch() {
 							</label>
 						</div>
 
-						<Separator className="mb-4 mt-6" />
+						<Separator className="mt-6 mb-4" />
 
 						<div className="flex w-full justify-center">
 							<h4 className="text-xl font-bold">Punti giocatori</h4>
@@ -462,11 +463,9 @@ export default function EditMatch() {
 									</div>
 								))}
 
-								<p className="text-red-500">
-									{actionData &&
-										'errorTeam1' in actionData &&
-										actionData.errorTeam1}
-								</p>
+								{actionData && 'errorTeam1' in actionData && (
+									<ErrorMessage message={actionData.errorTeam1} />
+								)}
 							</div>
 
 							<div className="flex flex-col space-y-2">
@@ -620,11 +619,9 @@ export default function EditMatch() {
 									</div>
 								))}
 
-								<p className="text-red-500">
-									{actionData &&
-										'errorTeam2' in actionData &&
-										actionData.errorTeam2}
-								</p>
+								{actionData && 'errorTeam2' in actionData && (
+									<ErrorMessage message={actionData.errorTeam2} />
+								)}
 							</div>
 						</div>
 

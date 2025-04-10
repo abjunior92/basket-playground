@@ -9,6 +9,7 @@ import {
 import { Form, useActionData, useLoaderData, useParams } from '@remix-run/react'
 import { Plus } from 'lucide-react'
 import invariant from 'tiny-invariant'
+import ErrorMessage from '~/components/ErrorMessage'
 import Header from '~/components/Header'
 import { Button } from '~/components/ui/button'
 import {
@@ -207,12 +208,14 @@ export default function NewMatch() {
 					</Select>
 				</div>
 
-				<Button type="submit" className="w-full md:w-auto">
-					Aggiungi Partita
-				</Button>
-				{actionData && 'error' in actionData && (
-					<p className="text-red-500">{actionData.error}</p>
-				)}
+				<div className="flex items-center gap-x-2">
+					<Button type="submit" className="w-full md:w-auto">
+						Aggiungi Partita
+					</Button>
+					{actionData && 'error' in actionData && (
+						<ErrorMessage message={actionData.error} />
+					)}
+				</div>
 			</Form>
 		</div>
 	)

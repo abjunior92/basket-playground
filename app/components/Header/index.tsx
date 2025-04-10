@@ -19,7 +19,7 @@ const Header = ({
 				<Button asChild variant={'secondary'}>
 					<Link
 						to={'/'}
-						className="flex items-center space-x-2 hover:text-blue-500"
+						className="flex items-center gap-x-2 hover:text-blue-500"
 					>
 						<Home className="h-5 w-5" />
 						<span className="hidden md:block">Home</span>

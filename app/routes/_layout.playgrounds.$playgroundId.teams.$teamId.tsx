@@ -14,7 +14,6 @@ import {
 	useRevalidator,
 } from '@remix-run/react'
 import {
-	AlertCircle,
 	Ambulance,
 	Ellipsis,
 	Minus,
@@ -26,6 +25,7 @@ import {
 import { useEffect, useState } from 'react'
 import invariant from 'tiny-invariant'
 import DialogAlert from '~/components/DialogAlert'
+import ErrorMessage from '~/components/ErrorMessage'
 import Header from '~/components/Header'
 import { Button } from '~/components/ui/button'
 import { Checkbox } from '~/components/ui/checkbox'
@@ -118,6 +118,19 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 			},
 			{ status: 400 },
 		)
+	}
+
+	const existingPlayer = await prisma.player.findFirst({
+		where: {
+			playgroundId: params.playgroundId,
+			name,
+			surname,
+			teamId: params.teamId,
+		},
+	})
+
+	if (existingPlayer) {
+		return json({ error: 'Giocatore già esistente!' }, { status: 400 })
 	}
 
 	if (!name || !surname || !birthYear || !level) {
@@ -251,16 +264,9 @@ export default function TeamDetails() {
 					<Button type="submit" disabled={isFull}>
 						Aggiungi Giocatore
 					</Button>
-					{isFull && (
-						<span className="flex items-center space-x-1 text-red-500">
-							<AlertCircle className="h-5 w-5" />
-							<span>Squadra piena</span>
-						</span>
-					)}
+					{isFull && <ErrorMessage message="Squadra piena" />}
+					{actionData?.error && <ErrorMessage message={actionData.error} />}
 				</div>
-				{actionData?.error && (
-					<p className="text-red-500">{actionData.error}</p>
-				)}
 			</Form>
 
 			<h2 className="mt-12 text-xl">Lista Giocatori</h2>
@@ -418,7 +424,9 @@ export default function TeamDetails() {
 													noValidate
 													action={`/data/players/${player.id}/${player.teamId}/${player.playgroundId}/edit`}
 												>
-													<Button type="submit">Salva</Button>
+													<Button type="submit" className="w-full md:w-auto">
+														Salva
+													</Button>
 												</fetcher.Form>
 											</DialogFooter>
 										</DialogContent>

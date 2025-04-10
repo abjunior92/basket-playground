@@ -1,5 +1,6 @@
 import { json, type ActionFunctionArgs, redirect } from '@remix-run/node'
 import { Form, useActionData } from '@remix-run/react'
+import ErrorMessage from '~/components/ErrorMessage'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import { authSessionStorage } from '~/session.server'
@@ -40,7 +41,9 @@ export default function LoginPage() {
 					required
 				/>
 				<Button type="submit">Login</Button>
-				{actionData && 'error' in actionData && <p>{actionData.error}</p>}
+				{actionData && 'error' in actionData && (
+					<ErrorMessage message={actionData.error} />
+				)}
 			</Form>
 		</div>
 	)

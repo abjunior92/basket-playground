@@ -5,10 +5,17 @@ import {
 	json,
 	type LoaderFunctionArgs,
 } from '@remix-run/node'
-import { Form, Link, redirect, useLoaderData } from '@remix-run/react'
+import {
+	Form,
+	Link,
+	redirect,
+	useActionData,
+	useLoaderData,
+} from '@remix-run/react'
 import { Pencil, Trophy, X } from 'lucide-react'
 import invariant from 'tiny-invariant'
 import DialogAlert from '~/components/DialogAlert'
+import ErrorMessage from '~/components/ErrorMessage'
 import Header from '~/components/Header'
 import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
@@ -80,6 +87,17 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 	const name = formData.get('name') as string
 	const color = formData.get('color') as ColorGroup
 
+	const existingGroup = await prisma.group.findFirst({
+		where: {
+			playgroundId: params.playgroundId,
+			name,
+		},
+	})
+
+	if (existingGroup) {
+		return json({ error: 'Girone già esistente!' }, { status: 400 })
+	}
+
 	if (!name || !color) {
 		return json(
 			{ error: 'Il nome e il colore del girone sono obbligatori' },
@@ -100,6 +118,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 
 export default function PlaygroundDetails() {
 	const { playground } = useLoaderData<typeof loader>()
+	const actionData = useActionData<typeof action>()
 
 	return (
 		<div className="md:p-4">
@@ -160,7 +179,10 @@ export default function PlaygroundDetails() {
 						</SelectGroup>
 					</SelectContent>
 				</Select>
-				<Button type="submit">Aggiungi Girone</Button>
+				<div className="flex items-center gap-x-2">
+					<Button type="submit">Aggiungi Girone</Button>
+					{actionData?.error && <ErrorMessage message={actionData.error} />}
+				</div>
 			</Form>
 
 			<h2 className="mt-12 text-xl">Lista Gironi</h2>
