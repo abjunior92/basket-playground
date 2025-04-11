@@ -1,5 +1,6 @@
 import { json, type ActionFunctionArgs, redirect } from '@remix-run/node'
 import { Form, useActionData } from '@remix-run/react'
+import { LogIn } from 'lucide-react'
 import ErrorMessage from '~/components/ErrorMessage'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
@@ -32,15 +33,29 @@ export default function LoginPage() {
 	return (
 		<div className="flex h-screen flex-col items-center justify-center space-y-4">
 			<h1 className="text-2xl font-bold">Login</h1>
-			<Form method="post" className="flex flex-col gap-4">
-				<Input type="email" name="email" placeholder="Email" required />
-				<Input
-					type="password"
-					name="password"
-					placeholder="Password"
-					required
-				/>
-				<Button type="submit">Login</Button>
+			<Form method="post" className="flex flex-col space-y-4">
+				<label htmlFor="email">
+					Email
+					<Input
+						type="email"
+						name="email"
+						placeholder="Inserisci email"
+						required
+					/>
+				</label>
+				<label htmlFor="password">
+					Password
+					<Input
+						type="password"
+						name="password"
+						placeholder="Inserisci password"
+						required
+					/>
+				</label>
+				<Button type="submit">
+					Login
+					<LogIn className="h-5 w-5" />
+				</Button>
 				{actionData && 'error' in actionData && (
 					<ErrorMessage message={actionData.error} />
 				)}
