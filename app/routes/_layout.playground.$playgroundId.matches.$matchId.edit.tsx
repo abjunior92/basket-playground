@@ -7,11 +7,18 @@ import {
 	redirect,
 } from '@remix-run/node'
 import { Form, useActionData, useLoaderData } from '@remix-run/react'
-import { Ambulance, Ellipsis, Minus, Pencil, Plus } from 'lucide-react'
+import { Ambulance, Minus, Pencil, Plus, Settings } from 'lucide-react'
+import { useState } from 'react'
 import invariant from 'tiny-invariant'
 import ErrorMessage from '~/components/ErrorMessage'
 import Header from '~/components/Header'
 import { Button } from '~/components/ui/button'
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+} from '~/components/ui/dialog'
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -257,6 +264,23 @@ const countTeam2 = (formData: FormData) => {
 export default function EditMatch() {
 	const { match, playerStatsMap, groups } = useLoaderData<typeof loader>()
 	const actionData = useActionData<typeof action>()
+	const [temporaryAliases, setTemporaryAliases] = useState<
+		Record<string, string>
+	>({})
+	const [aliasDialogOpen, setAliasDialogOpen] = useState(false)
+	const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null)
+
+	const handleAliasChange = (playerId: string, newAlias: string) => {
+		setTemporaryAliases((prev) => ({
+			...prev,
+			[playerId]: newAlias,
+		}))
+	}
+
+	const openAliasDialog = (playerId: string) => {
+		setSelectedPlayerId(playerId)
+		setAliasDialogOpen(true)
+	}
 
 	const timeSlots = getTimeSlots()
 
@@ -306,40 +330,99 @@ export default function EditMatch() {
 
 						<Separator className="mt-6 mb-4" />
 
-						<div className="flex w-full justify-center">
+						<div className="mb-4 flex w-full justify-center">
 							<h4 className="text-xl font-bold">Punti giocatori</h4>
 						</div>
 
-						<div className="flex justify-between">
-							<div className="flex flex-col space-y-2">
+						<div className="flex justify-between gap-x-4">
+							<div className="flex flex-1 flex-col space-y-4 md:max-w-[25%]">
 								{match.team1.players.map((player) => (
 									<div key={player.id}>
 										<label htmlFor={`player-${player.id}`}>
-											{player.warnings === 1 && '🟨 '}
-											{player.isExpelled && '🟥 '}
-											{player.name} {player.surname}:
+											<div className="border-input flex items-center justify-between rounded-t-lg border-x border-t bg-white px-2 py-1 leading-5 text-shadow-2xs">
+												<div className="flex flex-col">
+													<span className="text-xs">{player.name}</span>
+													<span className="font-semibold">
+														{player.surname}
+													</span>
+												</div>
+												<div>
+													{player.warnings === 1 && '🟨 '}
+													{player.isExpelled && '🟥 '}
+													{player.retired && <Ambulance className="h-4 w-4" />}
+												</div>
+											</div>
 											<input
 												hidden
 												name={`team1Players[]`}
 												defaultValue={player.id}
 											/>
-											<div className="flex items-center space-x-2">
-												<Input
-													type="number"
-													name={`player-${player.id}`}
-													className="w-16 md:w-64"
-													inputMode="numeric"
-													defaultValue={playerStatsMap.get(player.id) ?? 0}
-												/>
-
+											<div className="border-input bg-muted flex flex-col space-y-2 rounded-b-lg border p-2">
+												<span className="text-xs">
+													<i>
+														Alias:{' '}
+														{temporaryAliases[player.id] || 'non impostato'}
+													</i>
+												</span>
+												<div className="flex items-center justify-between gap-x-2">
+													<Button
+														variant="destructive"
+														type="button"
+														size="icon"
+														aria-label="Sottrai"
+														onClick={(e) => {
+															e.preventDefault()
+															const input = e.currentTarget
+																.nextElementSibling as HTMLInputElement
+															if (input) {
+																const currentValue = parseInt(input.value) || 0
+																input.value = Math.max(
+																	0,
+																	currentValue - 1,
+																).toString()
+															}
+														}}
+													>
+														<Minus className="h-4 w-4" />
+													</Button>
+													<Input
+														type="number"
+														name={`player-${player.id}`}
+														className="max-w-16 md:w-64"
+														inputMode="numeric"
+														min="0"
+														defaultValue={playerStatsMap.get(player.id) ?? 0}
+													/>
+													<Button
+														variant="success"
+														type="button"
+														size="icon"
+														aria-label="Aggiungi"
+														onClick={(e) => {
+															e.preventDefault()
+															const input = e.currentTarget
+																.previousElementSibling as HTMLInputElement
+															if (input) {
+																const currentValue = parseInt(input.value) || 0
+																input.value = Math.max(
+																	0,
+																	currentValue + 1,
+																).toString()
+															}
+														}}
+													>
+														<Plus className="h-4 w-4" />
+													</Button>
+												</div>
 												<DropdownMenu>
 													<DropdownMenuTrigger asChild>
 														<Button
 															variant="outline"
 															type="button"
-															aria-label="Azioni"
+															aria-label="Opzioni"
 														>
-															<Ellipsis className="h-4 w-4" />
+															<Settings className="h-4 w-4" />
+															Opzioni
 														</Button>
 													</DropdownMenuTrigger>
 													<DropdownMenuContent>
@@ -347,6 +430,7 @@ export default function EditMatch() {
 															<Form
 																method="post"
 																action={`/data/players/${player.id}/${player.teamId}/${player.playgroundId}/retire?matchId=${match.id}`}
+																preventScrollReset
 																className="w-full"
 															>
 																<Button
@@ -375,6 +459,7 @@ export default function EditMatch() {
 																	<Form
 																		method="post"
 																		action={`/data/players/${player.id}/${player.teamId}/${player.playgroundId}/add-warning?matchId=${match.id}`}
+																		preventScrollReset
 																		className="w-full"
 																	>
 																		<Button
@@ -397,6 +482,7 @@ export default function EditMatch() {
 																	<Form
 																		method="post"
 																		action={`/data/players/${player.id}/${player.teamId}/${player.playgroundId}/remove-warning?matchId=${match.id}`}
+																		preventScrollReset
 																		className="w-full"
 																	>
 																		<Button
@@ -419,6 +505,7 @@ export default function EditMatch() {
 																	<Form
 																		method="post"
 																		action={`/data/players/${player.id}/${player.teamId}/${player.playgroundId}/add-expulsion?matchId=${match.id}`}
+																		preventScrollReset
 																		className="w-full"
 																	>
 																		<Button
@@ -441,6 +528,7 @@ export default function EditMatch() {
 																	<Form
 																		method="post"
 																		action={`/data/players/${player.id}/${player.teamId}/${player.playgroundId}/remove-expulsion?matchId=${match.id}`}
+																		preventScrollReset
 																		className="w-full"
 																	>
 																		<Button
@@ -456,6 +544,13 @@ export default function EditMatch() {
 																</DropdownMenuItem>
 															</>
 														)}
+														<DropdownMenuItem
+															onSelect={() => openAliasDialog(player.id)}
+														>
+															<Button variant="outline" className="w-full">
+																Modifica Alias Temporaneo
+															</Button>
+														</DropdownMenuItem>
 													</DropdownMenuContent>
 												</DropdownMenu>
 											</div>
@@ -467,35 +562,94 @@ export default function EditMatch() {
 									<ErrorMessage message={actionData.errorTeam1} />
 								)}
 							</div>
-
-							<div className="flex flex-col space-y-2">
+							<div className="flex flex-1 flex-col space-y-4 md:max-w-[25%]">
 								{match.team2.players.map((player) => (
-									<div key={player.id} className="place-self-end">
+									<div key={player.id} className="">
 										<label htmlFor={`player-${player.id}`}>
-											{player.warnings === 1 && '🟨 '}
-											{player.isExpelled && '🟥 '}
-											{player.name} {player.surname}:
+											<div className="border-input flex items-center justify-between rounded-t-lg border-x border-t bg-white px-2 py-1 leading-5 text-shadow-2xs">
+												<div className="flex flex-col">
+													<span className="text-xs">{player.name}</span>
+													<span className="font-semibold">
+														{player.surname}
+													</span>
+												</div>
+												<div>
+													{player.warnings === 1 && '🟨 '}
+													{player.isExpelled && '🟥 '}
+													{player.retired && <Ambulance className="h-4 w-4" />}
+												</div>
+											</div>
 											<input
 												hidden
 												name={`team2Players[]`}
 												defaultValue={player.id}
 											/>
-											<div className="flex items-center justify-end space-x-2">
-												<Input
-													type="number"
-													name={`player-${player.id}`}
-													className="w-16 place-self-end md:w-64"
-													inputMode="numeric"
-													defaultValue={playerStatsMap.get(player.id) ?? 0}
-												/>
+											<div className="border-input bg-muted flex flex-col space-y-2 rounded-b-lg border p-2">
+												<span className="text-xs">
+													<i>
+														Alias:{' '}
+														{temporaryAliases[player.id] || 'non impostato'}
+													</i>
+												</span>
+												<div className="flex items-center justify-between gap-x-2">
+													<Button
+														variant="destructive"
+														type="button"
+														size="icon"
+														aria-label="Sottrai"
+														onClick={(e) => {
+															e.preventDefault()
+															const input = e.currentTarget
+																.nextElementSibling as HTMLInputElement
+															if (input) {
+																const currentValue = parseInt(input.value) || 0
+																input.value = Math.max(
+																	0,
+																	currentValue - 1,
+																).toString()
+															}
+														}}
+													>
+														<Minus className="h-4 w-4" />
+													</Button>
+													<Input
+														type="number"
+														name={`player-${player.id}`}
+														className="max-w-16 md:w-64"
+														inputMode="numeric"
+														min="0"
+														defaultValue={playerStatsMap.get(player.id) ?? 0}
+													/>
+													<Button
+														variant="success"
+														type="button"
+														size="icon"
+														aria-label="Aggiungi"
+														onClick={(e) => {
+															e.preventDefault()
+															const input = e.currentTarget
+																.previousElementSibling as HTMLInputElement
+															if (input) {
+																const currentValue = parseInt(input.value) || 0
+																input.value = Math.max(
+																	0,
+																	currentValue + 1,
+																).toString()
+															}
+														}}
+													>
+														<Plus className="h-4 w-4" />
+													</Button>
+												</div>
 												<DropdownMenu>
 													<DropdownMenuTrigger asChild>
 														<Button
 															variant="outline"
 															type="button"
-															aria-label="Azioni"
+															aria-label="Opzioni"
 														>
-															<Ellipsis className="h-4 w-4" />
+															<Settings className="h-4 w-4" />
+															Opzioni
 														</Button>
 													</DropdownMenuTrigger>
 													<DropdownMenuContent>
@@ -503,6 +657,7 @@ export default function EditMatch() {
 															<Form
 																method="post"
 																action={`/data/players/${player.id}/${player.teamId}/${player.playgroundId}/retire?matchId=${match.id}`}
+																preventScrollReset
 																className="w-full"
 															>
 																<Button
@@ -531,6 +686,7 @@ export default function EditMatch() {
 																	<Form
 																		method="post"
 																		action={`/data/players/${player.id}/${player.teamId}/${player.playgroundId}/add-warning?matchId=${match.id}`}
+																		preventScrollReset
 																		className="w-full"
 																	>
 																		<Button
@@ -553,6 +709,7 @@ export default function EditMatch() {
 																	<Form
 																		method="post"
 																		action={`/data/players/${player.id}/${player.teamId}/${player.playgroundId}/remove-warning?matchId=${match.id}`}
+																		preventScrollReset
 																		className="w-full"
 																	>
 																		<Button
@@ -575,6 +732,7 @@ export default function EditMatch() {
 																	<Form
 																		method="post"
 																		action={`/data/players/${player.id}/${player.teamId}/${player.playgroundId}/add-expulsion?matchId=${match.id}`}
+																		preventScrollReset
 																		className="w-full"
 																	>
 																		<Button
@@ -597,6 +755,7 @@ export default function EditMatch() {
 																	<Form
 																		method="post"
 																		action={`/data/players/${player.id}/${player.teamId}/${player.playgroundId}/remove-expulsion?matchId=${match.id}`}
+																		preventScrollReset
 																		className="w-full"
 																	>
 																		<Button
@@ -612,6 +771,13 @@ export default function EditMatch() {
 																</DropdownMenuItem>
 															</>
 														)}
+														<DropdownMenuItem
+															onSelect={() => openAliasDialog(player.id)}
+														>
+															<Button variant="outline" className="w-full">
+																Modifica Alias Temporaneo
+															</Button>
+														</DropdownMenuItem>
 													</DropdownMenuContent>
 												</DropdownMenu>
 											</div>
@@ -750,6 +916,28 @@ export default function EditMatch() {
 					</Form>
 				</TabsContent>
 			</Tabs>
+
+			<Dialog open={aliasDialogOpen} onOpenChange={setAliasDialogOpen}>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>Modifica Alias Temporaneo</DialogTitle>
+					</DialogHeader>
+					<div className="flex flex-col gap-4">
+						<Input
+							type="text"
+							placeholder="Inserisci alias temporaneo"
+							value={
+								selectedPlayerId ? temporaryAliases[selectedPlayerId] || '' : ''
+							}
+							onChange={(e) =>
+								selectedPlayerId &&
+								handleAliasChange(selectedPlayerId, e.target.value)
+							}
+						/>
+						<Button onClick={() => setAliasDialogOpen(false)}>Chiudi</Button>
+					</div>
+				</DialogContent>
+			</Dialog>
 		</div>
 	)
 }
