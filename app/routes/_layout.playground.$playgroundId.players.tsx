@@ -199,7 +199,9 @@ export default function PlayerStatsPage() {
 														e.stopPropagation()
 													}}
 												>
-													<Link to={`/teams/${player.teamId}`}>
+													<Link
+														to={`/playgrounds/${params.playgroundId}/teams/${player.teamId}`}
+													>
 														<Pencil />
 													</Link>
 												</Button>
