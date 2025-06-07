@@ -9,7 +9,7 @@ const Header = ({
 	home,
 }: {
 	title: string
-	backLink: string
+	backLink?: string
 	icon?: React.ReactNode
 	home?: boolean
 }) => {
@@ -28,9 +28,11 @@ const Header = ({
 			)}
 			<div className="flex w-full items-center space-x-2">
 				<Button asChild variant={'ghost'} size={'icon'}>
-					<Link to={backLink} className="hover:text-blue-500">
-						<ChevronLeft className="h-5 w-5" />
-					</Link>
+					{backLink && (
+						<Link to={backLink} className="hover:text-blue-500">
+							<ChevronLeft className="h-5 w-5" />
+						</Link>
+					)}
 				</Button>
 				{icon}
 				<h1 className="line-clamp-1 text-2xl font-bold">{title}</h1>
