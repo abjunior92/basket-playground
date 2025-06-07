@@ -255,41 +255,52 @@ export default function NewMatch() {
 
 			{selectedDay && selectedDayMatches.length > 0 ? (
 				<Card className="mt-8">
-					<CardHeader>
+					<CardHeader className="p-3 md:p-6">
 						<CardTitle>
 							{getDayLabel(selectedDay)} - Partite del giorno
 						</CardTitle>
 					</CardHeader>
-					<CardContent>
-						<div className="space-y-4">
+					<CardContent className="p-3 pt-0 md:p-6">
+						<div className="space-y-4 overflow-auto">
 							{selectedDayMatches
 								.sort((a, b) => a.timeSlot.localeCompare(b.timeSlot))
 								.map((match) => (
-									<div key={match.id} className="flex items-center gap-4">
-										<Badge variant="outline">{match.timeSlot}</Badge>
-										<Badge variant="outline">Campo {match.field}</Badge>
-										<div className="flex items-center gap-2">
-											<span>{match.team1.name}</span>
-											<Badge
-												className={cn(
-													colorGroupClasses[match.team1.group.color],
-													'text-xs',
-												)}
-											>
-												{match.team1.group.name}
+									<div
+										key={match.id}
+										className="flex items-center gap-4 border-b pb-4 last:border-b-0"
+									>
+										<div className="flex flex-col gap-2 md:flex-row">
+											<Badge className="w-max shrink-0" variant="outline">
+												{match.timeSlot}
+											</Badge>
+											<Badge className="shrink-0" variant="outline">
+												Campo {match.field}
 											</Badge>
 										</div>
-										<span>vs</span>
-										<div className="flex items-center gap-2">
-											<span>{match.team2.name}</span>
-											<Badge
-												className={cn(
-													colorGroupClasses[match.team2.group.color],
-													'text-xs',
-												)}
-											>
-												{match.team2.group.name}
-											</Badge>
+										<div className="flex flex-col md:flex-row md:gap-2">
+											<div className="flex items-center gap-2">
+												<span>{match.team1.name}</span>
+												<Badge
+													className={cn(
+														colorGroupClasses[match.team1.group.color],
+														'text-xs',
+													)}
+												>
+													{match.team1.group.name}
+												</Badge>
+											</div>
+											<span>vs</span>
+											<div className="flex items-center gap-2">
+												<span>{match.team2.name}</span>
+												<Badge
+													className={cn(
+														colorGroupClasses[match.team2.group.color],
+														'text-xs',
+													)}
+												>
+													{match.team2.group.name}
+												</Badge>
+											</div>
 										</div>
 									</div>
 								))}
