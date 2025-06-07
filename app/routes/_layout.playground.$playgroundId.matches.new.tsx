@@ -8,10 +8,13 @@ import {
 } from '@remix-run/node'
 import { Form, useActionData, useLoaderData, useParams } from '@remix-run/react'
 import { Plus } from 'lucide-react'
+import { useState } from 'react'
 import invariant from 'tiny-invariant'
 import ErrorMessage from '~/components/ErrorMessage'
 import Header from '~/components/Header'
+import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import {
 	Select,
 	SelectContent,
@@ -21,7 +24,8 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '~/components/ui/select'
-import { getDayLabel, getTimeSlots } from '~/lib/utils'
+import { colorGroupClasses } from '~/lib/types'
+import { cn, getDayLabel, getTimeSlots } from '~/lib/utils'
 
 const prisma = new PrismaClient()
 
@@ -41,7 +45,34 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 		},
 	})
 
-	return { groups }
+	const matches = await prisma.match.findMany({
+		where: { playgroundId: params.playgroundId },
+		include: {
+			team1: {
+				include: {
+					group: true,
+				},
+			},
+			team2: {
+				include: {
+					group: true,
+				},
+			},
+		},
+		orderBy: [{ timeSlot: 'asc' }],
+	})
+
+	// Raggruppiamo le partite per giorno
+	const matchesByDay = matches.reduce(
+		(acc, match) => {
+			acc[match.day] = acc[match.day] || []
+			acc[match.day]?.push(match)
+			return acc
+		},
+		{} as Record<number, typeof matches>,
+	)
+
+	return { groups, matchesByDay }
 }
 
 export const action = async ({ request, params }: ActionFunctionArgs) => {
@@ -94,11 +125,15 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 }
 
 export default function NewMatch() {
-	const { groups } = useLoaderData<typeof loader>()
+	const { groups, matchesByDay } = useLoaderData<typeof loader>()
 	const actionData = useActionData<typeof action>()
 	const params = useParams()
+	const [selectedDay, setSelectedDay] = useState<string | null>(null)
 
 	const timeSlots = getTimeSlots()
+	const selectedDayMatches = selectedDay
+		? (matchesByDay[Number(selectedDay)] ?? [])
+		: []
 
 	return (
 		<div className="flex flex-col space-y-4 p-4">
@@ -111,7 +146,7 @@ export default function NewMatch() {
 			<Form method="post" className="space-y-4">
 				<div>
 					<label htmlFor="day">Giorno:</label>
-					<Select name="day">
+					<Select name="day" onValueChange={(value) => setSelectedDay(value)}>
 						<SelectTrigger>
 							<SelectValue placeholder="Seleziona un giorno" />
 						</SelectTrigger>
@@ -217,6 +252,62 @@ export default function NewMatch() {
 					)}
 				</div>
 			</Form>
+
+			{selectedDay && selectedDayMatches.length > 0 ? (
+				<Card className="mt-8">
+					<CardHeader>
+						<CardTitle>
+							{getDayLabel(selectedDay)} - Partite del giorno
+						</CardTitle>
+					</CardHeader>
+					<CardContent>
+						<div className="space-y-4">
+							{selectedDayMatches
+								.sort((a, b) => a.timeSlot.localeCompare(b.timeSlot))
+								.map((match) => (
+									<div key={match.id} className="flex items-center gap-4">
+										<Badge variant="outline">{match.timeSlot}</Badge>
+										<Badge variant="outline">Campo {match.field}</Badge>
+										<div className="flex items-center gap-2">
+											<span>{match.team1.name}</span>
+											<Badge
+												className={cn(
+													colorGroupClasses[match.team1.group.color],
+													'text-xs',
+												)}
+											>
+												{match.team1.group.name}
+											</Badge>
+										</div>
+										<span>vs</span>
+										<div className="flex items-center gap-2">
+											<span>{match.team2.name}</span>
+											<Badge
+												className={cn(
+													colorGroupClasses[match.team2.group.color],
+													'text-xs',
+												)}
+											>
+												{match.team2.group.name}
+											</Badge>
+										</div>
+									</div>
+								))}
+						</div>
+					</CardContent>
+				</Card>
+			) : selectedDay ? (
+				<Card className="mt-8">
+					<CardHeader>
+						<CardTitle>Partite del giorno {getDayLabel(selectedDay)}</CardTitle>
+					</CardHeader>
+					<CardContent>
+						<p className="text-muted-foreground">
+							Nessuna partita in programma per questo giorno
+						</p>
+					</CardContent>
+				</Card>
+			) : null}
 		</div>
 	)
 }
