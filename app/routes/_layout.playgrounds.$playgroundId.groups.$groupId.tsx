@@ -24,6 +24,15 @@ import {
 } from '~/components/ui/dialog'
 import { Input } from '~/components/ui/input'
 import {
+	Select,
+	SelectContent,
+	SelectGroup,
+	SelectItem,
+	SelectLabel,
+	SelectTrigger,
+	SelectValue,
+} from '~/components/ui/select'
+import {
 	Table,
 	TableBody,
 	TableCell,
@@ -54,7 +63,11 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 
 	if (!group) throw new Response('Not Found', { status: 404 })
 
-	return json({ group })
+	const groups = await prisma.group.findMany({
+		where: { playgroundId: params.playgroundId },
+	})
+
+	return json({ group, groups })
 }
 
 export const action = async ({ request, params }: ActionFunctionArgs) => {
@@ -98,7 +111,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 }
 
 export default function GroupDetails() {
-	const { group } = useLoaderData<typeof loader>()
+	const { group, groups } = useLoaderData<typeof loader>()
 	const actionData = useActionData<typeof action>()
 
 	return (
@@ -210,12 +223,32 @@ export default function GroupDetails() {
 													placeholder="Inserisci il numero di telefono di riferimento della squadra"
 													defaultValue={team.refPhoneNumber ?? ''}
 												/>
+												<Select
+													form="editTeamForm"
+													name="groupId"
+													defaultValue={team.groupId}
+													required
+												>
+													<SelectTrigger>
+														<SelectValue placeholder="Seleziona il girone" />
+													</SelectTrigger>
+													<SelectContent>
+														<SelectGroup>
+															<SelectLabel>Girone</SelectLabel>
+															{groups.map((g) => (
+																<SelectItem key={g.id} value={g.id}>
+																	{g.name}
+																</SelectItem>
+															))}
+														</SelectGroup>
+													</SelectContent>
+												</Select>
 											</div>
 											<DialogFooter>
 												<Form
 													id="editTeamForm"
 													method="post"
-													action={`/data/teams/${team.id}/${group.id}/edit`}
+													action={`/data/teams/${team.id}/${group.id}/${group.playgroundId}/edit`}
 												>
 													<DialogClose>
 														<Button type="submit">Salva</Button>
