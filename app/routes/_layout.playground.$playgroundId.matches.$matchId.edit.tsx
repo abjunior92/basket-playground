@@ -7,7 +7,7 @@ import {
 	redirect,
 } from '@remix-run/node'
 import { Form, useActionData, useLoaderData } from '@remix-run/react'
-import { Ambulance, Minus, Pencil, Plus, Settings } from 'lucide-react'
+import { Ambulance, Minus, Pencil, Plus, Settings, Circle } from 'lucide-react'
 import { useState } from 'react'
 import invariant from 'tiny-invariant'
 import ErrorMessage from '~/components/ErrorMessage'
@@ -269,12 +269,51 @@ export default function EditMatch() {
 	>({})
 	const [aliasDialogOpen, setAliasDialogOpen] = useState(false)
 	const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null)
+	const [teamFouls, setTeamFouls] = useState<Record<string, number>>({
+		[match.team1Id]: 0,
+		[match.team2Id]: 0,
+	})
 
 	const handleAliasChange = (playerId: string, newAlias: string) => {
 		setTemporaryAliases((prev) => ({
 			...prev,
 			[playerId]: newAlias,
 		}))
+	}
+
+	const handleFoulClick = (teamId: string, foulNumber: number) => {
+		setTeamFouls((prev) => ({
+			...prev,
+			[teamId]: prev[teamId] === foulNumber ? foulNumber - 1 : foulNumber,
+		}))
+	}
+
+	const renderFoulDots = (teamId: string) => {
+		return Array.from({ length: 6 }, (_, i) => {
+			const isFilled = (teamFouls[teamId] || 0) > i
+			const isBonus = i === 5 && (teamFouls[teamId] || 0) === 6
+
+			return (
+				<button
+					key={i}
+					type="button"
+					onClick={() => handleFoulClick(teamId, i + 1)}
+					className={`transition-colors duration-200 ${
+						isBonus
+							? 'text-red-500 hover:text-red-600'
+							: isFilled
+								? 'text-black hover:text-gray-700'
+								: 'text-black hover:text-gray-300'
+					}`}
+				>
+					<Circle
+						className={`h-5 w-5 md:h-6 md:w-6 ${
+							isFilled ? 'fill-current' : ''
+						} stroke-current`}
+					/>
+				</button>
+			)
+		})
 	}
 
 	const openAliasDialog = (playerId: string) => {
@@ -326,6 +365,22 @@ export default function EditMatch() {
 									required
 								/>
 							</label>
+						</div>
+
+						<div className="mt-4 flex justify-between">
+							<div className="flex flex-col items-start">
+								<span className="text-sm font-semibold">Falli di squadra</span>
+								<div className="mt-2 flex items-center gap-x-1">
+									{renderFoulDots(match.team1Id)}
+								</div>
+							</div>
+
+							<div className="flex flex-col items-end">
+								<span className="text-sm font-semibold">Falli di squadra</span>
+								<div className="mt-2 flex items-center gap-x-1">
+									{renderFoulDots(match.team2Id)}
+								</div>
+							</div>
 						</div>
 
 						<Separator className="mt-6 mb-4" />
