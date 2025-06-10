@@ -37,7 +37,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 	const oldSize = player?.size
 
 	// Aggiorniamo lo stock SOLO SE la taglia è cambiata
-	if (oldSize && oldSize !== size) {
+	if (oldSize !== size) {
 		// 1. Se il player aveva già una taglia e la sta cambiando
 		if (oldSize) {
 			await prisma.jerseyStock.update({
