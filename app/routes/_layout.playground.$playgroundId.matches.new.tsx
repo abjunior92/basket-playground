@@ -310,7 +310,9 @@ export default function NewMatch() {
 			) : selectedDay ? (
 				<Card className="mt-8">
 					<CardHeader>
-						<CardTitle>Partite del giorno {getDayLabel(selectedDay)}</CardTitle>
+						<CardTitle>
+							{getDayLabel(selectedDay)} - Partite del giorno
+						</CardTitle>
 					</CardHeader>
 					<CardContent>
 						<p className="text-muted-foreground">
