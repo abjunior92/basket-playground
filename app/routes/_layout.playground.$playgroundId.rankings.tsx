@@ -167,7 +167,9 @@ export default function Standings() {
 														<TableCell>{team.matchesPlayed}</TableCell>
 														<TableCell>{team.pointsScored}</TableCell>
 														<TableCell>{team.pointsConceded}</TableCell>
-														<TableCell>{team.winPercentage}</TableCell>
+														<TableCell>
+															{team.winPercentage.toFixed(2)}
+														</TableCell>
 														<TableCell>{team.pointsDifference}</TableCell>
 													</TableRow>
 												)
