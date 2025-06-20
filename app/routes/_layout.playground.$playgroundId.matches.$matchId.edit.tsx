@@ -97,12 +97,33 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 			return json({ error: 'Tutti i campi sono obbligatori' }, { status: 400 })
 		}
 
-		// Controllo se la squadra gioca già in quello slot
+		// Controllo se la partita ha già un risultato
+		const currentMatch = await prisma.match.findUnique({
+			where: { id: params.matchId },
+			select: { score1: true, score2: true },
+		})
+
+		if (
+			currentMatch &&
+			(currentMatch.score1 !== null || currentMatch.score2 !== null)
+		) {
+			return json(
+				{
+					error:
+						'Non è possibile ripianificare una partita che ha già un risultato',
+				},
+				{ status: 400 },
+			)
+		}
+
+		// Controllo se un'altra squadra gioca già in quello slot
+		// Escludo la partita corrente dal controllo
 		const existingMatch = await prisma.match.findFirst({
 			where: {
 				playgroundId: params.playgroundId,
 				day,
 				timeSlot,
+				id: { not: params.matchId }, // Escludo la partita corrente
 				OR: [
 					{ team1Id },
 					{ team2Id },

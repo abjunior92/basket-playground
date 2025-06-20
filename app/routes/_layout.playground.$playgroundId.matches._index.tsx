@@ -3,10 +3,12 @@ import {
 	json,
 	type LoaderFunctionArgs,
 	type MetaFunction,
+	type ActionFunctionArgs,
 } from '@remix-run/node'
-import { Link, useLoaderData, useParams } from '@remix-run/react'
-import { CalendarRange, Pencil, Plus } from 'lucide-react'
+import { Link, useLoaderData, useParams, Form } from '@remix-run/react'
+import { CalendarRange, Pencil, Plus, Trash2 } from 'lucide-react'
 import invariant from 'tiny-invariant'
+import DialogAlert from '~/components/DialogAlert'
 import Header from '~/components/Header'
 import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
@@ -28,6 +30,64 @@ export const meta: MetaFunction = () => {
 		{ title: 'Calendario Partite' },
 		{ name: 'description', content: 'Calendario Partite' },
 	]
+}
+
+export const action = async ({ request, params }: ActionFunctionArgs) => {
+	invariant(params.playgroundId, 'playgroundId is required')
+	const formData = await request.formData()
+	const intent = formData.get('intent') as string
+
+	if (intent === 'delete-match') {
+		const matchId = formData.get('matchId') as string
+
+		if (!matchId) {
+			return json({ error: 'ID partita mancante' }, { status: 400 })
+		}
+
+		try {
+			// Elimina la partita e tutti i dati correlati in una transazione
+			await prisma.$transaction(async (tx) => {
+				// 1. Recupera le statistiche dei giocatori per questa partita
+				const playerStats = await tx.playerMatchStats.findMany({
+					where: { matchId },
+					select: { playerId: true, points: true },
+				})
+
+				// 2. Aggiorna i punteggi totali dei giocatori (sottrai i punti della partita)
+				for (const stat of playerStats) {
+					await tx.player.update({
+						where: { id: stat.playerId },
+						data: {
+							totalPoints: { decrement: stat.points },
+						},
+					})
+				}
+
+				// 3. Elimina le statistiche dei giocatori per questa partita
+				await tx.playerMatchStats.deleteMany({
+					where: { matchId },
+				})
+
+				// 4. Elimina la partita
+				await tx.match.delete({
+					where: {
+						id: matchId,
+						playgroundId: params.playgroundId,
+					},
+				})
+			})
+
+			return json({ success: true })
+		} catch (error) {
+			console.error("Errore durante l'eliminazione della partita:", error)
+			return json(
+				{ error: "Errore durante l'eliminazione della partita" },
+				{ status: 500 },
+			)
+		}
+	}
+
+	return json({ error: 'Azione non riconosciuta' }, { status: 400 })
 }
 
 export const loader = async ({ params }: LoaderFunctionArgs) => {
@@ -96,7 +156,7 @@ export default function Matches() {
 									<TableHead>👥 Squadra 1</TableHead>
 									<TableHead>👥 Squadra 2</TableHead>
 									<TableHead>📝 Risultato</TableHead>
-									<TableHead></TableHead>
+									<TableHead>Azioni</TableHead>
 								</TableRow>
 							</TableHeader>
 							<TableBody>
@@ -155,13 +215,45 @@ export default function Matches() {
 												</span>
 											</TableCell>
 											<TableCell>
-												<Button asChild variant="outline">
-													<Link
-														to={`/playground/${params.playgroundId}/matches/${match.id}/edit`}
+												<div className="flex justify-center gap-2">
+													<Button asChild variant="outline" size="sm">
+														<Link
+															to={`/playground/${params.playgroundId}/matches/${match.id}/edit`}
+														>
+															<Pencil className="h-4 w-4" />
+														</Link>
+													</Button>
+													<Form
+														id={`deleteMatchForm-${match.id}`}
+														method="post"
 													>
-														<Pencil />
-													</Link>
-												</Button>
+														<input
+															type="hidden"
+															name="intent"
+															value="delete-match"
+														/>
+														<input
+															type="hidden"
+															name="matchId"
+															value={match.id}
+														/>
+														<DialogAlert
+															trigger={
+																<Button
+																	type="button"
+																	variant="outline"
+																	size="sm"
+																	className="text-red-600 hover:bg-red-50 hover:text-red-700"
+																>
+																	<Trash2 className="h-4 w-4" />
+																</Button>
+															}
+															title="Elimina partita"
+															description="Sei sicuro di voler eliminare questa partita? Questa azione non può essere annullata ed eliminerà anche tutti i risultati e i punteggi dei giocatori."
+															formId={`deleteMatchForm-${match.id}`}
+														/>
+													</Form>
+												</div>
 											</TableCell>
 										</TableRow>
 									)
