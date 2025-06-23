@@ -1,6 +1,6 @@
 import { type ColorGroup, PrismaClient } from '@prisma/client'
 import { type LoaderFunctionArgs, type MetaFunction } from '@remix-run/node'
-import { useLoaderData } from '@remix-run/react'
+import { useLoaderData, useParams } from '@remix-run/react'
 import { Medal } from 'lucide-react'
 import invariant from 'tiny-invariant'
 import Header from '~/components/Header'
@@ -115,10 +115,15 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 
 export default function Standings() {
 	const { topPlayers, groups } = useLoaderData<typeof loader>()
+	const params = useParams()
 
 	return (
 		<div className="md:p-4">
-			<Header title="Classifiche" icon={<Medal />} />
+			<Header
+				title="Classifiche"
+				backLink={`/playground/${params.playgroundId}/menu`}
+				icon={<Medal />}
+			/>
 			<Tabs defaultValue="groups" className="mt-4 w-full">
 				<TabsList>
 					<TabsTrigger value="groups">Classifica Gironi</TabsTrigger>

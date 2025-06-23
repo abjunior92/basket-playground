@@ -4,7 +4,7 @@ import {
 	type LoaderFunctionArgs,
 	type MetaFunction,
 } from '@remix-run/node'
-import { useLoaderData } from '@remix-run/react'
+import { useLoaderData, useParams } from '@remix-run/react'
 import { CalendarRange } from 'lucide-react'
 import invariant from 'tiny-invariant'
 import Header from '~/components/Header'
@@ -65,11 +65,16 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 
 export default function Matches() {
 	const { matchesByDay } = useLoaderData<typeof loader>()
+	const params = useParams()
 
 	return (
 		<div className="md:p-4">
 			<div className="mb-4 flex items-center justify-between">
-				<Header title="Calendario Partite" icon={<CalendarRange />} />
+				<Header
+					title="Calendario Partite"
+					backLink={`/playground/${params.playgroundId}/menu`}
+					icon={<CalendarRange />}
+				/>
 			</div>
 			{Object.keys(matchesByDay).map((day) => (
 				<div key={day} className="mb-6">
