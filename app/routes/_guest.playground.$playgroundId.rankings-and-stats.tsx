@@ -118,7 +118,7 @@ export default function Standings() {
 	const params = useParams()
 
 	return (
-		<div className="md:p-4">
+		<div className="p-4">
 			<Header
 				title="Classifiche"
 				backLink={`/playground/${params.playgroundId}/menu`}

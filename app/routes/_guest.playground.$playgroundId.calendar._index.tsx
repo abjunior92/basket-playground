@@ -68,7 +68,7 @@ export default function Matches() {
 	const params = useParams()
 
 	return (
-		<div className="md:p-4">
+		<div className="p-4">
 			<div className="mb-4 flex items-center justify-between">
 				<Header
 					title="Calendario Partite"
