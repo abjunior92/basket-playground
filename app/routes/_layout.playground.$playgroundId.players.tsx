@@ -165,7 +165,7 @@ export default function PlayerStatsPage() {
 											className={cn('transition-transform', {
 												'rotate-180':
 													sortDirection === 'desc' && sortColumn === key,
-												'opacity-1': sortColumn === key,
+												'opacity-100': sortColumn === key,
 												'opacity-25': sortColumn !== key,
 											})}
 										>

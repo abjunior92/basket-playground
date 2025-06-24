@@ -1,3 +1,4 @@
+import { type Match } from '@prisma/client'
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 
@@ -64,4 +65,86 @@ export const getDayLabel = (day: string) => {
 			break
 	}
 	return label
+}
+
+export const getFinalTimeSlots = () => {
+	return getTimeSlots().filter(
+		(slot) =>
+			isMatchFinalEight(slot) ||
+			isMatchFinalFour(slot) ||
+			isMatchSemifinal(slot) ||
+			isMatchThirdPlace(slot) ||
+			isMatchFinal(slot),
+	)
+}
+
+export const getMatchLabel = (timeSlot: string) => {
+	let label
+
+	switch (timeSlot) {
+		case '19:20 > 19:35':
+		case '19:40 > 19:55':
+		case '20:00 > 20:15':
+		case '20:20 > 20:35':
+			label = 'Ottavi di Finale'
+			break
+		case '20:40 > 20:55':
+		case '21:00 > 21:15':
+			label = 'Quarti di Finale'
+			break
+		case '21:20 > 21:35':
+			label = 'Semifinali'
+			break
+		case '21:40 > 21:55':
+			label = 'Terzo posto'
+			break
+		case '22:00 > 22:15':
+			label = 'Finale'
+			break
+		default:
+			label = 'Extra Partita'
+			break
+	}
+	return label
+}
+
+export const isMatchFinalEight = (match: Match | string) => {
+	if (typeof match === 'string') {
+		match = { timeSlot: match } as Match
+	}
+	return (
+		match.timeSlot === '19:20 > 19:35' ||
+		match.timeSlot === '19:40 > 19:55' ||
+		match.timeSlot === '20:00 > 20:15' ||
+		match.timeSlot === '20:20 > 20:35'
+	)
+}
+export const isMatchFinalFour = (match: Match | string) => {
+	if (typeof match === 'string') {
+		match = { timeSlot: match } as Match
+	}
+	return (
+		match.timeSlot === '20:40 > 20:55' || match.timeSlot === '21:00 > 21:15'
+	)
+}
+
+export const isMatchSemifinal = (match: Match | string) => {
+	if (typeof match === 'string') {
+		match = { timeSlot: match } as Match
+	}
+	return match.timeSlot === '21:20 > 21:35'
+}
+
+export const isMatchThirdPlace = (match: Match | string) => {
+	if (typeof match === 'string') {
+		match = { timeSlot: match } as Match
+	}
+	return match.timeSlot === '21:40 > 21:55'
+}
+
+export const isMatchFinal = (match: Match | string) => {
+	if (typeof match === 'string') {
+		match = { timeSlot: match } as Match
+	}
+	return match.timeSlot === '22:00 > 22:15'
 }
