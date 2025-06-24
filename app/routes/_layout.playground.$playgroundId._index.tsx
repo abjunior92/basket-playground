@@ -8,6 +8,7 @@ import {
 	PersonStanding,
 	Shirt,
 	Swords,
+	Trophy,
 } from 'lucide-react'
 import invariant from 'tiny-invariant'
 import { Button } from '~/components/ui/button'
@@ -93,6 +94,11 @@ const resources = [
 		href: '/rankings',
 		text: 'Classifiche',
 		icon: <Medal />,
+	},
+	{
+		href: '/playoff',
+		text: 'Playoff',
+		icon: <Trophy />,
 	},
 	{
 		href: '/three-points-challenge',

@@ -6,7 +6,12 @@ import {
 	type MetaFunction,
 	redirect,
 } from '@remix-run/node'
-import { Form, useActionData, useLoaderData } from '@remix-run/react'
+import {
+	Form,
+	useActionData,
+	useLoaderData,
+	useLocation,
+} from '@remix-run/react'
 import { Ambulance, Minus, Pencil, Plus, Settings, Circle } from 'lucide-react'
 import { useState } from 'react'
 import invariant from 'tiny-invariant'
@@ -84,6 +89,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 	invariant(params.playgroundId, 'playgroundId is required')
 	invariant(params.matchId, 'matchId is required')
 	const formData = await request.formData()
+	const backLink = formData.get('backLink') as string
 	const formName = formData.get('intent') as 'score' | 'replan'
 
 	if (formName === 'replan') {
@@ -257,7 +263,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 		}
 	}
 
-	return redirect(`/playground/${params.playgroundId}/matches`)
+	return redirect(backLink)
 }
 
 const countTeam1 = (formData: FormData) => {
@@ -344,13 +350,14 @@ export default function EditMatch() {
 
 	const timeSlots = getTimeSlots()
 
+	const location = useLocation()
+
+	const backLink =
+		location.state?.backLink || `/playground/${match.playgroundId}/matches`
+
 	return (
 		<div className="md:p-4">
-			<Header
-				title="Modifica partita"
-				backLink={`/playground/${match.playgroundId}/matches`}
-				icon={<Pencil />}
-			/>
+			<Header title="Modifica partita" backLink={backLink} icon={<Pencil />} />
 			<Tabs defaultValue="scores" className="mt-4 w-full">
 				<TabsList>
 					<TabsTrigger value="scores">Risultato</TabsTrigger>
@@ -866,6 +873,8 @@ export default function EditMatch() {
 								)}
 							</div>
 						</div>
+
+						<input type="hidden" name="backLink" value={backLink} />
 
 						<Button
 							type="submit"

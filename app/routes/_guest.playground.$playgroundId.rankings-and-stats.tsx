@@ -33,29 +33,109 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 		include: {
 			group: true,
 			matchesAsTeam1: {
-				select: { id: true, winner: true, score1: true, score2: true },
+				select: {
+					id: true,
+					winner: true,
+					score1: true,
+					score2: true,
+					day: true,
+				},
 			},
 			matchesAsTeam2: {
-				select: { id: true, winner: true, score1: true, score2: true },
+				select: {
+					id: true,
+					winner: true,
+					score1: true,
+					score2: true,
+					day: true,
+				},
 			},
 		},
 	})
 
-	const topPlayers = await prisma.player.findMany({
-		orderBy: { totalPoints: 'desc' },
-		include: { team: { include: { group: true } } },
-		take: 10,
+	// Recupera tutti i giocatori
+	const allPlayers = await prisma.player.findMany({
+		where: { playgroundId: params.playgroundId },
+		include: {
+			team: { include: { group: true } },
+		},
 	})
+
+	// Recupera le statistiche dei giocatori per partita
+	const playerStats = await prisma.playerMatchStats.findMany({
+		where: {
+			player: {
+				playgroundId: params.playgroundId,
+			},
+		},
+		include: {
+			match: {
+				select: { day: true },
+			},
+			player: {
+				select: { id: true },
+			},
+		},
+	})
+
+	// Calcola i punti per i gironi (giorni 1,2,3,4,6)
+	const playersWithGroupStats = allPlayers.map((player) => {
+		const groupMatches = playerStats.filter(
+			(stat) =>
+				stat.playerId === player.id &&
+				stat.match.day !== 5 &&
+				stat.match.day !== 7,
+		)
+		const groupPoints = groupMatches.reduce((sum, stat) => sum + stat.points, 0)
+
+		return {
+			...player,
+			groupPoints,
+		}
+	})
+
+	// Calcola i punti per le finali (giorni 5,7)
+	const playersWithFinalsStats = allPlayers.map((player) => {
+		const finalsMatches = playerStats.filter(
+			(stat) =>
+				stat.playerId === player.id &&
+				(stat.match.day === 5 || stat.match.day === 7),
+		)
+		const finalsPoints = finalsMatches.reduce(
+			(sum, stat) => sum + stat.points,
+			0,
+		)
+
+		return {
+			...player,
+			finalsPoints,
+		}
+	})
+
+	// Top 10 giocatori per gironi
+	const topPlayersGroups = playersWithGroupStats
+		.sort((a, b) => b.groupPoints - a.groupPoints)
+		.slice(0, 10)
+
+	// Top 10 giocatori per finali
+	const topPlayersFinals = playersWithFinalsStats
+		.sort((a, b) => b.finalsPoints - a.finalsPoints)
+		.slice(0, 10)
 
 	// Raggruppiamo le squadre per girone
 	const groups = teams.reduce(
 		(acc, team) => {
-			const matches = [...team.matchesAsTeam1, ...team.matchesAsTeam2]
+			const allMatches = [...team.matchesAsTeam1, ...team.matchesAsTeam2]
 
-			const matchesPlayed = matches.filter(
+			// Filtra solo le partite dei giorni dei gironi (1,2,3,4,6) - escludi 5 (play-in) e 7 (finali)
+			const groupMatches = allMatches.filter(
+				(match) => match.day !== 5 && match.day !== 7,
+			)
+
+			const matchesPlayed = groupMatches.filter(
 				(match) => match.winner !== null,
 			).length
-			const matchesWon = matches.filter(
+			const matchesWon = groupMatches.filter(
 				(match) => match.winner === team.id,
 			).length
 
@@ -63,7 +143,7 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 			let pointsScored = 0
 			let pointsConceded = 0
 
-			matches.forEach((match) => {
+			groupMatches.forEach((match) => {
 				if (match.winner !== null) {
 					if (team.matchesAsTeam1.some((m) => m.id === match.id)) {
 						pointsScored += match.score1 || 0
@@ -110,11 +190,12 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 		})
 	})
 
-	return { groups, topPlayers }
+	return { groups, topPlayersGroups, topPlayersFinals }
 }
 
 export default function Standings() {
-	const { topPlayers, groups } = useLoaderData<typeof loader>()
+	const { topPlayersGroups, topPlayersFinals, groups } =
+		useLoaderData<typeof loader>()
 	const params = useParams()
 
 	return (
@@ -127,7 +208,12 @@ export default function Standings() {
 			<Tabs defaultValue="groups" className="mt-4 w-full">
 				<TabsList>
 					<TabsTrigger value="groups">Classifica Gironi</TabsTrigger>
-					<TabsTrigger value="players">Classifica Giocatori</TabsTrigger>
+					<TabsTrigger value="players">
+						Classifica Giocatori - Gironi
+					</TabsTrigger>
+					<TabsTrigger value="finals">
+						Classifica Giocatori - Finals
+					</TabsTrigger>
 				</TabsList>
 
 				<TabsContent value="groups">
@@ -167,7 +253,9 @@ export default function Standings() {
 														<TableCell>{team.matchesPlayed}</TableCell>
 														<TableCell>{team.pointsScored}</TableCell>
 														<TableCell>{team.pointsConceded}</TableCell>
-														<TableCell>{team.winPercentage}</TableCell>
+														<TableCell>
+															{team.winPercentage.toFixed(2)}
+														</TableCell>
 														<TableCell>{team.pointsDifference}</TableCell>
 													</TableRow>
 												)
@@ -188,11 +276,11 @@ export default function Standings() {
 									<TableHead>Nome Cognome</TableHead>
 									<TableHead>Squadra</TableHead>
 									<TableHead>Girone</TableHead>
-									<TableHead>Punti totali</TableHead>
+									<TableHead>Punti gironi</TableHead>
 								</TableRow>
 							</TableHeader>
 							<TableBody>
-								{topPlayers.map((player) => (
+								{topPlayersGroups.map((player) => (
 									<TableRow
 										key={player.id}
 										className={cn('text-center', {
@@ -213,7 +301,48 @@ export default function Standings() {
 												{player.team.group.name}
 											</Badge>
 										</TableCell>
-										<TableCell>{player.totalPoints}</TableCell>
+										<TableCell>{player.groupPoints}</TableCell>
+									</TableRow>
+								))}
+							</TableBody>
+						</Table>
+					</div>
+				</TabsContent>
+
+				<TabsContent value="finals">
+					<div className="mt-4 overflow-hidden rounded-lg border border-gray-300">
+						<Table className="w-full border-collapse">
+							<TableHeader>
+								<TableRow className="bg-gray-100">
+									<TableHead>Nome Cognome</TableHead>
+									<TableHead>Squadra</TableHead>
+									<TableHead>Girone</TableHead>
+									<TableHead>Punti finals</TableHead>
+								</TableRow>
+							</TableHeader>
+							<TableBody>
+								{topPlayersFinals.map((player) => (
+									<TableRow
+										key={player.id}
+										className={cn('text-center', {
+											'bg-red-500/20': player.isExpelled,
+											'hover:bg-red-500/30': player.isExpelled,
+											'bg-yellow-500/20': player.warnings === 1,
+											'hover:bg-yellow-500/30': player.warnings === 1,
+										})}
+									>
+										<TableCell>
+											{player.name} {player.surname}
+										</TableCell>
+										<TableCell>{player.team.name}</TableCell>
+										<TableCell>
+											<Badge
+												className={colorGroupClasses[player.team.group.color]}
+											>
+												{player.team.group.name}
+											</Badge>
+										</TableCell>
+										<TableCell>{player.finalsPoints}</TableCell>
 									</TableRow>
 								))}
 							</TableBody>
