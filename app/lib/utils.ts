@@ -10,7 +10,7 @@ export const getTimeSlots = () => {
 	let hour = 18
 	let minute = 0
 
-	while (hour < 22 || (hour === 22 && minute <= 35)) {
+	while (hour < 22 || (hour === 22 && minute <= 55)) {
 		const start = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`
 
 		// Aggiungi 15 minuti per ottenere l'orario di fine
@@ -52,7 +52,7 @@ export const getDayLabel = (day: string) => {
 			label = 'Mercoledì'
 			break
 		case '5':
-			label = 'Giovedì'
+			label = 'Giovedì (Play-in)'
 			break
 		case '6':
 			label = 'Venerdì (Recuperi)'
