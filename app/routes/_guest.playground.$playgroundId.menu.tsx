@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 import { type LoaderFunctionArgs, type MetaFunction } from '@remix-run/node'
 import { Link, useLoaderData } from '@remix-run/react'
-import { CalendarCog, Medal } from 'lucide-react'
+import { CalendarCog, Medal, Trophy } from 'lucide-react'
 import invariant from 'tiny-invariant'
 
 const prisma = new PrismaClient()
@@ -66,6 +66,11 @@ const resources = [
 		href: '/calendar',
 		text: 'Calendario partite',
 		icon: <CalendarCog />,
+	},
+	{
+		href: '/finals',
+		text: 'Playoff',
+		icon: <Trophy />,
 	},
 	{
 		href: '/rankings-and-stats',
