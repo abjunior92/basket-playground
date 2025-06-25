@@ -1,14 +1,25 @@
 import { PrismaClient } from '@prisma/client'
 import {
+	type ActionFunctionArgs,
 	json,
+	redirect,
 	type LoaderFunctionArgs,
 	type MetaFunction,
 } from '@remix-run/node'
-import { useLoaderData, useParams } from '@remix-run/react'
-import { CalendarRange } from 'lucide-react'
+import { useFetcher, useLoaderData, useParams } from '@remix-run/react'
+import { CalendarRange, Eye, EyeOff } from 'lucide-react'
+import { useState } from 'react'
 import invariant from 'tiny-invariant'
 import Header from '~/components/Header'
 import { Badge } from '~/components/ui/badge'
+import { Button } from '~/components/ui/button'
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '~/components/ui/select'
 import {
 	Table,
 	TableBody,
@@ -29,12 +40,46 @@ export const meta: MetaFunction = () => {
 	]
 }
 
-export const loader = async ({ params }: LoaderFunctionArgs) => {
+export const action = async ({ request, params }: ActionFunctionArgs) => {
 	invariant(params.playgroundId, 'playgroundId is required')
+	const formData = await request.formData()
+	const intent = formData.get('intent') as string
+
+	if (intent === 'filter-team') {
+		const teamId = formData.get('teamId') as string
+		const url = new URL(request.url)
+
+		if (teamId === 'all') {
+			url.searchParams.delete('teamId')
+		} else {
+			url.searchParams.set('teamId', teamId)
+		}
+
+		return redirect(url.pathname + url.search)
+	}
+
+	return json({ error: 'Azione non riconosciuta' }, { status: 400 })
+}
+
+export const loader = async ({ params, request }: LoaderFunctionArgs) => {
+	invariant(params.playgroundId, 'playgroundId is required')
+
+	// Recupera il teamId dall'URL se presente
+	const url = new URL(request.url)
+	const teamId = url.searchParams.get('teamId')
+
+	// Costruisci la query per le partite
+	const matchesWhere: any = {
+		playgroundId: params.playgroundId,
+	}
+
+	// Aggiungi filtro per squadra se specificato
+	if (teamId && teamId !== 'all') {
+		matchesWhere.OR = [{ team1Id: teamId }, { team2Id: teamId }]
+	}
+
 	const matches = await prisma.match.findMany({
-		where: {
-			playgroundId: params.playgroundId,
-		},
+		where: matchesWhere,
 		include: {
 			team1: {
 				include: {
@@ -50,6 +95,19 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 		orderBy: [{ day: 'asc' }, { timeSlot: 'asc' }],
 	})
 
+	// Recupera tutte le squadre del playground
+	const teams = await prisma.team.findMany({
+		where: {
+			group: {
+				playgroundId: params.playgroundId,
+			},
+		},
+		include: {
+			group: true,
+		},
+		orderBy: [{ group: { name: 'asc' } }, { name: 'asc' }],
+	})
+
 	// Raggruppiamo le partite per giorno
 	const matchesByDay = matches.reduce(
 		(acc, match) => {
@@ -60,12 +118,30 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 		{} as Record<number, typeof matches>,
 	)
 
-	return json({ matchesByDay })
+	return json({ matchesByDay, teams, selectedTeamId: teamId || 'all' })
 }
 
 export default function Matches() {
-	const { matchesByDay } = useLoaderData<typeof loader>()
+	const { matchesByDay, teams, selectedTeamId } = useLoaderData<typeof loader>()
 	const params = useParams()
+	const [hiddenDays, setHiddenDays] = useState<Set<number>>(new Set())
+	const fetcher = useFetcher()
+
+	const toggleDayVisibility = (day: number) => {
+		setHiddenDays((prev) => {
+			const newSet = new Set(prev)
+			if (newSet.has(day)) {
+				newSet.delete(day)
+			} else {
+				newSet.add(day)
+			}
+			return newSet
+		})
+	}
+
+	const handleTeamChange = (value: string) => {
+		fetcher.submit({ intent: 'filter-team', teamId: value }, { method: 'post' })
+	}
 
 	return (
 		<div className="p-4">
@@ -76,83 +152,142 @@ export default function Matches() {
 					icon={<CalendarRange />}
 				/>
 			</div>
-			{Object.keys(matchesByDay).map((day) => (
-				<div key={day} className="mb-6">
-					<h2 className="mb-2 text-xl font-semibold">{getDayLabel(day)}</h2>
-					<div className="overflow-hidden rounded-lg border border-gray-300">
-						<Table className="w-full border-collapse">
-							<TableHeader>
-								<TableRow className="bg-gray-100">
-									<TableHead>⏱️ Orario</TableHead>
-									<TableHead>📍 Campo</TableHead>
-									<TableHead>👥 Squadra 1</TableHead>
-									<TableHead>👥 Squadra 2</TableHead>
-									<TableHead>📝 Risultato</TableHead>
-								</TableRow>
-							</TableHeader>
-							<TableBody>
-								{matchesByDay[Number(day)]?.map((match) => {
-									const isTeam1Winner = match.winner === match.team1Id
-									const isTeam2Winner = match.winner === match.team2Id
-									return (
-										<TableRow key={match.id} className="text-center">
-											<TableCell>{match.timeSlot}</TableCell>
-											<TableCell>{match.field}</TableCell>
-											<TableCell>
-												<div className="flex flex-col items-center justify-center">
-													<span>
-														{isTeam1Winner && '🏆 '}
-														{match.team1.name}
-													</span>
-													<Badge
-														className={
-															colorGroupClasses[match.team1.group.color]
-														}
-													>
-														{match.team1.group.name}
-													</Badge>
-												</div>
-											</TableCell>
-											<TableCell>
-												<div className="flex flex-col items-center justify-center">
-													<span>
-														{isTeam2Winner && '🏆 '}
-														{match.team2.name}
-													</span>
-													<Badge
-														className={
-															colorGroupClasses[match.team2.group.color]
-														}
-													>
-														{match.team2.group.name}
-													</Badge>
-												</div>
-											</TableCell>
-											<TableCell>
-												<span
-													className={cn(
-														isTeam1Winner && 'font-bold text-green-600',
-													)}
-												>
-													{match.score1}
-												</span>{' '}
-												-{' '}
-												<span
-													className={cn(
-														isTeam2Winner && 'font-bold text-green-600',
-													)}
-												>
-													{match.score2}
-												</span>
-											</TableCell>
+
+			{/* Select per filtrare per squadra */}
+			<div className="mb-6 w-full md:w-auto">
+				<span className="text-sm">Filtra il calendario per squadra</span>
+				<Select value={selectedTeamId} onValueChange={handleTeamChange}>
+					<SelectTrigger className="w-full md:max-w-sm">
+						<SelectValue placeholder="Filtra per squadra" />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectItem value="all">Tutte le squadre</SelectItem>
+						{teams.map((team) => (
+							<SelectItem key={team.id} value={team.id}>
+								<div className="flex items-center gap-2">
+									<Badge className={colorGroupClasses[team.group.color]}>
+										{team.group.name}
+									</Badge>
+									{team.name}
+								</div>
+							</SelectItem>
+						))}
+					</SelectContent>
+				</Select>
+			</div>
+
+			{Object.keys(matchesByDay).map((day) => {
+				const dayNumber = Number(day)
+				const isHidden = hiddenDays.has(dayNumber)
+
+				return (
+					<div key={day} className="py-4">
+						<div className="mb-2 flex items-center justify-between">
+							<h2
+								className={cn(
+									'text-xl font-semibold',
+									isHidden && 'text-gray-400',
+								)}
+							>
+								{getDayLabel(day) + ' - Giorno ' + day}
+							</h2>
+							<Button
+								variant="outline"
+								onClick={() => toggleDayVisibility(dayNumber)}
+								className="w-32"
+							>
+								{isHidden ? (
+									<>
+										Mostra
+										<EyeOff className="h-5 w-5" />
+									</>
+								) : (
+									<>
+										Nascondi
+										<Eye className="h-5 w-5" />
+									</>
+								)}
+							</Button>
+						</div>
+						{!isHidden ? (
+							<div className="overflow-hidden rounded-lg border border-gray-300">
+								<Table className="w-full border-collapse">
+									<TableHeader>
+										<TableRow className="bg-gray-100">
+											<TableHead>⏱️ Orario</TableHead>
+											<TableHead>📍 Campo</TableHead>
+											<TableHead>👥 Squadra 1</TableHead>
+											<TableHead>👥 Squadra 2</TableHead>
+											<TableHead>📝 Risultato</TableHead>
 										</TableRow>
-									)
-								})}
-							</TableBody>
-						</Table>
+									</TableHeader>
+									<TableBody>
+										{matchesByDay[Number(day)]?.map((match) => {
+											const isTeam1Winner = match.winner === match.team1Id
+											const isTeam2Winner = match.winner === match.team2Id
+											return (
+												<TableRow key={match.id} className="text-center">
+													<TableCell>{match.timeSlot}</TableCell>
+													<TableCell>{match.field}</TableCell>
+													<TableCell>
+														<div className="flex flex-col items-center justify-center">
+															<span>
+																{isTeam1Winner && '🏆 '}
+																{match.team1.name}
+															</span>
+															<Badge
+																className={
+																	colorGroupClasses[match.team1.group.color]
+																}
+															>
+																{match.team1.group.name}
+															</Badge>
+														</div>
+													</TableCell>
+													<TableCell>
+														<div className="flex flex-col items-center justify-center">
+															<span>
+																{isTeam2Winner && '🏆 '}
+																{match.team2.name}
+															</span>
+															<Badge
+																className={
+																	colorGroupClasses[match.team2.group.color]
+																}
+															>
+																{match.team2.group.name}
+															</Badge>
+														</div>
+													</TableCell>
+													<TableCell>
+														<span
+															className={cn(
+																isTeam1Winner && 'font-bold text-green-600',
+															)}
+														>
+															{match.score1}
+														</span>{' '}
+														-{' '}
+														<span
+															className={cn(
+																isTeam2Winner && 'font-bold text-green-600',
+															)}
+														>
+															{match.score2}
+														</span>
+													</TableCell>
+												</TableRow>
+											)
+										})}
+									</TableBody>
+								</Table>
+							</div>
+						) : (
+							<div className="flex h-10 w-full justify-center rounded-lg border border-gray-300 bg-gray-100"></div>
+						)}
 					</div>
-				</div>
-			))}
+				)
+			})}
 		</div>
 	)
 }

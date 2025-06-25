@@ -161,7 +161,7 @@ export default function NewMatch() {
 								<SelectContent>
 									<SelectGroup>
 										<SelectLabel>Giorno</SelectLabel>
-										{['1', '2', '3', '4'].map((d) => (
+										{['1', '2', '3', '4', '6'].map((d) => (
 											<SelectItem key={d} value={d}>
 												{getDayLabel(d)}
 											</SelectItem>

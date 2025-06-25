@@ -234,12 +234,11 @@ export default function Standings() {
 										<TableHeader>
 											<TableRow className="bg-gray-100">
 												<TableHead>Nome squadra</TableHead>
-												<TableHead>Punti girone</TableHead>
 												<TableHead>Partite vinte</TableHead>
 												<TableHead>Partite giocate</TableHead>
 												<TableHead>Punti fatti</TableHead>
 												<TableHead>Punti subiti</TableHead>
-												<TableHead>%</TableHead>
+												<TableHead>% vittorie</TableHead>
 												<TableHead>+/-</TableHead>
 											</TableRow>
 										</TableHeader>
@@ -248,7 +247,6 @@ export default function Standings() {
 												return (
 													<TableRow key={team.id} className="text-center">
 														<TableCell>{team.name}</TableCell>
-														<TableCell>{team.pointsGroup}</TableCell>
 														<TableCell>{team.matchesWon}</TableCell>
 														<TableCell>{team.matchesPlayed}</TableCell>
 														<TableCell>{team.pointsScored}</TableCell>
