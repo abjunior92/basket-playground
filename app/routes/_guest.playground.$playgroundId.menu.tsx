@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 import { type LoaderFunctionArgs, type MetaFunction } from '@remix-run/node'
 import { Link, useLoaderData } from '@remix-run/react'
-import { CalendarCog, Medal, Trophy } from 'lucide-react'
+import { BookOpenText, CalendarCog, Medal, Trophy } from 'lucide-react'
 import invariant from 'tiny-invariant'
 
 const prisma = new PrismaClient()
@@ -76,5 +76,10 @@ const resources = [
 		href: '/rankings-and-stats',
 		text: 'Classifiche',
 		icon: <Medal />,
+	},
+	{
+		href: '/rules',
+		text: 'Regolamento',
+		icon: <BookOpenText />,
 	},
 ]
