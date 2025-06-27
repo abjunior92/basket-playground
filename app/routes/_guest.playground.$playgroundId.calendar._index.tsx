@@ -164,11 +164,11 @@ export default function Matches() {
 						<SelectItem value="all">Tutte le squadre</SelectItem>
 						{teams.map((team) => (
 							<SelectItem key={team.id} value={team.id}>
-								<div className="flex items-center gap-2">
+								<div className="flex items-center space-x-2">
 									<Badge className={colorGroupClasses[team.group.color]}>
 										{team.group.name}
 									</Badge>
-									{team.name}
+									<span>{team.name}</span>
 								</div>
 							</SelectItem>
 						))}
@@ -236,9 +236,10 @@ export default function Matches() {
 																{match.team1.name}
 															</span>
 															<Badge
-																className={
-																	colorGroupClasses[match.team1.group.color]
-																}
+																className={cn(
+																	'inline-table',
+																	colorGroupClasses[match.team1.group.color],
+																)}
 															>
 																{match.team1.group.name}
 															</Badge>
@@ -251,9 +252,10 @@ export default function Matches() {
 																{match.team2.name}
 															</span>
 															<Badge
-																className={
-																	colorGroupClasses[match.team2.group.color]
-																}
+																className={cn(
+																	'inline-table',
+																	colorGroupClasses[match.team2.group.color],
+																)}
 															>
 																{match.team2.group.name}
 															</Badge>
