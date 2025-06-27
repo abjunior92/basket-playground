@@ -14,13 +14,13 @@ export const meta: MetaFunction = () => {
 export default function Rules() {
 	const params = useParams()
 	return (
-		<div className="h-screen p-4">
+		<div className="h-screen p-4 md:h-auto">
 			<Header
 				title="Regolamento"
 				backLink={`/playground/${params.playgroundId}/menu`}
 				icon={<BookOpenText />}
 			/>
-			<div className="flex h-[calc(100%-60px)] flex-col justify-between md:h-1/2">
+			<div className="flex h-2/3 flex-col justify-between">
 				<div className="space-y-2 pt-4">
 					<p>Il regolamento è fondamentale per poter partecipare al torneo.</p>
 					<p>
@@ -34,7 +34,7 @@ export default function Rules() {
 					</p>
 				</div>
 
-				<div className="flex flex-col items-center justify-center">
+				<div className="flex flex-col items-center justify-center md:items-start md:justify-start md:pt-10">
 					<Link to="/regolamento.docx" target="_blank" rel="noreferrer">
 						<Button>
 							<BookOpenText />
