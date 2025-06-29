@@ -434,7 +434,7 @@ export default function TeamDetails() {
 								</TableCell>
 								<TableCell>
 									<Form
-										id="deletePlayerForm"
+										id={`deletePlayerForm-${player.id}`}
 										method="post"
 										action={`/data/players/${player.id}/${player.teamId}/${player.playgroundId}/delete`}
 									>
@@ -451,7 +451,7 @@ export default function TeamDetails() {
 											}
 											title="Elimina giocatore"
 											description="Sei sicuro di voler eliminare questo giocatore?"
-											formId="deletePlayerForm"
+											formId={`deletePlayerForm-${player.id}`}
 										/>
 									</Form>
 								</TableCell>

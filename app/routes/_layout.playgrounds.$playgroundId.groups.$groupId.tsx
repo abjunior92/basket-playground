@@ -209,7 +209,7 @@ export default function GroupDetails() {
 											</DialogHeader>
 											<div className="grid gap-4 py-4">
 												<Input
-													form="editTeamForm"
+													form={`editTeamForm-${team.id}`}
 													type="text"
 													name="name"
 													placeholder="Inserisci il nome della squadra"
@@ -217,14 +217,14 @@ export default function GroupDetails() {
 													required
 												/>
 												<Input
-													form="editTeamForm"
+													form={`editTeamForm-${team.id}`}
 													type="tel"
 													name="refPhoneNumber"
 													placeholder="Inserisci il numero di telefono di riferimento della squadra"
 													defaultValue={team.refPhoneNumber ?? ''}
 												/>
 												<Select
-													form="editTeamForm"
+													form={`editTeamForm-${team.id}`}
 													name="groupId"
 													defaultValue={team.groupId}
 													required
@@ -246,7 +246,7 @@ export default function GroupDetails() {
 											</div>
 											<DialogFooter>
 												<Form
-													id="editTeamForm"
+													id={`editTeamForm-${team.id}`}
 													method="post"
 													action={`/data/teams/${team.id}/${group.id}/${group.playgroundId}/edit`}
 												>

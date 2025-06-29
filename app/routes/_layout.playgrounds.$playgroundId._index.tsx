@@ -229,7 +229,7 @@ export default function PlaygroundDetails() {
 											</DialogHeader>
 											<div className="grid gap-4 py-4">
 												<Input
-													form="editGroupForm"
+													form={`editGroupForm-${group.id}`}
 													type="text"
 													name="name"
 													placeholder="Inserisci il nome del girone"
@@ -239,7 +239,7 @@ export default function PlaygroundDetails() {
 											</div>
 											<DialogFooter>
 												<Form
-													id="editGroupForm"
+													id={`editGroupForm-${group.id}`}
 													method="post"
 													action={`/data/groups/${group.id}/${group.playgroundId}/edit`}
 												>

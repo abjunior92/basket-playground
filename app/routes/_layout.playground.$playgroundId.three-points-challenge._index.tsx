@@ -162,13 +162,13 @@ export default function ThreePointChallenge() {
 											</DialogHeader>
 											<div className="grid gap-4 py-4">
 												<input
-													form="editScoreForm"
+													form={`editScoreForm-${p.id}`}
 													type="hidden"
 													name="id"
 													value={p.id}
 												/>
 												<Input
-													form="editScoreForm"
+													form={`editScoreForm-${p.id}`}
 													type="number"
 													name="score"
 													defaultValue={p.score}
@@ -178,7 +178,7 @@ export default function ThreePointChallenge() {
 												/>
 											</div>
 											<DialogFooter>
-												<Form id="editScoreForm" method="post">
+												<Form id={`editScoreForm-${p.id}`} method="post">
 													<Button type="submit">Salva</Button>
 												</Form>
 											</DialogFooter>
