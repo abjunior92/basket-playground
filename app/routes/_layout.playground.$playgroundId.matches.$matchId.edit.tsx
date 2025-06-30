@@ -11,6 +11,7 @@ import {
 	useActionData,
 	useLoaderData,
 	useLocation,
+	useNavigation,
 } from '@remix-run/react'
 import { Ambulance, Minus, Pencil, Plus, Settings, Circle } from 'lucide-react'
 import { useState } from 'react'
@@ -291,6 +292,7 @@ const countTeam2 = (formData: FormData) => {
 export default function EditMatch() {
 	const { match, playerStatsMap, groups } = useLoaderData<typeof loader>()
 	const actionData = useActionData<typeof action>()
+	const navigation = useNavigation()
 	const [temporaryAliases, setTemporaryAliases] = useState<
 		Record<string, string>
 	>({})
@@ -521,6 +523,10 @@ export default function EditMatch() {
 																		player.retired ? 'outline' : 'destructive'
 																	}
 																	type="submit"
+																	disabled={
+																		navigation.state === 'submitting' ||
+																		navigation.state === 'loading'
+																	}
 																	aria-label={
 																		player.retired
 																			? 'Segna come disponibile'
@@ -550,6 +556,10 @@ export default function EditMatch() {
 																			type="submit"
 																			aria-label="Aggiungi ammonizione"
 																			className="w-full"
+																			disabled={
+																				navigation.state === 'submitting' ||
+																				navigation.state === 'loading'
+																			}
 																		>
 																			<Plus className="h-4 w-4" />
 																			Aggiungi ammonizione
@@ -573,6 +583,10 @@ export default function EditMatch() {
 																			type="submit"
 																			aria-label="Rimuovi ammonizione"
 																			className="w-full"
+																			disabled={
+																				navigation.state === 'submitting' ||
+																				navigation.state === 'loading'
+																			}
 																		>
 																			<Minus className="h-4 w-4" />
 																			Rimuovi ammonizione
@@ -596,6 +610,10 @@ export default function EditMatch() {
 																			type="submit"
 																			aria-label="Espelli giocatore"
 																			className="w-full"
+																			disabled={
+																				navigation.state === 'submitting' ||
+																				navigation.state === 'loading'
+																			}
 																		>
 																			<Plus className="h-4 w-4" />
 																			Espelli giocatore
@@ -619,6 +637,10 @@ export default function EditMatch() {
 																			type="submit"
 																			aria-label="Rimuovi espulsione"
 																			className="w-full"
+																			disabled={
+																				navigation.state === 'submitting' ||
+																				navigation.state === 'loading'
+																			}
 																		>
 																			<Minus className="h-4 w-4" />
 																			Rimuovi espulsione
@@ -754,6 +776,10 @@ export default function EditMatch() {
 																			: 'Segna come ritirato'
 																	}
 																	className="w-full"
+																	disabled={
+																		navigation.state === 'submitting' ||
+																		navigation.state === 'loading'
+																	}
 																>
 																	<Ambulance className="h-4 w-4" />
 																	{player.retired
@@ -777,6 +803,10 @@ export default function EditMatch() {
 																			type="submit"
 																			aria-label="Aggiungi ammonizione"
 																			className="w-full"
+																			disabled={
+																				navigation.state === 'submitting' ||
+																				navigation.state === 'loading'
+																			}
 																		>
 																			<Plus className="h-4 w-4" />
 																			Aggiungi ammonizione
@@ -800,6 +830,10 @@ export default function EditMatch() {
 																			type="submit"
 																			aria-label="Rimuovi ammonizione"
 																			className="w-full"
+																			disabled={
+																				navigation.state === 'submitting' ||
+																				navigation.state === 'loading'
+																			}
 																		>
 																			<Minus className="h-4 w-4" />
 																			Rimuovi ammonizione
@@ -823,6 +857,10 @@ export default function EditMatch() {
 																			type="submit"
 																			aria-label="Espelli giocatore"
 																			className="w-full"
+																			disabled={
+																				navigation.state === 'submitting' ||
+																				navigation.state === 'loading'
+																			}
 																		>
 																			<Plus className="h-4 w-4" />
 																			Espelli giocatore
@@ -846,6 +884,10 @@ export default function EditMatch() {
 																			type="submit"
 																			aria-label="Rimuovi espulsione"
 																			className="w-full"
+																			disabled={
+																				navigation.state === 'submitting' ||
+																				navigation.state === 'loading'
+																			}
 																		>
 																			<Minus className="h-4 w-4" />
 																			Rimuovi espulsione
@@ -881,8 +923,17 @@ export default function EditMatch() {
 							name="intent"
 							value="score"
 							className="mt-8 w-full md:w-auto"
+							disabled={
+								(navigation.state === 'submitting' ||
+									navigation.state === 'loading') &&
+								navigation.formAction?.includes('edit')
+							}
 						>
-							Salva
+							{(navigation.state === 'submitting' ||
+								navigation.state === 'loading') &&
+							navigation.formAction?.includes('edit')
+								? 'Salvataggio...'
+								: 'Salva'}
 						</Button>
 					</Form>
 				</TabsContent>
@@ -992,6 +1043,10 @@ export default function EditMatch() {
 							name="intent"
 							value="replan"
 							className="w-full md:w-auto"
+							disabled={
+								navigation.state === 'submitting' ||
+								navigation.state === 'loading'
+							}
 						>
 							Ripianifica Partita
 						</Button>

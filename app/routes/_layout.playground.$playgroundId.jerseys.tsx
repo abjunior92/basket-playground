@@ -5,7 +5,7 @@ import {
 	type LoaderFunctionArgs,
 	type MetaFunction,
 } from '@remix-run/node'
-import { Form, useLoaderData } from '@remix-run/react'
+import { Form, useLoaderData, useNavigation } from '@remix-run/react'
 import { ChevronDown, Shirt } from 'lucide-react'
 import invariant from 'tiny-invariant'
 import Header from '~/components/Header'
@@ -114,7 +114,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 
 export default function JerseysPage() {
 	const { jerseys, playersGrouped } = useLoaderData<typeof loader>()
-
+	const navigation = useNavigation()
 	return (
 		<div className="p-4">
 			<Header title="Gestione maglie" backLink="/" icon={<Shirt />} />
@@ -145,7 +145,15 @@ export default function JerseysPage() {
 						placeholder="Disponibili"
 						inputMode="numeric"
 					/>
-					<Button type="submit">Aggiorna</Button>
+					<Button
+						type="submit"
+						disabled={
+							navigation.state === 'submitting' ||
+							navigation.state === 'loading'
+						}
+					>
+						Aggiorna
+					</Button>
 				</Form>
 			</div>
 

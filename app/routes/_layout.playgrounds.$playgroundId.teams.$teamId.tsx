@@ -11,6 +11,7 @@ import {
 	useActionData,
 	useFetcher,
 	useLoaderData,
+	useNavigation,
 	useRevalidator,
 } from '@remix-run/react'
 import {
@@ -161,7 +162,7 @@ export default function TeamDetails() {
 	const fetcher = useFetcher<{ ok: boolean } | { error: string }>()
 	const revalidator = useRevalidator()
 	const { toast } = useToast()
-
+	const navigation = useNavigation()
 	const [open, setOpen] = useState<string | null>(null)
 
 	const isFull =
@@ -261,8 +262,20 @@ export default function TeamDetails() {
 					</label>
 				</div>
 				<div className="flex items-center space-x-4">
-					<Button type="submit" disabled={isFull}>
-						Aggiungi Giocatore
+					<Button
+						type="submit"
+						disabled={
+							isFull ||
+							((navigation.state === 'submitting' ||
+								navigation.state === 'loading') &&
+								!navigation.formAction?.includes('data'))
+						}
+					>
+						{(navigation.state === 'submitting' ||
+							navigation.state === 'loading') &&
+						!navigation.formAction?.includes('data')
+							? 'Aggiungi Giocatore in corso...'
+							: 'Aggiungi Giocatore'}
 					</Button>
 					{isFull && <ErrorMessage message="Squadra piena" />}
 					{actionData?.error && <ErrorMessage message={actionData.error} />}
@@ -424,8 +437,18 @@ export default function TeamDetails() {
 													noValidate
 													action={`/data/players/${player.id}/${player.teamId}/${player.playgroundId}/edit`}
 												>
-													<Button type="submit" className="w-full md:w-auto">
-														Salva
+													<Button
+														type="submit"
+														className="w-full md:w-auto"
+														disabled={
+															fetcher.state === 'submitting' ||
+															fetcher.state === 'loading'
+														}
+													>
+														{fetcher.state === 'submitting' ||
+														fetcher.state === 'loading'
+															? 'Salvataggio...'
+															: 'Salva'}
 													</Button>
 												</fetcher.Form>
 											</DialogFooter>

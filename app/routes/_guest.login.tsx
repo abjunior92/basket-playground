@@ -1,5 +1,5 @@
 import { json, type ActionFunctionArgs, redirect } from '@remix-run/node'
-import { Form, useActionData } from '@remix-run/react'
+import { Form, useActionData, useNavigation } from '@remix-run/react'
 import { LogIn } from 'lucide-react'
 import ErrorMessage from '~/components/ErrorMessage'
 import { Button } from '~/components/ui/button'
@@ -29,7 +29,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
 export default function LoginPage() {
 	const actionData = useActionData<typeof action>()
-
+	const navigation = useNavigation()
 	return (
 		<div className="flex h-screen flex-col items-center justify-center space-y-4">
 			<h1 className="text-2xl font-bold">Login</h1>
@@ -52,7 +52,12 @@ export default function LoginPage() {
 						required
 					/>
 				</label>
-				<Button type="submit">
+				<Button
+					type="submit"
+					disabled={
+						navigation.state === 'submitting' || navigation.state === 'loading'
+					}
+				>
 					Login
 					<LogIn className="h-5 w-5" />
 				</Button>

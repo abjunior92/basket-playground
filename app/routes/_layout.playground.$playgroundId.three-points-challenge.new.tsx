@@ -4,7 +4,7 @@ import {
 	type ActionFunctionArgs,
 	redirect,
 } from '@remix-run/node'
-import { Form, useLoaderData } from '@remix-run/react'
+import { Form, useLoaderData, useNavigation } from '@remix-run/react'
 import { useState } from 'react'
 import invariant from 'tiny-invariant'
 import { Button } from '~/components/ui/button'
@@ -70,6 +70,7 @@ export default function NewParticipant() {
 	const { players } = useLoaderData<typeof loader>()
 	const [selectedPlayer, setSelectedPlayer] = useState('')
 	const [search, setSearch] = useState('')
+	const navigation = useNavigation()
 
 	const filteredPlayers = players.filter(
 		(player) =>
@@ -131,8 +132,16 @@ export default function NewParticipant() {
 						required={selectedPlayer === ''}
 					/>
 				</div>
-				<Button className="w-full md:w-auto" type="submit">
-					Iscrivi
+				<Button
+					className="w-full md:w-auto"
+					type="submit"
+					disabled={
+						navigation.state === 'submitting' || navigation.state === 'loading'
+					}
+				>
+					{navigation.state === 'submitting' || navigation.state === 'loading'
+						? 'Iscrizione in corso...'
+						: 'Iscrivi'}
 				</Button>
 			</Form>
 		</div>

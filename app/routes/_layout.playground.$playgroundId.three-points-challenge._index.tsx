@@ -12,9 +12,10 @@ import {
 	useActionData,
 	useRevalidator,
 } from '@remix-run/react'
-import { Pencil, Plus, Swords } from 'lucide-react'
+import { Pencil, Plus, Swords, Trash2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import invariant from 'tiny-invariant'
+import DialogAlert from '~/components/DialogAlert'
 import Header from '~/components/Header'
 import { Button } from '~/components/ui/button'
 import {
@@ -55,10 +56,28 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 export const action = async ({ request, params }: ActionFunctionArgs) => {
 	invariant(params.playgroundId, 'playgroundId is required')
 	const formData = await request.formData()
+	const intent = formData.get('intent') as string
+
+	// Eliminazione partecipante
+	if (intent === 'delete') {
+		const id = formData.get('id') as string
+
+		if (!id) {
+			return json({ error: 'ID partecipante mancante!' }, { status: 400 })
+		}
+
+		await prisma.threePointChallengeParticipant.delete({
+			where: { id },
+		})
+
+		return { ok: true }
+	}
+
+	// Aggiornamento punteggio
 	const id = formData.get('id') as string
 	const score = parseInt(formData.get('score') as string)
 
-	if (!id || !score) {
+	if (!id || score === null || score === undefined || isNaN(score)) {
 		return json(
 			{ error: 'Compila tutti i campi correttamente!' },
 			{ status: 400 },
@@ -139,51 +158,79 @@ export default function ThreePointChallenge() {
 								</TableCell>
 								<TableCell>{p.score}</TableCell>
 								<TableCell>
-									<Dialog
-										open={open === p.id}
-										onOpenChange={() => setOpen(open === p.id ? null : p.id)}
-									>
-										<DialogTrigger asChild>
-											<Button
-												variant="outline"
-												type="button"
-												aria-label="Modifica punteggio"
-											>
-												<Pencil className="h-4 w-4" />
-											</Button>
-										</DialogTrigger>
-										<DialogContent className="sm:max-w-[425px]">
-											<DialogHeader>
-												<DialogTitle>Modifica punteggio</DialogTitle>
-												<DialogDescription>
-													Modifica il punteggio ottenuto nella gara da 3 punti
-													da {p.name} {p.surname}
-												</DialogDescription>
-											</DialogHeader>
-											<div className="grid gap-4 py-4">
-												<input
-													form={`editScoreForm-${p.id}`}
-													type="hidden"
-													name="id"
-													value={p.id}
-												/>
-												<Input
-													form={`editScoreForm-${p.id}`}
-													type="number"
-													name="score"
-													defaultValue={p.score}
-													placeholder="Inserisci il punteggio"
-													inputMode="numeric"
-													required
-												/>
-											</div>
-											<DialogFooter>
-												<Form id={`editScoreForm-${p.id}`} method="post">
-													<Button type="submit">Salva</Button>
-												</Form>
-											</DialogFooter>
-										</DialogContent>
-									</Dialog>
+									<div className="flex items-center justify-center gap-2">
+										<Dialog
+											open={open === p.id}
+											onOpenChange={() => setOpen(open === p.id ? null : p.id)}
+										>
+											<DialogTrigger asChild>
+												<Button
+													variant="outline"
+													type="button"
+													aria-label="Modifica punteggio"
+												>
+													<Pencil className="h-4 w-4" />
+												</Button>
+											</DialogTrigger>
+											<DialogContent className="sm:max-w-[425px]">
+												<DialogHeader>
+													<DialogTitle>Modifica punteggio</DialogTitle>
+													<DialogDescription>
+														Modifica il punteggio ottenuto nella gara da 3 punti
+														da {p.name} {p.surname}
+													</DialogDescription>
+												</DialogHeader>
+												<div className="grid gap-4 py-4">
+													<input
+														form={`editScoreForm-${p.id}`}
+														type="hidden"
+														name="id"
+														value={p.id}
+													/>
+													<input
+														form={`editScoreForm-${p.id}`}
+														type="hidden"
+														name="intent"
+														value="update"
+													/>
+													<Input
+														form={`editScoreForm-${p.id}`}
+														type="number"
+														name="score"
+														defaultValue={p.score}
+														placeholder="Inserisci il punteggio"
+														inputMode="numeric"
+														required
+													/>
+												</div>
+												<DialogFooter>
+													<Form id={`editScoreForm-${p.id}`} method="post">
+														<Button type="submit">Salva</Button>
+													</Form>
+												</DialogFooter>
+											</DialogContent>
+										</Dialog>
+
+										<DialogAlert
+											trigger={
+												<Button
+													variant="outline"
+													type="button"
+													aria-label="Elimina partecipante"
+													className="text-red-600 hover:text-red-700"
+												>
+													<Trash2 className="h-4 w-4" />
+												</Button>
+											}
+											title="Elimina partecipante"
+											description={`Sei sicuro di voler eliminare ${p.name} ${p.surname} dalla gara dei 3 punti?`}
+											formId={`deleteForm-${p.id}`}
+										/>
+										<Form id={`deleteForm-${p.id}`} method="post">
+											<input type="hidden" name="intent" value="delete" />
+											<input type="hidden" name="id" value={p.id} />
+										</Form>
+									</div>
 								</TableCell>
 							</TableRow>
 						))}
