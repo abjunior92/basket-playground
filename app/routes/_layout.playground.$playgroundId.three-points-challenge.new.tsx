@@ -85,7 +85,7 @@ export default function NewParticipant() {
 				<div className="space-y-2">
 					<label htmlFor="playerId">Seleziona un giocatore esistente:</label>
 					<Select name="playerId" onValueChange={setSelectedPlayer}>
-						<SelectTrigger>
+						<SelectTrigger id="playerId">
 							<SelectValue placeholder="Seleziona un giocatore" />
 						</SelectTrigger>
 						<SelectContent>
@@ -96,6 +96,7 @@ export default function NewParticipant() {
 								value={search}
 								onChange={(e) => setSearch(e.target.value)}
 								onKeyDown={(e) => e.stopPropagation()}
+								className="sticky top-0 z-10"
 							/>
 							<SelectGroup>
 								<SelectLabel>Giocatore</SelectLabel>
