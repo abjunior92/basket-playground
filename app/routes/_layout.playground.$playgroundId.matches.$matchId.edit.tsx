@@ -19,6 +19,7 @@ import invariant from 'tiny-invariant'
 import ErrorMessage from '~/components/ErrorMessage'
 import Header from '~/components/Header'
 import { Button } from '~/components/ui/button'
+import { Checkbox } from '~/components/ui/checkbox'
 import {
 	Dialog,
 	DialogContent,
@@ -154,9 +155,41 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 	} else {
 		const score1 = Number(formData.get('score1') || '0')
 		const score2 = Number(formData.get('score2') || '0')
+		const isWalkover = formData.get('isWalkover') === 'on'
 
 		const team1Id = formData.get('team1Id') as string
 		const team2Id = formData.get('team2Id') as string
+
+		// Se la partita è vinta a tavolino, saltiamo il controllo dei punti
+		if (!isWalkover) {
+			const isCountTeam1Ok = countTeam1(formData) === score1
+			const isCountTeam2Ok = countTeam2(formData) === score2
+
+			// Controllo se i punti segnati coincidono con i risultati
+			if (!isCountTeam1Ok && !isCountTeam2Ok) {
+				return json(
+					{
+						errorTeam1: 'I punti non coincidono con i risultati',
+						errorTeam2: 'I punti non coincidono con i risultati',
+					},
+					{ status: 400 },
+				)
+			}
+
+			if (!isCountTeam1Ok) {
+				return json(
+					{ errorTeam1: 'I punti non coincidono con i risultati' },
+					{ status: 400 },
+				)
+			}
+
+			if (!isCountTeam2Ok) {
+				return json(
+					{ errorTeam2: 'I punti non coincidono con i risultati' },
+					{ status: 400 },
+				)
+			}
+		}
 
 		const winnerTeamId =
 			score1 > score2 ? team1Id : score2 > score1 ? team2Id : null
@@ -233,34 +266,6 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 					totalPoints: { increment: stat.points },
 				},
 			})
-		}
-
-		const isCountTeam1Ok = countTeam1(formData) === score1
-		const isCountTeam2Ok = countTeam2(formData) === score2
-
-		// Controllo se i punti segnati coincidono con i risultati
-		if (!isCountTeam1Ok && !isCountTeam2Ok) {
-			return json(
-				{
-					errorTeam1: 'I punti non coincidono con i risultati',
-					errorTeam2: 'I punti non coincidono con i risultati',
-				},
-				{ status: 400 },
-			)
-		}
-
-		if (!isCountTeam1Ok) {
-			return json(
-				{ errorTeam1: 'I punti non coincidono con i risultati' },
-				{ status: 400 },
-			)
-		}
-
-		if (!isCountTeam2Ok) {
-			return json(
-				{ errorTeam2: 'I punti non coincidono con i risultati' },
-				{ status: 400 },
-			)
 		}
 	}
 
@@ -918,23 +923,40 @@ export default function EditMatch() {
 
 						<input type="hidden" name="backLink" value={backLink} />
 
-						<Button
-							type="submit"
-							name="intent"
-							value="score"
-							className="mt-8 w-full md:w-auto"
-							disabled={
-								(navigation.state === 'submitting' ||
+						<Separator className="mt-6 mb-4" />
+
+						<div className="mt-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+							<div className="flex items-center space-x-2">
+								<Checkbox id="isWalkover" name="isWalkover" />
+								<label
+									htmlFor="isWalkover"
+									className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+								>
+									Segna come vinta a tavolino <br />
+									<i className="leading-4 text-gray-500">
+										(impostare un risultato di 10-0)
+									</i>
+								</label>
+							</div>
+
+							<Button
+								type="submit"
+								name="intent"
+								value="score"
+								className="w-full md:w-32"
+								disabled={
+									(navigation.state === 'submitting' ||
+										navigation.state === 'loading') &&
+									navigation.formAction?.includes('edit')
+								}
+							>
+								{(navigation.state === 'submitting' ||
 									navigation.state === 'loading') &&
 								navigation.formAction?.includes('edit')
-							}
-						>
-							{(navigation.state === 'submitting' ||
-								navigation.state === 'loading') &&
-							navigation.formAction?.includes('edit')
-								? 'Salvataggio...'
-								: 'Salva'}
-						</Button>
+									? 'Salvataggio...'
+									: 'Salva'}
+							</Button>
+						</div>
 					</Form>
 				</TabsContent>
 				<TabsContent value="planner">
