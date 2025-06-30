@@ -108,8 +108,25 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 
 		if (teamId === 'all') {
 			url.searchParams.delete('teamId')
+			url.searchParams.delete('groupId')
 		} else {
 			url.searchParams.set('teamId', teamId)
+			url.searchParams.delete('groupId')
+		}
+
+		return redirect(url.pathname + url.search)
+	}
+
+	if (intent === 'filter-group') {
+		const groupId = formData.get('groupId') as string
+		const url = new URL(request.url)
+
+		if (groupId === 'all') {
+			url.searchParams.delete('groupId')
+			url.searchParams.delete('teamId')
+		} else {
+			url.searchParams.set('groupId', groupId)
+			url.searchParams.delete('teamId')
 		}
 
 		return redirect(url.pathname + url.search)
@@ -124,6 +141,7 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
 	// Recupera il teamId dall'URL se presente
 	const url = new URL(request.url)
 	const teamId = url.searchParams.get('teamId')
+	const groupId = url.searchParams.get('groupId')
 
 	// Costruisci la query per le partite
 	const matchesWhere: any = {
@@ -133,6 +151,14 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
 	// Aggiungi filtro per squadra se specificato
 	if (teamId && teamId !== 'all') {
 		matchesWhere.OR = [{ team1Id: teamId }, { team2Id: teamId }]
+	}
+
+	// Aggiungi filtro per girone se specificato
+	if (groupId && groupId !== 'all') {
+		matchesWhere.OR = [
+			{ team1: { groupId: groupId } },
+			{ team2: { groupId: groupId } },
+		]
 	}
 
 	const matches = await prisma.match.findMany({
@@ -165,6 +191,13 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
 		orderBy: [{ group: { name: 'asc' } }, { name: 'asc' }],
 	})
 
+	// Recupera tutti i gironi del playground
+	const groups = await prisma.group.findMany({
+		where: {
+			playgroundId: params.playgroundId,
+		},
+	})
+
 	// Raggruppiamo le partite per giorno
 	const matchesByDay = matches.reduce(
 		(acc, match) => {
@@ -175,11 +208,18 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
 		{} as Record<number, typeof matches>,
 	)
 
-	return json({ matchesByDay, teams, selectedTeamId: teamId || 'all' })
+	return json({
+		matchesByDay,
+		teams,
+		groups,
+		selectedTeamId: teamId || 'all',
+		selectedGroupId: groupId || 'all',
+	})
 }
 
 export default function Matches() {
-	const { matchesByDay, teams, selectedTeamId } = useLoaderData<typeof loader>()
+	const { matchesByDay, teams, groups, selectedTeamId, selectedGroupId } =
+		useLoaderData<typeof loader>()
 	const params = useParams()
 	const [hiddenDays, setHiddenDays] = useState<Set<number>>(new Set())
 	const fetcher = useFetcher()
@@ -200,6 +240,13 @@ export default function Matches() {
 		fetcher.submit({ intent: 'filter-team', teamId: value }, { method: 'post' })
 	}
 
+	const handleGroupChange = (value: string) => {
+		fetcher.submit(
+			{ intent: 'filter-group', groupId: value },
+			{ method: 'post' },
+		)
+	}
+
 	return (
 		<div className="md:p-4">
 			<div className="mb-4 flex items-center justify-between">
@@ -217,27 +264,53 @@ export default function Matches() {
 				</Button>
 			</div>
 
-			{/* Select per filtrare per squadra */}
-			<div className="mb-6 w-full md:w-auto">
-				<span className="text-sm">Filtra il calendario per squadra</span>
-				<Select value={selectedTeamId} onValueChange={handleTeamChange}>
-					<SelectTrigger className="w-full md:max-w-sm">
-						<SelectValue placeholder="Filtra per squadra" />
-					</SelectTrigger>
-					<SelectContent>
-						<SelectItem value="all">Tutte le squadre</SelectItem>
-						{teams.map((team) => (
-							<SelectItem key={team.id} value={team.id}>
-								<div className="flex items-center space-x-2">
-									<Badge className={colorGroupClasses[team.group.color]}>
-										{team.group.name}
+			<div className="flex flex-col md:flex-row md:gap-4 md:[&>div]:w-96">
+				{/* Select per filtrare per girone */}
+				<div className="mb-6 w-full md:w-auto">
+					<span className="text-sm">
+						Filtra il calendario per <b>girone</b>
+					</span>
+					<Select value={selectedGroupId} onValueChange={handleGroupChange}>
+						<SelectTrigger className="w-full md:max-w-sm">
+							<SelectValue placeholder="Filtra per girone" />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="all">Tutti i gironi</SelectItem>
+							{groups.map((group) => (
+								<SelectItem key={group.id} value={group.id}>
+									<Badge className={colorGroupClasses[group.color]}>
+										{group.name}
 									</Badge>
-									<span>{team.name}</span>
-								</div>
-							</SelectItem>
-						))}
-					</SelectContent>
-				</Select>
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
+				</div>
+
+				{/* Select per filtrare per squadra */}
+				<div className="mb-6 w-full md:w-auto">
+					<span className="text-sm">
+						Filtra il calendario per <b>squadra</b>
+					</span>
+					<Select value={selectedTeamId} onValueChange={handleTeamChange}>
+						<SelectTrigger className="w-full md:max-w-sm">
+							<SelectValue placeholder="Filtra per squadra" />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="all">Tutte le squadre</SelectItem>
+							{teams.map((team) => (
+								<SelectItem key={team.id} value={team.id}>
+									<div className="flex items-center space-x-2">
+										<Badge className={colorGroupClasses[team.group.color]}>
+											{team.group.name}
+										</Badge>
+										<span>{team.name}</span>
+									</div>
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
+				</div>
 			</div>
 
 			{Object.keys(matchesByDay).map((day) => {
