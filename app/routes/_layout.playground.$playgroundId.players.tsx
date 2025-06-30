@@ -201,6 +201,9 @@ export default function PlayerStatsPage() {
 												>
 													<Link
 														to={`/playgrounds/${params.playgroundId}/teams/${player.teamId}`}
+														state={{
+															backLink: `/playground/${params.playgroundId}/players`,
+														}}
 													>
 														<Pencil />
 													</Link>

@@ -11,6 +11,7 @@ import {
 	useActionData,
 	useFetcher,
 	useLoaderData,
+	useLocation,
 	useNavigation,
 	useRevalidator,
 } from '@remix-run/react'
@@ -164,7 +165,7 @@ export default function TeamDetails() {
 	const { toast } = useToast()
 	const navigation = useNavigation()
 	const [open, setOpen] = useState<string | null>(null)
-
+	const location = useLocation()
 	const isFull =
 		team &&
 		team.players.filter((p) => !p.retired).length >= MAX_PLAYERS_PER_TEAM
@@ -194,7 +195,10 @@ export default function TeamDetails() {
 			<div className="flex items-center justify-between">
 				<Header
 					title={team.name}
-					backLink={`/playgrounds/${team.playgroundId}/groups/${team.groupId}`}
+					backLink={
+						location.state?.backLink ||
+						`/playgrounds/${team.playgroundId}/groups/${team.groupId}`
+					}
 					icon={<ShieldUser />}
 					home
 				/>
@@ -268,13 +272,13 @@ export default function TeamDetails() {
 							isFull ||
 							((navigation.state === 'submitting' ||
 								navigation.state === 'loading') &&
-								!navigation.formAction?.includes('data'))
+								navigation.formAction?.includes('playgrounds'))
 						}
 					>
 						{(navigation.state === 'submitting' ||
 							navigation.state === 'loading') &&
-						!navigation.formAction?.includes('data')
-							? 'Aggiungi Giocatore in corso...'
+						navigation.formAction?.includes('playgrounds')
+							? 'Aggiungi Giocatore...'
 							: 'Aggiungi Giocatore'}
 					</Button>
 					{isFull && <ErrorMessage message="Squadra piena" />}
