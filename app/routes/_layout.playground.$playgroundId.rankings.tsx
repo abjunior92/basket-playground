@@ -115,12 +115,12 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 	// Top 10 giocatori per gironi
 	const topPlayersGroups = playersWithGroupStats
 		.sort((a, b) => b.groupPoints - a.groupPoints)
-		.slice(0, 10)
+		.slice(0, 100)
 
 	// Top 10 giocatori per finali
 	const topPlayersFinals = playersWithFinalsStats
 		.sort((a, b) => b.finalsPoints - a.finalsPoints)
-		.slice(0, 10)
+		.slice(0, 50)
 
 	// Raggruppiamo le squadre per girone
 	const groups = teams.reduce(
@@ -267,6 +267,7 @@ export default function Standings() {
 				</TabsContent>
 
 				<TabsContent value="players">
+					<h3 className="text-lg font-bold">Top 100</h3>
 					<div className="mt-4 overflow-hidden rounded-lg border border-gray-300">
 						<Table className="w-full border-collapse">
 							<TableHeader>
@@ -308,6 +309,7 @@ export default function Standings() {
 				</TabsContent>
 
 				<TabsContent value="finals">
+					<h3 className="text-lg font-bold">Top 50</h3>
 					<div className="mt-4 overflow-hidden rounded-lg border border-gray-300">
 						<Table className="w-full border-collapse">
 							<TableHeader>
