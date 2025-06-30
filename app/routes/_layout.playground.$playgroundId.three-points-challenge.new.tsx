@@ -4,9 +4,11 @@ import {
 	type ActionFunctionArgs,
 	redirect,
 } from '@remix-run/node'
-import { Form, useLoaderData, useNavigation } from '@remix-run/react'
+import { Form, useLoaderData, useNavigation, useParams } from '@remix-run/react'
+import { UserPlus } from 'lucide-react'
 import { useState } from 'react'
 import invariant from 'tiny-invariant'
+import Header from '~/components/Header'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import {
@@ -71,6 +73,7 @@ export default function NewParticipant() {
 	const [selectedPlayer, setSelectedPlayer] = useState('')
 	const [search, setSearch] = useState('')
 	const navigation = useNavigation()
+	const params = useParams()
 
 	const filteredPlayers = players.filter(
 		(player) =>
@@ -80,7 +83,13 @@ export default function NewParticipant() {
 
 	return (
 		<div className="container mx-auto p-4">
-			<h1 className="mb-4 text-xl font-bold">Aggiungi Partecipante</h1>
+			<div className="mb-4">
+				<Header
+					title="Aggiungi Partecipante"
+					backLink={`/playground/${params.playgroundId}/three-points-challenge`}
+					icon={<UserPlus />}
+				/>
+			</div>
 			<Form method="post" className="space-y-4">
 				<div className="space-y-2">
 					<label htmlFor="playerId">Seleziona un giocatore esistente:</label>

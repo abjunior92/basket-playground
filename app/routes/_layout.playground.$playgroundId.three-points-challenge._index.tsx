@@ -12,7 +12,7 @@ import {
 	useActionData,
 	useRevalidator,
 } from '@remix-run/react'
-import { Pencil, Plus, Swords, Trash2 } from 'lucide-react'
+import { Pencil, Swords, Trash2, UserPlus } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import invariant from 'tiny-invariant'
 import DialogAlert from '~/components/DialogAlert'
@@ -132,7 +132,7 @@ export default function ThreePointChallenge() {
 					<Link
 						to={`/playground/${params.playgroundId}/three-points-challenge/new`}
 					>
-						<Plus className="h-5 w-5" />
+						<UserPlus className="h-5 w-5" />
 						<span className="hidden md:block">Aggiungi Partecipante</span>
 					</Link>
 				</Button>
