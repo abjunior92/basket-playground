@@ -420,7 +420,7 @@ export default function Playoff() {
 											className="flex items-center justify-between rounded-lg border pr-2"
 										>
 											<div className="flex items-center gap-2">
-												<span className="h-fill-available flex w-6 items-center rounded-l-lg border-r px-1">
+												<span className="flex w-6 items-center self-stretch rounded-l-lg border-r px-1">
 													{team?.groupPosition}ª
 												</span>
 												<div className="flex items-center gap-2 p-2">
@@ -458,7 +458,7 @@ export default function Playoff() {
 											className="flex items-center justify-between rounded-lg border pr-2"
 										>
 											<div className="flex items-center gap-2">
-												<span className="h-fill-available flex w-6 items-center rounded-l-lg border-r px-1">
+												<span className="flex w-6 items-center self-stretch rounded-l-lg border-r px-1">
 													{team?.groupPosition}ª
 												</span>
 												<div className="flex items-center gap-2 p-2">
