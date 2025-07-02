@@ -109,6 +109,9 @@
 		-o-background-size: cover;
 		background-size: cover;
 	}
+	.h-fill-available {
+		height: -webkit-fill-available;
+	}
 }
 
 @layer base {

@@ -410,22 +410,25 @@ export default function Playoff() {
 									{directPlayoffTeams.map((team) => (
 										<div
 											key={team?.id}
-											className="flex items-center justify-between rounded-lg border p-2"
+											className="flex items-center justify-between rounded-lg border pr-2"
 										>
 											<div className="flex items-center gap-2">
-												<Badge
-													className={colorGroupClasses[team?.group?.color]}
-												>
-													{team?.group?.name}
-												</Badge>
-												<span className="font-medium">{team?.name}</span>
-												<span className="text-muted-foreground text-xs">
-													{team?.groupPosition}ª pos.
+												<span className="h-fill-available flex w-6 items-center rounded-l-lg border-r px-1">
+													{team?.groupPosition}ª
 												</span>
+												<div className="flex items-center gap-2 p-2">
+													<Badge
+														className={colorGroupClasses[team?.group?.color]}
+													>
+														{team?.group?.name}
+													</Badge>
+													<span className="text-sm font-medium md:text-base">
+														{team?.name}
+													</span>
+												</div>
 											</div>
 											<div className="text-muted-foreground text-sm">
-												{team?.winPercentage.toFixed(2)}% ({team?.matchesWon}W-
-												{team?.matchesPlayed - team?.matchesWon}L)
+												{team?.winPercentage.toFixed(2)}%
 											</div>
 										</div>
 									))}
@@ -445,22 +448,25 @@ export default function Playoff() {
 									{playinTeams.map((team) => (
 										<div
 											key={team?.id}
-											className="flex items-center justify-between rounded-lg border p-2"
+											className="flex items-center justify-between rounded-lg border pr-2"
 										>
 											<div className="flex items-center gap-2">
-												<Badge
-													className={colorGroupClasses[team?.group?.color]}
-												>
-													{team?.group?.name}
-												</Badge>
-												<span className="font-medium">{team?.name}</span>
-												<span className="text-muted-foreground text-xs">
-													{team?.groupPosition}ª pos.
+												<span className="h-fill-available flex w-6 items-center rounded-l-lg border-r px-1">
+													{team?.groupPosition}ª
 												</span>
+												<div className="flex items-center gap-2 p-2">
+													<Badge
+														className={colorGroupClasses[team?.group?.color]}
+													>
+														{team?.group?.name}
+													</Badge>
+													<span className="text-sm font-medium md:text-base">
+														{team?.name}
+													</span>
+												</div>
 											</div>
 											<div className="text-muted-foreground text-sm">
-												{team?.winPercentage.toFixed(2)}% ({team?.matchesWon}W-
-												{team?.matchesPlayed - team?.matchesWon}L)
+												{team?.winPercentage.toFixed(2)}%
 											</div>
 										</div>
 									))}
