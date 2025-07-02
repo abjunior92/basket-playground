@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import { type ColorGroup, PrismaClient } from '@prisma/client'
 import { type LoaderFunctionArgs, type MetaFunction } from '@remix-run/node'
 import { Link, useLoaderData, useParams } from '@remix-run/react'
 import { Trophy, Users, Calendar, Pencil, Plus } from 'lucide-react'
@@ -19,6 +19,25 @@ import {
 	isMatchThirdPlace,
 } from '~/lib/utils'
 
+type TeamWithPlayoffStats = {
+	id: string
+	name: string
+	group: {
+		id: string
+		name: string
+		color: ColorGroup
+		playgroundId: string
+	}
+	matchesPlayed: number
+	matchesWon: number
+	pointsScored: number
+	pointsConceded: number
+	winPercentage: number
+	pointsDifference: number
+	pointsGroup: number
+	groupPosition: number
+}
+
 const prisma = new PrismaClient()
 
 export const meta: MetaFunction = () => {
@@ -36,9 +55,11 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 		include: {
 			group: true,
 			matchesAsTeam1: {
+				where: { day: { in: [1, 2, 3, 4] } }, // Solo partite della fase a gironi
 				select: { id: true, winner: true, score1: true, score2: true },
 			},
 			matchesAsTeam2: {
+				where: { day: { in: [1, 2, 3, 4] } }, // Solo partite della fase a gironi
 				select: { id: true, winner: true, score1: true, score2: true },
 			},
 		},
@@ -83,7 +104,8 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 			winPercentage,
 			pointsDifference,
 			pointsGroup: matchesWon * 2,
-		}
+			groupPosition: 0, // Sarà aggiornato dopo l'ordinamento
+		} as TeamWithPlayoffStats
 	})
 
 	// Raggruppa le squadre per girone
@@ -96,7 +118,7 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 			acc[groupKey].push(team)
 			return acc
 		},
-		{} as Record<string, typeof teamsWithStats>,
+		{} as Record<string, TeamWithPlayoffStats[]>,
 	)
 
 	// Ordina le squadre di ogni girone per percentuale vittorie e differenza punti
@@ -108,6 +130,11 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 					return b.winPercentage - a.winPercentage
 				}
 				return b.pointsDifference - a.pointsDifference
+			})
+
+			// Aggiungi la posizione in classifica per ogni squadra
+			group.forEach((team, index) => {
+				team.groupPosition = index + 1
 			})
 		}
 	})
@@ -129,8 +156,35 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 		.map((group) => group?.[4])
 		.filter(Boolean)
 
+	// Ordina le prime classificate per percentuale vittorie e differenza punti
+	firstPlacedTeams.sort((a, b) => {
+		if (!a || !b) return 0
+		if (b.winPercentage !== a.winPercentage) {
+			return b.winPercentage - a.winPercentage
+		}
+		return b.pointsDifference - a.pointsDifference
+	})
+
 	// Ordina le seconde classificate per percentuale vittorie e differenza punti
 	secondPlacedTeams.sort((a, b) => {
+		if (!a || !b) return 0
+		if (b.winPercentage !== a.winPercentage) {
+			return b.winPercentage - a.winPercentage
+		}
+		return b.pointsDifference - a.pointsDifference
+	})
+
+	// Ordina le terze classificate per percentuale vittorie e differenza punti
+	thirdPlacedTeams.sort((a, b) => {
+		if (!a || !b) return 0
+		if (b.winPercentage !== a.winPercentage) {
+			return b.winPercentage - a.winPercentage
+		}
+		return b.pointsDifference - a.pointsDifference
+	})
+
+	// Ordina le quarte classificate per percentuale vittorie e differenza punti
+	fourthPlacedTeams.sort((a, b) => {
 		if (!a || !b) return 0
 		if (b.winPercentage !== a.winPercentage) {
 			return b.winPercentage - a.winPercentage
@@ -198,6 +252,14 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 		.map((match) => {
 			const winningTeam =
 				match.winner === match.team1Id ? match.team1 : match.team2
+
+			// Trova la posizione della squadra vincitrice nel suo girone
+			const teamGroupKey = `${winningTeam.group.name}_${winningTeam.group.color}`
+			const teamInGroup = groups[teamGroupKey]?.find(
+				(team) => team.id === winningTeam.id,
+			)
+			const groupPosition = teamInGroup?.groupPosition || 0
+
 			return {
 				id: winningTeam.id,
 				name: winningTeam.name,
@@ -210,6 +272,7 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 				winPercentage: 0,
 				pointsDifference: 0,
 				pointsGroup: 0,
+				groupPosition,
 			}
 		})
 
@@ -356,6 +419,9 @@ export default function Playoff() {
 													{team?.group?.name}
 												</Badge>
 												<span className="font-medium">{team?.name}</span>
+												<span className="text-muted-foreground text-xs">
+													{team?.groupPosition}ª pos.
+												</span>
 											</div>
 											<div className="text-muted-foreground text-sm">
 												{team?.winPercentage.toFixed(2)}% ({team?.matchesWon}W-
@@ -388,6 +454,9 @@ export default function Playoff() {
 													{team?.group?.name}
 												</Badge>
 												<span className="font-medium">{team?.name}</span>
+												<span className="text-muted-foreground text-xs">
+													{team?.groupPosition}ª pos.
+												</span>
 											</div>
 											<div className="text-muted-foreground text-sm">
 												{team?.winPercentage.toFixed(2)}% ({team?.matchesWon}W-
@@ -427,9 +496,14 @@ export default function Playoff() {
 													key={team?.id}
 													className="flex items-center justify-between text-sm"
 												>
-													<span>
-														{index + 1}. {team?.name}
-													</span>
+													<div className="flex items-center gap-2">
+														<span>
+															{index + 1}. {team?.name}
+														</span>
+														<span className="text-muted-foreground text-xs">
+															{team?.groupPosition}ª pos.
+														</span>
+													</div>
 													<Badge
 														className={colorGroupClasses[team?.group?.color]}
 													>
@@ -697,9 +771,14 @@ export default function Playoff() {
 														key={team.id}
 														className="flex items-center justify-between text-sm"
 													>
-														<span>
-															{index + 1}. {team.name}
-														</span>
+														<div className="flex items-center gap-2">
+															<span>
+																{index + 1}. {team.name}
+															</span>
+															<span className="text-muted-foreground text-xs">
+																{team.groupPosition}ª pos.
+															</span>
+														</div>
 														<Badge
 															className={colorGroupClasses[team.group.color]}
 														>
@@ -737,9 +816,14 @@ export default function Playoff() {
 														key={team.id}
 														className="flex items-center justify-between text-sm"
 													>
-														<span>
-															{index + 1}. {team.name}
-														</span>
+														<div className="flex items-center gap-2">
+															<span>
+																{index + 1}. {team.name}
+															</span>
+															<span className="text-muted-foreground text-xs">
+																{team.groupPosition}ª pos.
+															</span>
+														</div>
 														<Badge
 															className={colorGroupClasses[team.group.color]}
 														>
