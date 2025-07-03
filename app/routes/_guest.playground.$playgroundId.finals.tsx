@@ -37,11 +37,11 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 		include: {
 			group: true,
 			matchesAsTeam1: {
-				where: { day: { in: [1, 2, 3, 4] } }, // Solo partite della fase a gironi
+				where: { day: { in: [1, 2, 3, 4, 6] } }, // Solo partite della fase a gironi
 				select: { id: true, winner: true, score1: true, score2: true },
 			},
 			matchesAsTeam2: {
-				where: { day: { in: [1, 2, 3, 4] } }, // Solo partite della fase a gironi
+				where: { day: { in: [1, 2, 3, 4, 6] } }, // Solo partite della fase a gironi
 				select: { id: true, winner: true, score1: true, score2: true },
 			},
 		},

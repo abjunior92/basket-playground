@@ -22,8 +22,15 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '~/components/ui/select'
-import { colorGroupClasses } from '~/lib/types'
-import { cn, getDayLabel, getFinalTimeSlots, getMatchLabel } from '~/lib/utils'
+import { colorGroupClasses, type TeamWithPlayoffStats } from '~/lib/types'
+import {
+	calculateTiebreaker,
+	cn,
+	getDayLabel,
+	getFinalTimeSlots,
+	getMatchLabel,
+	sortTeamsWithTiebreaker,
+} from '~/lib/utils'
 
 const prisma = new PrismaClient()
 
@@ -43,9 +50,11 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 		include: {
 			group: true,
 			matchesAsTeam1: {
+				where: { day: { in: [1, 2, 3, 4, 6] } },
 				select: { id: true, winner: true, score1: true, score2: true },
 			},
 			matchesAsTeam2: {
+				where: { day: { in: [1, 2, 3, 4, 6] } },
 				select: { id: true, winner: true, score1: true, score2: true },
 			},
 		},
@@ -90,7 +99,8 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 			winPercentage,
 			pointsDifference,
 			pointsGroup: matchesWon * 2,
-		}
+			groupPosition: 0, // Sarà aggiornato dopo l'ordinamento
+		} as TeamWithPlayoffStats
 	})
 
 	// Raggruppa le squadre per girone
@@ -103,18 +113,64 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 			acc[groupKey].push(team)
 			return acc
 		},
-		{} as Record<string, typeof teamsWithStats>,
+		{} as Record<string, TeamWithPlayoffStats[]>,
 	)
 
-	// Ordina le squadre di ogni girone per percentuale vittorie e differenza punti
+	// Ordina le squadre di ogni girone con la nuova logica:
+	// 1. Ordina per percentuale vittorie
+	// 2. Se ci sono squadre con la stessa percentuale vittorie, applica la classifica avulsa
 	Object.keys(groups).forEach((groupName) => {
 		const group = groups[groupName]
 		if (group) {
+			// Prima ordina per percentuale vittorie
 			group.sort((a, b) => {
-				if (b.winPercentage !== a.winPercentage) {
-					return b.winPercentage - a.winPercentage
+				if (!a || !b) return 0
+				return b.winPercentage - a.winPercentage
+			})
+
+			// Poi applica la classifica avulsa per squadre con stessa percentuale
+			let currentIndex = 0
+			while (currentIndex < group.length) {
+				const currentTeam = group[currentIndex]
+				if (!currentTeam) {
+					currentIndex++
+					continue
 				}
-				return b.pointsDifference - a.pointsDifference
+
+				const currentWinPercentage = currentTeam.winPercentage
+				let endIndex = currentIndex + 1
+
+				// Trova tutte le squadre con la stessa percentuale vittorie
+				while (
+					endIndex < group.length &&
+					group[endIndex]?.winPercentage === currentWinPercentage
+				) {
+					endIndex++
+				}
+
+				// Se ci sono più squadre con la stessa percentuale, applica la classifica avulsa
+				if (endIndex - currentIndex > 1) {
+					const tiedTeams = group.slice(currentIndex, endIndex).filter(Boolean)
+					const sortedTiedTeams = calculateTiebreaker(tiedTeams, teams)
+
+					// Sostituisci le squadre ordinate
+					for (let i = 0; i < sortedTiedTeams.length; i++) {
+						if (group[currentIndex + i] && sortedTiedTeams[i]) {
+							group[currentIndex + i] = sortedTiedTeams[
+								i
+							]! as TeamWithPlayoffStats
+						}
+					}
+				}
+
+				currentIndex = endIndex
+			}
+
+			// Aggiungi la posizione in classifica per ogni squadra
+			group.forEach((team, index) => {
+				if (team) {
+					team.groupPosition = index + 1
+				}
 			})
 		}
 	})
@@ -136,28 +192,32 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 		.map((group) => group?.[4])
 		.filter(Boolean)
 
-	// Ordina le seconde classificate per percentuale vittorie e differenza punti
-	secondPlacedTeams.sort((a, b) => {
-		if (!a || !b) return 0
-		if (b.winPercentage !== a.winPercentage) {
-			return b.winPercentage - a.winPercentage
-		}
-		return b.pointsDifference - a.pointsDifference
-	})
-
-	// Ordina le quinte classificate per percentuale vittorie e differenza punti
-	fifthPlacedTeams.sort((a, b) => {
-		if (!a || !b) return 0
-		if (b.winPercentage !== a.winPercentage) {
-			return b.winPercentage - a.winPercentage
-		}
-		return b.pointsDifference - a.pointsDifference
-	})
+	// Ordina tutte le classifiche con la nuova logica
+	const sortedFirstPlacedTeams = sortTeamsWithTiebreaker(
+		firstPlacedTeams,
+		teams,
+	)
+	const sortedSecondPlacedTeams = sortTeamsWithTiebreaker(
+		secondPlacedTeams,
+		teams,
+	)
+	const sortedThirdPlacedTeams = sortTeamsWithTiebreaker(
+		thirdPlacedTeams,
+		teams,
+	)
+	const sortedFourthPlacedTeams = sortTeamsWithTiebreaker(
+		fourthPlacedTeams,
+		teams,
+	)
+	const sortedFifthPlacedTeams = sortTeamsWithTiebreaker(
+		fifthPlacedTeams,
+		teams,
+	)
 
 	// Squadre che vanno direttamente ai playoff (finali di domenica)
 	const directPlayoffTeams = [
-		...firstPlacedTeams,
-		...secondPlacedTeams.slice(0, 3), // Le 3 migliori seconde
+		...sortedFirstPlacedTeams,
+		...sortedSecondPlacedTeams.slice(0, 3), // Le 3 migliori seconde
 	].filter(
 		(team): team is NonNullable<typeof team> =>
 			team !== null && team !== undefined,
@@ -165,10 +225,10 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 
 	// Squadre che giocano i playin (giovedì)
 	const playinTeams = [
-		...secondPlacedTeams.slice(3), // Le 2 peggiori seconde
-		...thirdPlacedTeams,
-		...fourthPlacedTeams,
-		...fifthPlacedTeams.slice(0, 4), // Le 4 migliori quinte
+		...sortedSecondPlacedTeams.slice(3), // Le 2 peggiori seconde
+		...sortedThirdPlacedTeams,
+		...sortedFourthPlacedTeams,
+		...sortedFifthPlacedTeams.slice(0, 4), // Le 4 migliori quinte
 	].filter(
 		(team): team is NonNullable<typeof team> =>
 			team !== null && team !== undefined,
