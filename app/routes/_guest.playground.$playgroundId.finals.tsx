@@ -563,9 +563,6 @@ export default function Playoff() {
 								{playinMatches.length === 0 ? (
 									<div className="text-muted-foreground py-8 text-center">
 										<p>Nessuna partita play-in creata ancora.</p>
-										<p className="mt-2 text-sm">
-											Crea le partite per iniziare il torneo play-in.
-										</p>
 									</div>
 								) : (
 									<div className="space-y-4">
@@ -828,9 +825,6 @@ export default function Playoff() {
 								{playoffMatches.length === 0 ? (
 									<div className="text-muted-foreground py-8 text-center">
 										<p>Nessuna partita playoff creata ancora.</p>
-										<p className="mt-2 text-sm">
-											Crea le partite per iniziare il torneo playoff.
-										</p>
 									</div>
 								) : (
 									<div className="space-y-4">
@@ -1002,9 +996,6 @@ export default function Playoff() {
 								{playoffMatches.length === 0 ? (
 									<div className="text-muted-foreground py-8 text-center">
 										<p>Nessuna partita playoff creata ancora.</p>
-										<p className="mt-2 text-sm">
-											Crea le partite per visualizzare il tabellone.
-										</p>
 									</div>
 								) : (
 									<div className="overflow-x-auto">
