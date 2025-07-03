@@ -135,4 +135,37 @@ export type TeamWithStatsType = {
 	winPercentage: number
 	pointsDifference: number
 	pointsGroup: number
+	headToHeadPoints?: number
+	headToHeadGames?: number
+}
+
+export type TeamWithPlayoffStats = TeamWithStatsType & {
+	group: {
+		id: string
+		name: string
+		color: ColorGroup
+		playgroundId: string
+	}
+	groupPosition: number
+}
+
+export type TeamWithMatches = {
+	id: string
+	name: string
+	group: {
+		id: string
+		playgroundId: string
+	}
+	matchesAsTeam1: {
+		id: string
+		winner: string | null
+		score1: number | null
+		score2: number | null
+	}[]
+	matchesAsTeam2: {
+		id: string
+		winner: string | null
+		score1: number | null
+		score2: number | null
+	}[]
 }

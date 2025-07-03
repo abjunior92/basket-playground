@@ -15,7 +15,7 @@ import {
 } from '~/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
 import { colorGroupClasses, type TeamWithStatsType } from '~/lib/types'
-import { cn } from '~/lib/utils'
+import { calculateTiebreaker, cn } from '~/lib/utils'
 
 const prisma = new PrismaClient()
 
@@ -33,21 +33,21 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 		include: {
 			group: true,
 			matchesAsTeam1: {
+				where: { day: { in: [1, 2, 3, 4] } }, // Solo partite della fase a gironi
 				select: {
 					id: true,
 					winner: true,
 					score1: true,
 					score2: true,
-					day: true,
 				},
 			},
 			matchesAsTeam2: {
+				where: { day: { in: [1, 2, 3, 4] } }, // Solo partite della fase a gironi
 				select: {
 					id: true,
 					winner: true,
 					score1: true,
 					score2: true,
-					day: true,
 				},
 			},
 		},
@@ -127,15 +127,10 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 		(acc, team) => {
 			const allMatches = [...team.matchesAsTeam1, ...team.matchesAsTeam2]
 
-			// Filtra solo le partite dei giorni dei gironi (1,2,3,4,6) - escludi 5 (play-in) e 7 (finali)
-			const groupMatches = allMatches.filter(
-				(match) => match.day !== 5 && match.day !== 7,
-			)
-
-			const matchesPlayed = groupMatches.filter(
+			const matchesPlayed = allMatches.filter(
 				(match) => match.winner !== null,
 			).length
-			const matchesWon = groupMatches.filter(
+			const matchesWon = allMatches.filter(
 				(match) => match.winner === team.id,
 			).length
 
@@ -143,7 +138,7 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 			let pointsScored = 0
 			let pointsConceded = 0
 
-			groupMatches.forEach((match) => {
+			allMatches.forEach((match) => {
 				if (match.winner !== null) {
 					if (team.matchesAsTeam1.some((m) => m.id === match.id)) {
 						pointsScored += match.score1 || 0
@@ -180,14 +175,54 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 		{} as Record<string, TeamWithStatsType[]>,
 	)
 
-	// Ordiniamo le squadre di ogni girone per percentuale vittorie e, successivamente, per differenza punti
+	// Ordiniamo le squadre di ogni girone con la nuova logica:
+	// 1. Ordina per percentuale vittorie
+	// 2. Se ci sono squadre con la stessa percentuale vittorie, applica la classifica avulsa
 	Object.keys(groups).forEach((groupName) => {
-		groups[groupName]?.sort((a, b) => {
-			if (b?.winPercentage !== a?.winPercentage) {
+		const group = groups[groupName]
+		if (group) {
+			// Prima ordina per percentuale vittorie
+			group.sort((a, b) => {
+				if (!a || !b) return 0
 				return b.winPercentage - a.winPercentage
+			})
+
+			// Poi applica la classifica avulsa per squadre con stessa percentuale
+			let currentIndex = 0
+			while (currentIndex < group.length) {
+				const currentTeam = group[currentIndex]
+				if (!currentTeam) {
+					currentIndex++
+					continue
+				}
+
+				const currentWinPercentage = currentTeam.winPercentage
+				let endIndex = currentIndex + 1
+
+				// Trova tutte le squadre con la stessa percentuale vittorie
+				while (
+					endIndex < group.length &&
+					group[endIndex]?.winPercentage === currentWinPercentage
+				) {
+					endIndex++
+				}
+
+				// Se ci sono più squadre con la stessa percentuale, applica la classifica avulsa
+				if (endIndex - currentIndex > 1) {
+					const tiedTeams = group.slice(currentIndex, endIndex).filter(Boolean)
+					const sortedTiedTeams = calculateTiebreaker(tiedTeams, teams)
+
+					// Sostituisci le squadre ordinate
+					for (let i = 0; i < sortedTiedTeams.length; i++) {
+						if (group[currentIndex + i] && sortedTiedTeams[i]) {
+							group[currentIndex + i] = sortedTiedTeams[i]!
+						}
+					}
+				}
+
+				currentIndex = endIndex
 			}
-			return b.pointsDifference - a.pointsDifference
-		})
+		}
 	})
 
 	return { groups, topPlayersGroups, topPlayersFinals }
