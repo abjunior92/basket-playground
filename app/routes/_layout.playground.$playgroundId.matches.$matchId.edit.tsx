@@ -372,7 +372,9 @@ export default function EditMatch() {
 				</TabsList>
 				<TabsContent value="scores">
 					<h4 className="mt-4 flex justify-between text-xl">
-						{match.team1.name} <span>vs</span> {match.team2.name}
+						<span className="flex w-1/3 justify-start">{match.team1.name}</span>
+						<span className="w-fit">vs</span>
+						<span className="flex w-1/3 justify-end">{match.team2.name}</span>
 					</h4>
 
 					<Form method="post" className="mt-4">

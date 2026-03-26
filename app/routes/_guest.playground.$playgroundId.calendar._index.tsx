@@ -287,20 +287,25 @@ export default function Matches() {
 								<Table className="w-full border-collapse">
 									<TableHeader>
 										<TableRow className="bg-gray-100">
-											<TableHead className="w-10 md:w-3xs">
-												⏱️ <span className="hidden md:inline">Orario</span>
+											<TableHead className="w-auto">
+												⏱️ <br />
+												<span className="hidden md:inline">Orario</span>
 											</TableHead>
 											<TableHead className="max-w-12">
-												📍 <span className="hidden md:inline">Campo</span>
+												📍 <br />
+												<span className="hidden md:block">Campo</span>
 											</TableHead>
 											<TableHead className="w-auto">
-												👥 <span className="hidden md:inline">Squadra 1</span>
+												👥 <br />
+												<span className="hidden md:inline">Squadra 1</span>
 											</TableHead>
 											<TableHead className="w-auto">
-												👥 <span className="hidden md:inline">Squadra 2</span>
+												👥 <br />
+												<span className="hidden md:inline">Squadra 2</span>
 											</TableHead>
-											<TableHead className="w-16 md:w-auto">
-												📝 <span className="hidden md:inline">Risultato</span>
+											<TableHead className="min-w-16 md:w-auto">
+												📝 <br />
+												<span className="hidden md:inline">Risultato</span>
 											</TableHead>
 										</TableRow>
 									</TableHeader>

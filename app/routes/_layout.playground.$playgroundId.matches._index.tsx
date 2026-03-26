@@ -351,22 +351,30 @@ export default function Matches() {
 								<Table className="w-full border-collapse">
 									<TableHeader>
 										<TableRow className="bg-gray-100">
-											<TableHead className="w-auto md:w-3xs">
-												⏱️ <span className="hidden md:inline">Orario</span>
+											<TableHead className="w-auto">
+												⏱️ <br />
+												<span className="hidden md:inline">Orario</span>
 											</TableHead>
 											<TableHead className="max-w-12">
-												📍 <span className="hidden md:inline">Campo</span>
+												📍 <br />
+												<span className="hidden md:block">Campo</span>
 											</TableHead>
 											<TableHead className="w-auto">
-												👥 <span className="hidden md:inline">Squadra 1</span>
+												👥 <br />
+												<span className="hidden md:inline">Squadra 1</span>
 											</TableHead>
 											<TableHead className="w-auto">
-												👥 <span className="hidden md:inline">Squadra 2</span>
+												👥 <br />
+												<span className="hidden md:inline">Squadra 2</span>
 											</TableHead>
 											<TableHead className="min-w-16 md:w-auto">
-												📝 <span className="hidden md:inline">Risultato</span>
+												📝 <br />
+												<span className="hidden md:inline">Risultato</span>
 											</TableHead>
-											<TableHead className="w-auto">Azioni</TableHead>
+											<TableHead className="w-auto">
+												⚙️ <br />
+												<span className="hidden md:inline">Azioni</span>
+											</TableHead>
 										</TableRow>
 									</TableHeader>
 									<TableBody>
@@ -427,7 +435,7 @@ export default function Matches() {
 														</span>
 													</TableCell>
 													<TableCell>
-														<div className="flex justify-center gap-2">
+														<div className="flex flex-col justify-center gap-2 sm:flex-row">
 															<Button asChild variant="outline" size="sm">
 																<Link
 																	to={`/playground/${params.playgroundId}/matches/${match.id}/edit`}
