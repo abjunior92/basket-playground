@@ -25,7 +25,7 @@ model Group {
   id       String   @id @default(uuid())
   name     String
   color    ColorGroup   @unique
-  playground   Playground   @relation(fields: [playgroundId], references: [id])
+  playground   Playground   @relation(fields: [playgroundId], references: [id], onDelete: Cascade)
   playgroundId String
   teams  Team[]
 }
@@ -49,11 +49,11 @@ enum ColorGroup {
 model Team {
   id       String   @id @default(uuid())
   name     String
-  group    Group   @relation(fields: [groupId], references: [id])
+  group    Group   @relation(fields: [groupId], references: [id], onDelete: Cascade)
   groupId  String
 
   // Riferimento diretto al playground
-  playground   Playground @relation(fields: [playgroundId], references: [id])
+  playground   Playground @relation(fields: [playgroundId], references: [id], onDelete: Cascade)
   playgroundId String
 
   matchesAsTeam1 Match[] @relation(name: "Team1Matches")
@@ -72,13 +72,13 @@ model Player {
   level        Level
   paid         Boolean
   totalPoints  Int     @default(0)
-  team         Team    @relation(fields: [teamId], references: [id])
+  team         Team    @relation(fields: [teamId], references: [id], onDelete: Cascade)
   teamId       String
   matchStats PlayerMatchStats[]
   size         Sizes?
 
   // Riferimento diretto al playground
-  playground   Playground @relation(fields: [playgroundId], references: [id])
+  playground   Playground @relation(fields: [playgroundId], references: [id], onDelete: Cascade)
   playgroundId String
   
   warnings     Int     @default(0)  // Numero di ammonizioni ricevute
@@ -117,15 +117,15 @@ enum Level {
 
 model Match {
   id           String   @id @default(uuid())
-  playground   Playground @relation(fields: [playgroundId], references: [id])
+  playground   Playground @relation(fields: [playgroundId], references: [id], onDelete: Cascade)
   playgroundId String
   day          Int
   timeSlot     String
   field        String
 
-  team1       Team @relation(name: "Team1Matches", fields: [team1Id], references: [id])
+  team1       Team @relation(name: "Team1Matches", fields: [team1Id], references: [id], onDelete: Cascade)
   team1Id     String
-  team2       Team @relation(name: "Team2Matches", fields: [team2Id], references: [id])
+  team2       Team @relation(name: "Team2Matches", fields: [team2Id], references: [id], onDelete: Cascade)
   team2Id     String
 
   score1      Int?
@@ -143,15 +143,15 @@ model PlayerMatchStats {
   playerId  String
   points    Int     @default(0)
 
-  match     Match    @relation(fields: [matchId], references: [id])
-  player    Player   @relation(fields: [playerId], references: [id])
+  match     Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  player    Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
 
   @@unique([matchId, playerId])  // Definisce una combinazione unica di matchId e playerId
 }
 
 model JerseyStock {
   id        String  @id @default(uuid())
-  playground  Playground @relation(fields: [playgroundId], references: [id])
+  playground  Playground @relation(fields: [playgroundId], references: [id], onDelete: Cascade)
   playgroundId String
   size      Sizes   @unique
   available Int     @default(0)
@@ -167,9 +167,9 @@ model ThreePointChallengeParticipant {
   score        Int      @default(0)
   fee          Int
   
-  player       Player?   @relation(fields: [playerId], references: [id])
+  player       Player?   @relation(fields: [playerId], references: [id], onDelete: SetNull)
   playerId     String?   
 
-  playground   Playground @relation(fields: [playgroundId], references: [id])
+  playground   Playground @relation(fields: [playgroundId], references: [id], onDelete: Cascade)
   playgroundId String
 }
