@@ -14,8 +14,13 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 	const birthYear = parseInt(formData.get('birthYear') as string)
 	const level = formData.get('level') as Level
 	const paid = formData.get('paid') === 'on'
+	const sizeRaw = formData.get('size')
 	const size =
-		formData.get('size') === '' ? undefined : (formData.get('size') as Sizes)
+		typeof sizeRaw !== 'string' || sizeRaw === ''
+			? undefined
+			: sizeRaw === '__none__'
+				? null
+				: (sizeRaw as Sizes)
 
 	if (!name || !surname || !birthYear || !level) {
 		return json(

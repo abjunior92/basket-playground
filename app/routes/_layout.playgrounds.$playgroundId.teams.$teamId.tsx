@@ -84,7 +84,11 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 	invariant(params.teamId, 'teamId is required')
 	const team = await prisma.team.findUnique({
 		where: { id: params.teamId },
-		include: { players: { orderBy: { name: 'asc' } } },
+		include: {
+			players: {
+				orderBy: [{ surname: 'asc' }, { name: 'asc' }],
+			},
+		},
 	})
 
 	if (!team) throw new Response('Not Found', { status: 404 })
@@ -402,7 +406,6 @@ export default function TeamDetails() {
 													form="editPlayerForm"
 													name="size"
 													defaultValue={player.size ?? undefined}
-													required
 												>
 													<SelectTrigger>
 														<SelectValue placeholder="Seleziona la taglia assegnata" />
@@ -410,6 +413,9 @@ export default function TeamDetails() {
 													<SelectContent>
 														<SelectGroup>
 															<SelectLabel>Taglia</SelectLabel>
+															<SelectItem value="__none__">
+																Nessuna taglia
+															</SelectItem>
 															{Array.from(playerSizesMap.entries()).map(
 																([key, value]) => (
 																	<SelectItem key={key} value={key}>
