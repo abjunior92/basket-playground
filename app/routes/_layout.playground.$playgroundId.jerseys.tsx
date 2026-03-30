@@ -5,8 +5,14 @@ import {
 	type LoaderFunctionArgs,
 	type MetaFunction,
 } from '@remix-run/node'
-import { Form, useLoaderData, useNavigation } from '@remix-run/react'
+import {
+	Form,
+	useActionData,
+	useLoaderData,
+	useNavigation,
+} from '@remix-run/react'
 import { ChevronDown, Shirt } from 'lucide-react'
+import React, { useEffect, useState, useMemo } from 'react'
 import invariant from 'tiny-invariant'
 import Header from '~/components/Header'
 import { Button } from '~/components/ui/button'
@@ -33,6 +39,7 @@ import {
 	TableHeader,
 	TableRow,
 } from '~/components/ui/table'
+import { useToast } from '~/hooks/use-toast'
 import { playerSizesMap } from '~/lib/types'
 
 const prisma = new PrismaClient()
@@ -92,9 +99,11 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 	invariant(params.playgroundId, 'playgroundId is required')
 	const formData = await request.formData()
 	const size = formData.get('size') as Sizes
-	const available = Number(formData.get('available') as string)
+	const availableRaw = formData.get('available')
+	const available =
+		typeof availableRaw === 'string' ? Number(availableRaw) : NaN
 
-	if (!size || !available) {
+	if (!size || Number.isNaN(available) || available < 0) {
 		return json({ error: 'Dati non validi' }, { status: 400 })
 	}
 
@@ -109,22 +118,65 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 		},
 	})
 
-	return json({ success: true })
+	return json({ ok: true })
 }
 
 export default function JerseysPage() {
 	const { jerseys, playersGrouped } = useLoaderData<typeof loader>()
 	const navigation = useNavigation()
+	const { toast } = useToast()
+	const actionData = useActionData<typeof action>()
+
+	const availableBySize = useMemo(() => {
+		return jerseys.reduce(
+			(acc, jersey) => {
+				acc[jersey.size] = jersey.available
+				return acc
+			},
+			{} as Partial<Record<Sizes, number>>,
+		)
+	}, [jerseys])
+
+	const [selectedSize, setSelectedSize] = useState<Sizes | undefined>(undefined)
+	const [availableInput, setAvailableInput] = useState<string>('')
+
+	const handleSizeChange = (nextValue: string) => {
+		const nextSize = nextValue as Sizes
+		setSelectedSize(nextSize)
+
+		const existing = availableBySize[nextSize]
+		setAvailableInput(existing === undefined ? '' : String(existing))
+	}
+
+	useEffect(() => {
+		if (actionData === undefined || actionData === null) {
+			return
+		}
+
+		if ('ok' in actionData) {
+			toast({
+				title: 'Successo',
+				description: 'Stock aggiornato con successo',
+				variant: 'default',
+			})
+		}
+	}, [actionData, toast])
+
 	return (
 		<div className="p-4">
 			<Header title="Gestione maglie" backLink="/" icon={<Shirt />} />
 
 			<div className="mt-4 flex flex-col space-y-2">
 				<h2 className="text-lg">
-					Imposta uno stock delle maglie disponibili per ogni taglia
+					Imposta o modifica uno stock delle maglie disponibili per ogni taglia
 				</h2>
 				<Form method="post" className="mb-4 flex flex-col gap-2 md:flex-row">
-					<Select name="size" required>
+					<Select
+						name="size"
+						required
+						value={selectedSize}
+						onValueChange={handleSizeChange}
+					>
 						<SelectTrigger>
 							<SelectValue placeholder="Seleziona la taglia assegnata" />
 						</SelectTrigger>
@@ -142,8 +194,11 @@ export default function JerseysPage() {
 					<Input
 						type="number"
 						name="available"
-						placeholder="Disponibili"
+						placeholder="Stock iniziale"
 						inputMode="numeric"
+						value={availableInput}
+						onChange={(e) => setAvailableInput(e.target.value)}
+						min={0}
 					/>
 					<Button
 						type="submit"
@@ -165,6 +220,7 @@ export default function JerseysPage() {
 							<TableHead>Taglia</TableHead>
 							<TableHead>Distribuite</TableHead>
 							<TableHead>Disponibili</TableHead>
+							<TableHead>Stock iniziale</TableHead>
 							<TableHead></TableHead>
 						</TableRow>
 					</TableHeader>
@@ -177,6 +233,7 @@ export default function JerseysPage() {
 											<TableCell>{size.toUpperCase()}</TableCell>
 											<TableCell>{distributed}</TableCell>
 											<TableCell>{available}</TableCell>
+											<TableCell>{distributed + available}</TableCell>
 											<TableCell>
 												<Button variant={'link'} size="icon">
 													<ChevronDown className="transition-all duration-300 ease-in-out group-data-[state=open]:rotate-180" />
@@ -186,7 +243,7 @@ export default function JerseysPage() {
 									</CollapsibleTrigger>
 									<CollapsibleContent asChild>
 										<TableRow>
-											<TableCell colSpan={4}>
+											<TableCell colSpan={5}>
 												<div className="rounded-lg bg-gray-100 p-4">
 													<h3 className="mb-2 text-sm font-bold">
 														Giocatori con questa taglia:
