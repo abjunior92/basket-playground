@@ -11,7 +11,7 @@ import {
 	useLoaderData,
 	useNavigation,
 } from '@remix-run/react'
-import { ChevronDown, Shirt } from 'lucide-react'
+import { ChevronDown, Shirt, Trash } from 'lucide-react'
 import React, { useEffect, useState, useMemo } from 'react'
 import invariant from 'tiny-invariant'
 import Header from '~/components/Header'
@@ -21,6 +21,16 @@ import {
 	CollapsibleContent,
 	CollapsibleTrigger,
 } from '~/components/ui/collapsible'
+import {
+	Dialog,
+	DialogClose,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from '~/components/ui/dialog'
 import { Input } from '~/components/ui/input'
 import {
 	Select,
@@ -98,6 +108,22 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 export const action = async ({ request, params }: ActionFunctionArgs) => {
 	invariant(params.playgroundId, 'playgroundId is required')
 	const formData = await request.formData()
+	const reset = formData.get('_reset') === 'on'
+
+	if (reset) {
+		await prisma.$transaction([
+			prisma.jerseyStock.updateMany({
+				where: { playgroundId: params.playgroundId },
+				data: { available: 0, distributed: 0 },
+			}),
+			prisma.player.updateMany({
+				where: { playgroundId: params.playgroundId, size: { not: null } },
+				data: { size: null },
+			}),
+		])
+		return json({ ok: true, reset: true })
+	}
+
 	const size = formData.get('size') as Sizes
 	const availableRaw = formData.get('available')
 	const available =
@@ -118,7 +144,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 		},
 	})
 
-	return json({ ok: true })
+	return json({ ok: true, reset: false })
 }
 
 export default function JerseysPage() {
@@ -154,17 +180,63 @@ export default function JerseysPage() {
 		}
 
 		if ('ok' in actionData) {
-			toast({
-				title: 'Successo',
-				description: 'Stock aggiornato con successo',
-				variant: 'default',
-			})
+			toast(
+				actionData.reset
+					? {
+							title: 'Reset completato',
+							description: 'Stock azzerato per tutte le taglie',
+							variant: 'default',
+						}
+					: {
+							title: 'Successo',
+							description: 'Stock aggiornato con successo',
+							variant: 'default',
+						},
+			)
 		}
 	}, [actionData, toast])
 
 	return (
 		<div className="p-4">
-			<Header title="Gestione maglie" backLink="/" icon={<Shirt />} />
+			<div className="mb-4 flex items-center justify-between">
+				<Header title="Gestione maglie" backLink="/" icon={<Shirt />} />
+
+				<Dialog>
+					<DialogTrigger asChild>
+						<Button type="button" variant="destructive">
+							<Trash className="h-5 w-5" />
+							<span className="hidden md:block">Reset stock</span>
+						</Button>
+					</DialogTrigger>
+					<DialogContent className="sm:max-w-[520px]">
+						<DialogHeader>
+							<DialogTitle>Reset stock</DialogTitle>
+							<DialogDescription>
+								Sei sicuro di voler azzerare completamente lo stock di tutte le
+								taglie?
+								<br />
+								Inoltre verranno rimossi tutti i giocatori dalla taglia assegnata
+								(perché lo stock risulta 0).
+							</DialogDescription>
+						</DialogHeader>
+						<DialogFooter>
+							<DialogClose asChild>
+								<Button type="button" variant="secondary">
+									Annulla
+								</Button>
+							</DialogClose>
+							<Form method="post">
+								<input type="hidden" name="_reset" value="on" />
+								<DialogClose>
+									<Button type="submit" variant="destructive">
+										Conferma reset
+									</Button>
+								</DialogClose>
+							</Form>
+						</DialogFooter>
+					</DialogContent>
+				</Dialog>
+			</div>
 
 			<div className="mt-4 flex flex-col space-y-2">
 				<h2 className="text-lg">
