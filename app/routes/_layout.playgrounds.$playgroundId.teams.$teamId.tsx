@@ -483,7 +483,7 @@ export default function TeamDetails() {
 												</Button>
 											}
 											title="Elimina giocatore"
-											description="Sei sicuro di voler eliminare questo giocatore?"
+											description="<b>Sei sicuro di voler eliminare questo giocatore?</b> <br />Questa operazione rimuoverà la taglia assegnata al giocatore e ripristinerà la disponibilità della taglia nello stock"
 											formId={`deletePlayerForm-${player.id}`}
 										/>
 									</Form>

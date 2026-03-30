@@ -25,7 +25,9 @@ const DialogAlert = ({ trigger, title, description, formId }: Props) => {
 				<AlertDialogHeader>
 					<AlertDialogTitle>{title}</AlertDialogTitle>
 					{description && (
-						<AlertDialogDescription>{description}</AlertDialogDescription>
+						<AlertDialogDescription
+							dangerouslySetInnerHTML={{ __html: description }}
+						/>
 					)}
 				</AlertDialogHeader>
 				<AlertDialogFooter>
