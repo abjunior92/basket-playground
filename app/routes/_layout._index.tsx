@@ -18,11 +18,16 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 	await checkUserIsLoggedIn(request)
 
 	const playgrounds = await prisma.playground.findMany()
-	return { playgrounds }
+	const palmaresList = await prisma.tournamentPalmares.findMany({
+		select: { year: true },
+		orderBy: { year: 'desc' },
+	})
+
+	return { playgrounds, palmaresList }
 }
 
 export default function Index() {
-	const { playgrounds } = useLoaderData<typeof loader>()
+	const { playgrounds, palmaresList } = useLoaderData<typeof loader>()
 
 	return (
 		<div className="flex h-screen items-start justify-center md:items-center">
@@ -36,14 +41,8 @@ export default function Index() {
 				<nav className="flex flex-col items-center justify-center">
 					<ul className="space-y-4">
 						{resources.map(({ href, text, icon }) => (
-							<li
-								key={href}
-								className="rounded-3xl border-2 border-white bg-black/80 text-white transition-colors duration-300 ease-in-out hover:bg-black/90"
-							>
-								<Link
-									className="group flex items-center justify-start gap-3 p-3 leading-normal"
-									to={href}
-								>
+							<li key={href} className="nav-button">
+								<Link to={href}>
 									<div className="flex items-center space-x-2">
 										<span>{icon}</span>
 										<span>{text}</span>
@@ -58,14 +57,8 @@ export default function Index() {
 					<ul className="space-y-4">
 						{playgrounds.length > 0 ? (
 							playgrounds.map(({ id, name }) => (
-								<li
-									key={id}
-									className="rounded-3xl border-2 border-white bg-black/80 text-white transition-colors duration-300 ease-in-out hover:bg-black/90"
-								>
-									<Link
-										className="group flex items-center justify-start gap-3 p-3 leading-normal"
-										to={`/playground/${id}`}
-									>
+								<li key={id} className="nav-button">
+									<Link to={`/playground/${id}`}>
 										<div className="flex items-center space-x-2">
 											<Award className="h-5 w-5" />
 											<span>{name}</span>
@@ -75,6 +68,20 @@ export default function Index() {
 							))
 						) : (
 							<li>Nessun torneo disponibile</li>
+						)}
+					</ul>
+				</nav>
+				<h2 className="mt-4 text-xl font-bold">Palmares</h2>
+				<nav className="flex flex-col items-center justify-center">
+					<ul className="space-y-4">
+						{palmaresList.length > 0 ? (
+							palmaresList.map(({ year }) => (
+								<li key={year} className="nav-button">
+									<Link to={`/palmares/${year}`}>Anno {year}</Link>
+								</li>
+							))
+						) : (
+							<li>Nessun palmares salvato</li>
 						)}
 					</ul>
 				</nav>

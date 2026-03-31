@@ -112,6 +112,10 @@
 	.h-fill-available {
 		height: -webkit-fill-available;
 	}
+
+	.nav-button {
+		@apply flex items-center justify-start gap-3 rounded-3xl border-2 border-white bg-black/80 p-3 leading-normal text-white transition-colors duration-300 ease-in-out hover:bg-black/90;
+	}
 }
 
 @layer base {

@@ -10,6 +10,7 @@ import {
 	useActionData,
 	useLoaderData,
 	useNavigation,
+	useParams,
 } from '@remix-run/react'
 import { ChevronDown, Shirt, Trash } from 'lucide-react'
 import React, { useEffect, useState, useMemo } from 'react'
@@ -152,7 +153,7 @@ export default function JerseysPage() {
 	const navigation = useNavigation()
 	const { toast } = useToast()
 	const actionData = useActionData<typeof action>()
-
+	const { playgroundId } = useParams()
 	const availableBySize = useMemo(() => {
 		return jerseys.reduce(
 			(acc, jersey) => {
@@ -199,7 +200,11 @@ export default function JerseysPage() {
 	return (
 		<div className="p-4">
 			<div className="mb-4 flex items-center justify-between">
-				<Header title="Gestione maglie" backLink="/" icon={<Shirt />} />
+				<Header
+					title="Gestione maglie"
+					backLink={`/playground/${playgroundId}`}
+					icon={<Shirt />}
+				/>
 
 				<Dialog>
 					<DialogTrigger asChild>
@@ -215,8 +220,8 @@ export default function JerseysPage() {
 								Sei sicuro di voler azzerare completamente lo stock di tutte le
 								taglie?
 								<br />
-								Inoltre verranno rimossi tutti i giocatori dalla taglia assegnata
-								(perché lo stock risulta 0).
+								Inoltre verranno rimossi tutti i giocatori dalla taglia
+								assegnata (perché lo stock risulta 0).
 							</DialogDescription>
 						</DialogHeader>
 						<DialogFooter>

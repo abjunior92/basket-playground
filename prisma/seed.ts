@@ -153,6 +153,16 @@ function generateRandomTeam() {
 	}
 }
 
+type TeamStats = {
+	id: string
+	name: string
+	groupId: string
+	wins: number
+	played: number
+	pointsScored: number
+	pointsConceded: number
+}
+
 function generateTimeSlots() {
 	const timeSlots: string[] = []
 	let hour = 18
@@ -283,7 +293,7 @@ function verificaDisponibilitaSlot(
 async function generateMatchScores(
 	match: { id: string; team1Id: string; team2Id: string },
 	prisma: PrismaClient,
-) {
+): Promise<{ winnerId: string; loserId: string }> {
 	// Genera punteggi diversi per evitare pareggi
 	let score1, score2
 	do {
@@ -358,6 +368,11 @@ async function generateMatchScores(
 			winner,
 		},
 	})
+
+	return {
+		winnerId: winner,
+		loserId: winner === match.team1Id ? match.team2Id : match.team1Id,
+	}
 }
 
 // Funzione per distribuire i punti tra i giocatori
@@ -383,6 +398,126 @@ function distributePoints(totalPoints: number, numPlayers: number): number[] {
 	return points
 }
 
+function compareTeamStats(a: TeamStats, b: TeamStats): number {
+	const winPctA = a.played > 0 ? a.wins / a.played : 0
+	const winPctB = b.played > 0 ? b.wins / b.played : 0
+	if (winPctA !== winPctB) return winPctB - winPctA
+
+	const diffA = a.pointsScored - a.pointsConceded
+	const diffB = b.pointsScored - b.pointsConceded
+	if (diffA !== diffB) return diffB - diffA
+
+	if (a.pointsScored !== b.pointsScored) return b.pointsScored - a.pointsScored
+	return a.name.localeCompare(b.name)
+}
+
+async function computeGroupRankings(playgroundId: string) {
+	const groups = await prisma.group.findMany({
+		where: { playgroundId },
+		include: {
+			teams: {
+				include: {
+					matchesAsTeam1: {
+						where: { day: { in: [1, 2, 3, 4, 6] }, winner: { not: null } },
+						select: {
+							id: true,
+							team1Id: true,
+							team2Id: true,
+							score1: true,
+							score2: true,
+							winner: true,
+						},
+					},
+					matchesAsTeam2: {
+						where: { day: { in: [1, 2, 3, 4, 6] }, winner: { not: null } },
+						select: {
+							id: true,
+							team1Id: true,
+							team2Id: true,
+							score1: true,
+							score2: true,
+							winner: true,
+						},
+					},
+				},
+			},
+		},
+	})
+
+	const rankings = groups.map((group) => {
+		const teamStats: TeamStats[] = group.teams.map((team) => {
+			const matches = [...team.matchesAsTeam1, ...team.matchesAsTeam2]
+
+			let pointsScored = 0
+			let pointsConceded = 0
+			let wins = 0
+
+			for (const match of matches) {
+				const isTeam1 = match.team1Id === team.id
+				pointsScored += isTeam1 ? (match.score1 ?? 0) : (match.score2 ?? 0)
+				pointsConceded += isTeam1 ? (match.score2 ?? 0) : (match.score1 ?? 0)
+				if (match.winner === team.id) wins++
+			}
+
+			return {
+				id: team.id,
+				name: team.name,
+				groupId: group.id,
+				wins,
+				played: matches.length,
+				pointsScored,
+				pointsConceded,
+			}
+		})
+
+		teamStats.sort(compareTeamStats)
+		return { groupId: group.id, teams: teamStats }
+	})
+
+	const firstPlaced = rankings
+		.map((r) => r.teams[0])
+		.filter((team): team is TeamStats => team !== undefined)
+	const secondPlaced = rankings
+		.map((r) => r.teams[1])
+		.filter((team): team is TeamStats => team !== undefined)
+	const thirdPlaced = rankings
+		.map((r) => r.teams[2])
+		.filter((team): team is TeamStats => team !== undefined)
+	const fourthPlaced = rankings
+		.map((r) => r.teams[3])
+		.filter((team): team is TeamStats => team !== undefined)
+	const fifthPlaced = rankings
+		.map((r) => r.teams[4])
+		.filter((team): team is TeamStats => team !== undefined)
+
+	secondPlaced.sort(compareTeamStats)
+	thirdPlaced.sort(compareTeamStats)
+	fourthPlaced.sort(compareTeamStats)
+	fifthPlaced.sort(compareTeamStats)
+
+	const directPlayoffTeams = [...firstPlaced, ...secondPlaced.slice(0, 3)]
+	const playinTeams = [
+		...secondPlaced.slice(3),
+		...thirdPlaced,
+		...fourthPlaced,
+		...fifthPlaced.slice(0, 4),
+	]
+
+	return { directPlayoffTeams, playinTeams }
+}
+
+async function createAndScoreMatch(data: {
+	playgroundId: string
+	day: number
+	timeSlot: string
+	field: string
+	team1Id: string
+	team2Id: string
+}) {
+	const match = await prisma.match.create({ data })
+	return generateMatchScores(match, prisma)
+}
+
 // Funzione principale per popolare il database
 async function main() {
 	// 1. Reset del database
@@ -399,6 +534,7 @@ async function main() {
 	const playground = await prisma.playground.create({
 		data: {
 			name: 'Longara 3vs3 2025',
+			year: 2025,
 		},
 	})
 
@@ -593,7 +729,7 @@ async function main() {
 		}
 	}
 
-	// 6. Genera i risultati delle partite
+	// 6. Genera i risultati delle partite dei gironi
 	const allMatches = await prisma.match.findMany({
 		where: { playgroundId: playground.id },
 	})
@@ -601,6 +737,154 @@ async function main() {
 	for (const match of allMatches) {
 		await generateMatchScores(match, prisma)
 	}
+
+	// 7. Simulazione play-in (giorno 5)
+	const { directPlayoffTeams, playinTeams } = await computeGroupRankings(playground.id)
+
+	if (directPlayoffTeams.length !== 8 || playinTeams.length !== 16) {
+		throw new Error(
+			`Qualificazione non valida: dirette=${directPlayoffTeams.length}, playin=${playinTeams.length}`,
+		)
+	}
+
+	const playinTimeSlots = [
+		'18:00 > 18:15',
+		'18:20 > 18:35',
+		'18:40 > 18:55',
+		'19:00 > 19:15',
+	]
+	const playinWinners: string[] = []
+
+	for (let i = 0; i < 8; i++) {
+		const team1 = playinTeams[i]
+		const team2 = playinTeams[playinTeams.length - 1 - i]
+		const slot = playinTimeSlots[Math.floor(i / 2)]
+		const field = i % 2 === 0 ? 'A' : 'B'
+
+		if (!team1 || !team2 || !slot) {
+			throw new Error('Dati insufficienti per creare il tabellone play-in')
+		}
+
+		const result = await createAndScoreMatch({
+			playgroundId: playground.id,
+			day: 5,
+			timeSlot: slot,
+			field,
+			team1Id: team1.id,
+			team2Id: team2.id,
+		})
+
+		playinWinners.push(result.winnerId)
+	}
+
+	// 8. Simulazione playoff completi (giorno 7)
+	const seededTeams = [...directPlayoffTeams.map((t) => t.id), ...playinWinners]
+	if (seededTeams.length !== 16) {
+		throw new Error(`Tabellone playoff incompleto: ${seededTeams.length} squadre`)
+	}
+
+	const finalEightSlots = [
+		'19:20 > 19:35',
+		'19:40 > 19:55',
+		'20:00 > 20:15',
+		'20:20 > 20:35',
+	]
+	const finalFourSlots = ['20:40 > 20:55', '21:00 > 21:15']
+	const semifinalSlot = '21:20 > 21:35'
+	const thirdPlaceSlot = '21:40 > 21:55'
+	const finalSlot = '22:00 > 22:15'
+
+	const roundOf16Winners: string[] = []
+	for (let i = 0; i < 8; i++) {
+		const team1Id = seededTeams[i]
+		const team2Id = seededTeams[seededTeams.length - 1 - i]
+		const slot = finalEightSlots[Math.floor(i / 2)]
+		const field = i % 2 === 0 ? 'A' : 'B'
+
+		if (!team1Id || !team2Id || !slot) {
+			throw new Error('Errore creazione ottavi')
+		}
+
+		const result = await createAndScoreMatch({
+			playgroundId: playground.id,
+			day: 7,
+			timeSlot: slot,
+			field,
+			team1Id,
+			team2Id,
+		})
+
+		roundOf16Winners.push(result.winnerId)
+	}
+
+	const quarterWinners: string[] = []
+	for (let i = 0; i < 4; i++) {
+		const team1Id = roundOf16Winners[i * 2]
+		const team2Id = roundOf16Winners[i * 2 + 1]
+		const slot = finalFourSlots[Math.floor(i / 2)]
+		const field = i % 2 === 0 ? 'A' : 'B'
+
+		if (!team1Id || !team2Id || !slot) {
+			throw new Error('Errore creazione quarti')
+		}
+
+		const result = await createAndScoreMatch({
+			playgroundId: playground.id,
+			day: 7,
+			timeSlot: slot,
+			field,
+			team1Id,
+			team2Id,
+		})
+
+		quarterWinners.push(result.winnerId)
+	}
+
+	const semifinalWinners: string[] = []
+	const semifinalLosers: string[] = []
+	for (let i = 0; i < 2; i++) {
+		const team1Id = quarterWinners[i * 2]
+		const team2Id = quarterWinners[i * 2 + 1]
+		const field = i === 0 ? 'A' : 'B'
+
+		if (!team1Id || !team2Id) {
+			throw new Error('Errore creazione semifinali')
+		}
+
+		const result = await createAndScoreMatch({
+			playgroundId: playground.id,
+			day: 7,
+			timeSlot: semifinalSlot,
+			field,
+			team1Id,
+			team2Id,
+		})
+
+		semifinalWinners.push(result.winnerId)
+		semifinalLosers.push(result.loserId)
+	}
+
+	if (semifinalLosers.length !== 2 || semifinalWinners.length !== 2) {
+		throw new Error('Errore determinazione finaliste e finale 3° posto')
+	}
+
+	await createAndScoreMatch({
+		playgroundId: playground.id,
+		day: 7,
+		timeSlot: thirdPlaceSlot,
+		field: 'A',
+		team1Id: semifinalLosers[0]!,
+		team2Id: semifinalLosers[1]!,
+	})
+
+	await createAndScoreMatch({
+		playgroundId: playground.id,
+		day: 7,
+		timeSlot: finalSlot,
+		field: 'A',
+		team1Id: semifinalWinners[0]!,
+		team2Id: semifinalWinners[1]!,
+	})
 }
 
 main()

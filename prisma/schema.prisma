@@ -13,6 +13,7 @@ datasource db {
 model Playground {
   id      String   @id @default(uuid())
   name    String
+  year    Int
   groups  Group[]
   matches Match[]
   jerseys JerseyStock[]
@@ -172,4 +173,25 @@ model ThreePointChallengeParticipant {
 
   playground   Playground @relation(fields: [playgroundId], references: [id], onDelete: Cascade)
   playgroundId String
+}
+
+model TournamentPalmares {
+  id                           String   @id @default(uuid())
+  year                         Int      @unique
+  tournamentName               String?
+  firstTeamName                String
+  firstTeamPlayers             String[]
+  secondTeamName               String
+  secondTeamPlayers            String[]
+  thirdTeamName                String
+  thirdTeamPlayers             String[]
+  bestGroupScorerName          String
+  bestGroupScorerSurname       String
+  bestGroupScorerPoints        Int
+  bestFinalsScorerName         String
+  bestFinalsScorerSurname      String
+  bestFinalsScorerPoints       Int
+  sourcePlaygroundId           String?
+  savedAt                      DateTime @default(now())
+  updatedAt                    DateTime @updatedAt
 }

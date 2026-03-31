@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client'
 import { type LoaderFunctionArgs, type MetaFunction } from '@remix-run/node'
 import { Link, useLoaderData } from '@remix-run/react'
 import {
+	Award,
 	CalendarCog,
 	Home,
 	Medal,
@@ -109,5 +110,10 @@ const resources = [
 		href: '/jerseys',
 		text: 'Gestione maglie',
 		icon: <Shirt />,
+	},
+	{
+		href: '/palmares',
+		text: 'Palmares',
+		icon: <Award />,
 	},
 ]

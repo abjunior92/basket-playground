@@ -19,14 +19,18 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 	const playground = await prisma.playground.findUnique({
 		where: { id: params.playgroundId },
 	})
+	const palmaresList = await prisma.tournamentPalmares.findMany({
+		select: { year: true },
+		orderBy: { year: 'desc' },
+	})
 
 	if (!playground) throw new Response('Not Found', { status: 404 })
 
-	return { playground }
+	return { playground, palmaresList }
 }
 
 export default function Index() {
-	const { playground } = useLoaderData<typeof loader>()
+	const { playground, palmaresList } = useLoaderData<typeof loader>()
 
 	return (
 		<div className="flex h-screen items-center justify-center">
@@ -39,14 +43,8 @@ export default function Index() {
 				<nav className="flex flex-col items-center justify-center">
 					<ul className="space-y-4">
 						{resources.map(({ href, text, icon }) => (
-							<li
-								key={href}
-								className="rounded-3xl border-2 border-white bg-black/80 text-white transition-colors duration-300 ease-in-out hover:bg-black/90"
-							>
-								<Link
-									className="group flex items-center justify-start gap-3 p-3 leading-normal"
-									to={`/playground/${playground.id}${href}`}
-								>
+							<li key={href} className="nav-button">
+								<Link to={`/playground/${playground.id}${href}`}>
 									<div className="flex items-center space-x-2">
 										<span>{icon}</span>
 										<span>{text}</span>
@@ -54,6 +52,22 @@ export default function Index() {
 								</Link>
 							</li>
 						))}
+					</ul>
+				</nav>
+				<h2 className="mt-4 text-xl font-bold">Palmares</h2>
+				<nav className="flex flex-col items-center justify-center">
+					<ul className="space-y-4">
+						{palmaresList.length > 0 ? (
+							palmaresList.map(({ year }) => (
+								<li key={year} className="nav-button">
+									<Link to={`/playground/${playground.id}/palmares/${year}`}>
+										Anno {year}
+									</Link>
+								</li>
+							))
+						) : (
+							<li>Nessun palmares salvato</li>
+						)}
 					</ul>
 				</nav>
 			</div>

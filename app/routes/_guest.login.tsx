@@ -1,10 +1,31 @@
-import { json, type ActionFunctionArgs, redirect } from '@remix-run/node'
+import {
+	json,
+	type ActionFunctionArgs,
+	redirect,
+	type MetaFunction,
+	type LoaderFunctionArgs,
+} from '@remix-run/node'
 import { Form, useActionData, useNavigation } from '@remix-run/react'
 import { LogIn } from 'lucide-react'
 import ErrorMessage from '~/components/ErrorMessage'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import { authSessionStorage } from '~/session.server'
+
+export const meta: MetaFunction = () => {
+	return [{ title: 'Login' }, { name: 'description', content: 'Login' }]
+}
+
+export const loader = async ({ request }: LoaderFunctionArgs) => {
+	const session = await authSessionStorage.getSession(
+		request.headers.get('Cookie'),
+	)
+	const isAdmin = session.get('isAdmin')
+	if (isAdmin) {
+		return redirect('/')
+	}
+	return null
+}
 
 export async function action({ request }: ActionFunctionArgs) {
 	const formData = await request.formData()
