@@ -1,15 +1,12 @@
-# fly.toml app configuration file generated for basket-playground on 2025-04-04T17:06:52+02:00
+# fly.toml app configuration file generated for basket-playground on 2026-04-08T15:45:56Z
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
 app = 'basket-playground'
-primary_region = 'fra'
+primary_region = 'iad'
 
 [build]
-
-[deploy]
-  release_command = 'npx prisma migrate deploy'
 
 [http_service]
   internal_port = 3000
@@ -20,6 +17,7 @@ primary_region = 'fra'
   processes = ['app']
 
 [[vm]]
-  memory = '256mb'
+  memory = '1gb'
   cpu_kind = 'shared'
   cpus = 1
+  memory_mb = 1024
