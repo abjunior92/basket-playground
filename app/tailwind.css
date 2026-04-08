@@ -112,9 +112,15 @@
 	.h-fill-available {
 		height: -webkit-fill-available;
 	}
+}
 
+@layer components {
 	.nav-button {
-		@apply flex items-center justify-start gap-3 rounded-3xl border-2 border-white bg-black/80 p-3 leading-normal text-white transition-colors duration-300 ease-in-out hover:bg-black/90;
+		@apply flex items-center justify-start gap-3 rounded-xl border-2 border-white bg-black/80 p-3 px-6 leading-normal text-white transition-colors duration-300 ease-in-out hover:bg-black/90 md:px-4;
+	}
+
+	.section-blur {
+		@apply w-full rounded-2xl border border-white/60 bg-white/35 p-5 shadow-lg ring-1 shadow-slate-900/10 ring-white/40 backdrop-blur-xl;
 	}
 }
 

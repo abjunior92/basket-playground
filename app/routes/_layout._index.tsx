@@ -3,6 +3,7 @@ import { type LoaderFunctionArgs, type MetaFunction } from '@remix-run/node'
 import { Form, Link, useLoaderData } from '@remix-run/react'
 import { Award, Cog, LogOut, Trophy, UserCog } from 'lucide-react'
 import { Button } from '~/components/ui/button'
+import { cn } from '~/lib/utils'
 import { checkUserIsLoggedIn } from '~/utils/helpers'
 
 const prisma = new PrismaClient()
@@ -30,81 +31,93 @@ export default function Index() {
 	const { playgrounds, palmaresList } = useLoaderData<typeof loader>()
 
 	return (
-		<main className="flex h-screen items-start justify-center md:items-center">
-			<div className="flex flex-col items-center gap-8">
-				<header className="flex flex-col items-center">
-					<h1 className="leading text-center text-3xl font-bold text-gray-800 dark:text-gray-100">
-						Welcome to Playgrounds 🏀
-					</h1>
+		<main className="bg-white/20 px-4 py-4 text-slate-800 md:px-8 md:py-12">
+			<div className="mx-auto flex w-full max-w-lg flex-col gap-4 md:gap-8">
+				<header className={cn('section-blur', 'p-6')}>
+					<p className="text-sm font-medium tracking-wide text-slate-600">
+						Longara 3vs3 Playground
+					</p>
+					<h1 className="mt-2 text-3xl font-bold md:text-4xl">Il Tralcio 🏀</h1>
+					<p className="mt-2 text-sm text-slate-700">
+						Accedi rapidamente alle sezioni principali e gestisci tornei e
+						statistiche da un unico punto.
+					</p>
 				</header>
-				<h2 className="mt-4 text-xl font-bold">
-					<div className="flex items-center space-x-2">
+
+				<section className="section-blur">
+					<h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
 						<Cog className="h-5 w-5" />
 						<span>Menù Admin</span>
-					</div>
-				</h2>
-				<nav className="flex flex-col items-center justify-center">
-					<ul className="space-y-4">
-						{resources.map(({ href, text, icon }) => (
-							<li key={href} className="nav-button">
-								<Link to={href}>
-									<div className="flex items-center space-x-2">
+					</h2>
+					<nav>
+						<ul className="grid gap-2 md:grid-cols-2">
+							{resources.map(({ href, text, icon }) => (
+								<li key={href}>
+									<Link to={href} className="nav-button">
 										<span>{icon}</span>
 										<span>{text}</span>
-									</div>
-								</Link>
-							</li>
-						))}
-					</ul>
-				</nav>
-				<h2 className="mt-4 text-xl font-bold">
-					<div className="flex items-center space-x-2">
-						<Trophy className="h-5 w-5" />
-						<span>Lista Tornei</span>
-					</div>
-				</h2>
-				<nav className="flex flex-col items-center justify-center">
-					<ul className="space-y-4">
-						{playgrounds.length > 0 ? (
-							playgrounds.map(({ id, name }) => (
-								<li key={id} className="nav-button">
-									<Link to={`/playground/${id}`}>
-										<div className="flex items-center space-x-2">
-											<span>{name}</span>
-										</div>
 									</Link>
 								</li>
-							))
-						) : (
-							<li>Nessun torneo disponibile</li>
-						)}
-					</ul>
-				</nav>
-				<h2 className="mt-4 text-xl font-bold">
-					<div className="flex items-center space-x-2">
+							))}
+						</ul>
+					</nav>
+				</section>
+
+				<section className="section-blur">
+					<h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
+						<Trophy className="h-5 w-5" />
+						<span>Torneo</span>
+					</h2>
+					<nav>
+						<ul className="space-y-3">
+							{playgrounds.length > 0 ? (
+								playgrounds.map(({ id, name }) => (
+									<li key={id}>
+										<Link
+											to={`/playground/${id}`}
+											className={cn('nav-button', 'justify-center')}
+										>
+											{name}
+										</Link>
+									</li>
+								))
+							) : (
+								<li className="rounded-xl border border-dashed border-slate-400/80 bg-white/40 px-4 py-3 text-sm text-slate-600">
+									Nessun torneo disponibile
+								</li>
+							)}
+						</ul>
+					</nav>
+				</section>
+
+				<section className="section-blur">
+					<h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
 						<Award className="h-5 w-5" />
 						<span>Palmares</span>
-					</div>
-				</h2>
-				<nav className="flex flex-col items-center justify-center">
-					<ul className="space-y-4">
-						{palmaresList.length > 0 ? (
-							palmaresList.map(({ year }) => (
-								<li key={year} className="nav-button">
-									<Link to={`/palmares/${year}`}>
-										<div className="flex items-center space-x-2">
-											<span>Anno {year}</span>
-										</div>
-									</Link>
+					</h2>
+					<nav>
+						<ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+							{palmaresList.length > 0 ? (
+								palmaresList.map(({ year }) => (
+									<li key={year}>
+										<Link
+											to={`/palmares/${year}`}
+											className={cn('nav-button', 'justify-center')}
+										>
+											Anno {year}
+										</Link>
+									</li>
+								))
+							) : (
+								<li className="rounded-xl border border-dashed border-slate-400/80 bg-white/40 px-4 py-3 text-sm text-slate-600">
+									Nessun palmares salvato
 								</li>
-							))
-						) : (
-							<li>Nessun palmares salvato</li>
-						)}
-					</ul>
-				</nav>
+							)}
+						</ul>
+					</nav>
+				</section>
 
-				<Form method="post" action="/logout">
+				<Form method="post" action="/logout" className="self-start">
 					<Button type="submit" variant="outline">
 						<LogOut className="h-5 w-5" />
 						Logout

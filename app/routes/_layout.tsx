@@ -9,10 +9,8 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
 export default function Layout() {
 	return (
-		<main className="relative container mx-auto min-h-screen w-full">
-			<div className="p-4 md:p-0">
-				<Outlet />
-			</div>
+		<main className="relative container mx-auto flex min-h-screen w-full flex-col p-4 md:p-0">
+			<Outlet />
 		</main>
 	)
 }

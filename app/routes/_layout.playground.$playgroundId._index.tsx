@@ -41,33 +41,28 @@ export default function Index() {
 	const { playground } = useLoaderData<typeof loader>()
 
 	return (
-		<div className="flex h-screen items-center justify-center">
-			<div className="flex flex-col items-center gap-8">
-				<header className="flex flex-col items-center">
-					<h1 className="leading text-2xl font-bold text-gray-800 dark:text-gray-100">
+		<div className="flex h-full grow flex-col items-center justify-center">
+			<div className="mx-auto flex w-full max-w-lg flex-col items-center gap-8">
+				<header className="section-blur">
+					<h1 className="leading mb-4 text-2xl font-bold text-gray-800">
 						{playground.name}
 					</h1>
-				</header>
-				<nav className="flex flex-col items-center justify-center">
-					<ul className="space-y-4">
-						{resources.map(({ href, text, icon }) => (
-							<li
-								key={href}
-								className="rounded-3xl border-2 border-white bg-black/80 text-white transition-colors duration-300 ease-in-out hover:bg-black/90"
-							>
-								<Link
-									className="group flex items-center justify-start gap-3 p-3 leading-normal"
-									to={`/playground/${playground.id}${href}`}
-								>
-									<div className="flex items-center space-x-2">
+					<nav>
+						<ul className="grid gap-2 md:grid-cols-2">
+							{resources.map(({ href, text, icon }) => (
+								<li key={href}>
+									<Link
+										className="nav-button"
+										to={`/playground/${playground.id}${href}`}
+									>
 										<span>{icon}</span>
 										<span>{text}</span>
-									</div>
-								</Link>
-							</li>
-						))}
-					</ul>
-				</nav>
+									</Link>
+								</li>
+							))}
+						</ul>
+					</nav>
+				</header>
 
 				<Button asChild variant="outline">
 					<Link to="/">

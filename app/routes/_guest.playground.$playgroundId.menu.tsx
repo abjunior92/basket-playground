@@ -3,6 +3,7 @@ import { type LoaderFunctionArgs, type MetaFunction } from '@remix-run/node'
 import { Link, useLoaderData } from '@remix-run/react'
 import { Award, BookOpenText, CalendarCog, Medal, Trophy } from 'lucide-react'
 import invariant from 'tiny-invariant'
+import { cn } from '~/lib/utils'
 
 const prisma = new PrismaClient()
 
@@ -33,50 +34,64 @@ export default function Index() {
 	const { playground, palmaresList } = useLoaderData<typeof loader>()
 
 	return (
-		<main className="flex h-screen items-center justify-center">
-			<div className="flex flex-col items-center gap-8">
-				<header className="flex flex-col items-center">
-					<h1 className="leading text-2xl font-bold text-gray-800 dark:text-gray-100">
+		<main className="flex h-screen px-4 py-4 md:items-center md:justify-center">
+			<div className="mx-auto flex w-full max-w-lg flex-col items-center gap-8">
+				<header className={cn('section-blur', 'p-6')}>
+					<h1 className="leading text-2xl font-bold text-gray-800">
 						{playground.name}
 					</h1>
+					<p className="mt-2 text-sm text-slate-700">
+						Accedi rapidamente alle sezioni principali, visualizza i tornei e le
+						statistiche da un unico punto.
+					</p>
 				</header>
-				<nav className="flex flex-col items-center justify-center">
-					<ul className="space-y-4">
-						{resources.map(({ href, text, icon }) => (
-							<li key={href} className="nav-button">
-								<Link to={`/playground/${playground.id}${href}`}>
-									<div className="flex items-center space-x-2">
+
+				<section className="section-blur">
+					<h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
+						<Trophy className="h-5 w-5" />
+						<span>Torneo</span>
+					</h2>
+					<nav>
+						<ul className="grid gap-2 md:grid-cols-2">
+							{resources.map(({ href, text, icon }) => (
+								<li key={href}>
+									<Link
+										className="nav-button"
+										to={`/playground/${playground.id}${href}`}
+									>
 										<span>{icon}</span>
 										<span>{text}</span>
-									</div>
-								</Link>
-							</li>
-						))}
-					</ul>
-				</nav>
-				<h2 className="mt-4 text-xl font-bold">
-					<div className="flex items-center space-x-2">
-						<Award className="h-5 w-5" />
-						<span>Palmares</span>
-					</div>
-				</h2>
-				<nav className="flex flex-col items-center justify-center">
-					<ul className="space-y-4">
-						{palmaresList.length > 0 ? (
-							palmaresList.map(({ year }) => (
-								<li key={year} className="nav-button">
-									<Link to={`/playground/${playground.id}/palmares/${year}`}>
-										<div className="flex items-center space-x-2">
-											<span>Anno {year}</span>
-										</div>
 									</Link>
 								</li>
-							))
-						) : (
-							<li>Nessun palmares salvato</li>
-						)}
-					</ul>
-				</nav>
+							))}
+						</ul>
+					</nav>
+				</section>
+
+				<section className="section-blur">
+					<h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
+						<Award className="h-5 w-5" />
+						<span>Palmares</span>
+					</h2>
+					<nav>
+						<ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+							{palmaresList.length > 0 ? (
+								palmaresList.map(({ year }) => (
+									<li key={year}>
+										<Link
+											className="nav-button"
+											to={`/playground/${playground.id}/palmares/${year}`}
+										>
+											<span>Anno {year}</span>
+										</Link>
+									</li>
+								))
+							) : (
+								<li>Nessun palmares salvato</li>
+							)}
+						</ul>
+					</nav>
+				</section>
 			</div>
 		</main>
 	)
