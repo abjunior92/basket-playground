@@ -3,6 +3,7 @@ import { type LoaderFunctionArgs, type MetaFunction } from '@remix-run/node'
 import { Link, useLoaderData } from '@remix-run/react'
 import { Award, BookOpenText, CalendarCog, Medal, Trophy } from 'lucide-react'
 import invariant from 'tiny-invariant'
+import InstagramIcon from '~/components/icons/Instagram'
 import { cn } from '~/lib/utils'
 
 const prisma = new PrismaClient()
@@ -89,6 +90,27 @@ export default function Index() {
 							) : (
 								<li>Nessun palmares salvato</li>
 							)}
+						</ul>
+					</nav>
+				</section>
+
+				<section className="section-blur">
+					<h2 className="mb-4 flex items-center justify-center gap-2 text-lg font-semibold">
+						<span>Seguici sui social</span>
+					</h2>
+					<nav className="flex items-center justify-center gap-2">
+						<ul className="grid gap-2">
+							<li>
+								<Link
+									to="https://www.instagram.com/torneodilongara/"
+									target="_blank"
+									rel="noreferrer"
+									className="nav-button"
+								>
+									<InstagramIcon size={24} />
+									<span>Instagram</span>
+								</Link>
+							</li>
 						</ul>
 					</nav>
 				</section>
