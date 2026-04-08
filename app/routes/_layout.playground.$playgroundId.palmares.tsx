@@ -158,6 +158,11 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 				select: {
 					name: true,
 					surname: true,
+					team: {
+						select: {
+							name: true,
+						},
+					},
 				},
 			},
 		},
@@ -165,11 +170,11 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 
 	const groupScorerMap = new Map<
 		string,
-		{ name: string; surname: string; points: number }
+		{ name: string; surname: string; teamName: string; points: number }
 	>()
 	const finalsScorerMap = new Map<
 		string,
-		{ name: string; surname: string; points: number }
+		{ name: string; surname: string; teamName: string; points: number }
 	>()
 
 	for (const stat of playerStats) {
@@ -178,6 +183,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 			groupScorerMap.set(stat.playerId, {
 				name: stat.player.name,
 				surname: stat.player.surname,
+				teamName: stat.player.team.name,
 				points: (previous?.points ?? 0) + stat.points,
 			})
 		}
@@ -186,6 +192,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 			finalsScorerMap.set(stat.playerId, {
 				name: stat.player.name,
 				surname: stat.player.surname,
+				teamName: stat.player.team.name,
 				points: (previous?.points ?? 0) + stat.points,
 			})
 		}
@@ -227,9 +234,11 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 			),
 			bestGroupScorerName: bestGroupScorer.name,
 			bestGroupScorerSurname: bestGroupScorer.surname,
+			bestGroupScorerTeamName: bestGroupScorer.teamName,
 			bestGroupScorerPoints: bestGroupScorer.points,
 			bestFinalsScorerName: bestFinalsScorer.name,
 			bestFinalsScorerSurname: bestFinalsScorer.surname,
+			bestFinalsScorerTeamName: bestFinalsScorer.teamName,
 			bestFinalsScorerPoints: bestFinalsScorer.points,
 			sourcePlaygroundId: params.playgroundId,
 		},
@@ -249,9 +258,11 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 			),
 			bestGroupScorerName: bestGroupScorer.name,
 			bestGroupScorerSurname: bestGroupScorer.surname,
+			bestGroupScorerTeamName: bestGroupScorer.teamName,
 			bestGroupScorerPoints: bestGroupScorer.points,
 			bestFinalsScorerName: bestFinalsScorer.name,
 			bestFinalsScorerSurname: bestFinalsScorer.surname,
+			bestFinalsScorerTeamName: bestFinalsScorer.teamName,
 			bestFinalsScorerPoints: bestFinalsScorer.points,
 			sourcePlaygroundId: params.playgroundId,
 		},

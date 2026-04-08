@@ -187,9 +187,11 @@ model TournamentPalmares {
   thirdTeamPlayers             String[]
   bestGroupScorerName          String
   bestGroupScorerSurname       String
+  bestGroupScorerTeamName      String?
   bestGroupScorerPoints        Int
   bestFinalsScorerName         String
   bestFinalsScorerSurname      String
+  bestFinalsScorerTeamName     String?
   bestFinalsScorerPoints       Int
   sourcePlaygroundId           String?
   savedAt                      DateTime @default(now())
