@@ -39,7 +39,7 @@ export default function Index() {
 					</p>
 					<h1 className="mt-2 text-3xl font-bold md:text-4xl">Il Tralcio 🏀</h1>
 					<p className="mt-2 text-sm text-slate-700">
-						Accedi rapidamente alle sezioni principali e gestisci tornei e
+						Accedi rapidamente alle sezioni principali, gestisci i tornei e le
 						statistiche da un unico punto.
 					</p>
 				</header>

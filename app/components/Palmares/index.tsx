@@ -33,38 +33,23 @@ const Palmares = ({ palmares }: { palmares: PalmaresData }) => {
 		},
 	]
 
-	const getPlayerTeam = (name: string, surname: string) => {
-		const fullName = `${name} ${surname}`.trim().toLowerCase()
-		const normalizedFullName = fullName.replace(/\s+/g, ' ')
-
-		const team = podium.find(({ players }) =>
-			players.some((player) => player.trim().toLowerCase().replace(/\s+/g, ' ') === normalizedFullName),
-		)
-
-		return team?.team ?? 'N/D'
-	}
-
-	const bestGroupScorerTeam =
-		palmares.bestGroupScorerTeamName ??
-		getPlayerTeam(palmares.bestGroupScorerName, palmares.bestGroupScorerSurname)
-	const bestFinalsScorerTeam =
-		palmares.bestFinalsScorerTeamName ??
-		getPlayerTeam(palmares.bestFinalsScorerName, palmares.bestFinalsScorerSurname)
+	const bestGroupScorerTeam = palmares.bestGroupScorerTeamName
+	const bestFinalsScorerTeam = palmares.bestFinalsScorerTeamName
 
 	return (
 		<div className="space-y-4">
-			<div className="rounded-xl border bg-card/95 p-4 shadow-sm">
-				<p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+			<div className="section-blur">
+				<p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
 					Torneo
 				</p>
-				<p className="mt-1 text-lg leading-tight font-semibold text-card-foreground sm:text-xl">
+				<p className="text-card-foreground mt-1 text-lg leading-tight font-semibold sm:text-xl">
 					{palmares.tournamentName ?? 'Edizione storica'}
 				</p>
 			</div>
 
 			<div className="grid gap-4 lg:grid-cols-2">
-				<section className="rounded-xl border bg-card p-4 shadow-sm transition-shadow hover:shadow-md">
-					<h2 className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">
+				<section className="section-blur">
+					<h2 className="text-muted-foreground text-sm font-semibold tracking-wide uppercase">
 						Podio
 					</h2>
 					<Accordion type="single" collapsible className="mt-4 space-y-2">
@@ -94,32 +79,33 @@ const Palmares = ({ palmares }: { palmares: PalmaresData }) => {
 					</Accordion>
 				</section>
 
-				<section className="rounded-xl border bg-card p-4 shadow-sm transition-shadow hover:shadow-md">
-					<h2 className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">
+				<section className="section-blur">
+					<h2 className="text-muted-foreground text-sm font-semibold tracking-wide uppercase">
 						Top scorer
 					</h2>
 					<div className="mt-4 space-y-3">
-						<div className="rounded-lg bg-muted/50 p-3">
-							<p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+						<div className="rounded-lg bg-slate-100 p-3">
+							<p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
 								Gironi
 							</p>
 							<p className="mt-1 text-sm font-semibold">
-								{palmares.bestGroupScorerName} {palmares.bestGroupScorerSurname} ({bestGroupScorerTeam})
+								{palmares.bestGroupScorerName} {palmares.bestGroupScorerSurname}{' '}
+								({bestGroupScorerTeam})
 							</p>
-							<p className="text-sm text-muted-foreground">
+							<p className="text-muted-foreground text-sm">
 								{palmares.bestGroupScorerPoints} pt
 							</p>
 						</div>
 
-						<div className="rounded-lg bg-muted/50 p-3">
-							<p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+						<div className="rounded-lg bg-slate-100 p-3">
+							<p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
 								Finali
 							</p>
 							<p className="mt-1 text-sm font-semibold">
 								{palmares.bestFinalsScorerName}{' '}
 								{palmares.bestFinalsScorerSurname} ({bestFinalsScorerTeam})
 							</p>
-							<p className="text-sm text-muted-foreground">
+							<p className="text-muted-foreground text-sm">
 								{palmares.bestFinalsScorerPoints} pt
 							</p>
 						</div>

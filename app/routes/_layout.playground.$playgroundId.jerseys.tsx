@@ -198,7 +198,7 @@ export default function JerseysPage() {
 	}, [actionData, toast])
 
 	return (
-		<div className="p-4">
+		<div className="md:p-4">
 			<div className="mb-4 flex items-center justify-between">
 				<Header
 					title="Gestione maglie"

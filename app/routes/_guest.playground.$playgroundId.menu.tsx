@@ -35,7 +35,7 @@ export default function Index() {
 
 	return (
 		<main className="flex h-screen px-4 py-4 md:items-center md:justify-center">
-			<div className="mx-auto flex w-full max-w-lg flex-col items-center gap-8">
+			<div className="mx-auto flex w-full max-w-lg flex-col items-center gap-4 md:gap-8">
 				<header className={cn('section-blur', 'p-6')}>
 					<h1 className="leading text-2xl font-bold text-gray-800">
 						{playground.name}
@@ -79,7 +79,7 @@ export default function Index() {
 								palmaresList.map(({ year }) => (
 									<li key={year}>
 										<Link
-											className="nav-button"
+											className={cn('nav-button', 'justify-center')}
 											to={`/playground/${playground.id}/palmares/${year}`}
 										>
 											<span>Anno {year}</span>

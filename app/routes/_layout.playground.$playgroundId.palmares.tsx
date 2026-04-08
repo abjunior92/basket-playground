@@ -278,7 +278,7 @@ export default function Palmares() {
 	const { playgroundId } = useParams()
 
 	return (
-		<div className="h-[calc(100vh-64px)] p-4">
+		<div className="flex h-full grow flex-col md:p-4">
 			<div className="mb-4 flex items-center justify-between">
 				<Header
 					title="Palmares"
@@ -287,7 +287,7 @@ export default function Palmares() {
 				/>
 			</div>
 
-			<div className="flex h-full flex-col items-center justify-center space-y-4">
+			<div className="flex h-full flex-1 flex-col items-center justify-center space-y-4">
 				<h2 className="text-center font-bold md:text-xl">
 					Salva palmares per questa edizione
 				</h2>
@@ -302,7 +302,7 @@ export default function Palmares() {
 					</p>
 				) : null}
 
-				<p className="text-sm text-muted-foreground">
+				<p className="text-muted-foreground text-sm">
 					Edizione torneo: <b>{playgroundYear}</b>
 				</p>
 				<Form method="post" className="flex w-full max-w-sm flex-col gap-2">
