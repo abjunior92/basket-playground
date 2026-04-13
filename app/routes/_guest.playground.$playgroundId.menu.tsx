@@ -35,7 +35,7 @@ export default function Index() {
 	const { playground, palmaresList } = useLoaderData<typeof loader>()
 
 	return (
-		<main className="flex h-screen px-4 py-4 md:items-center md:justify-center">
+		<main className="flex px-4 py-4 md:h-screen md:items-center md:justify-center">
 			<div className="mx-auto flex w-full max-w-lg flex-col items-center gap-4 md:gap-8">
 				<header className={cn('section-blur', 'p-6')}>
 					<h1 className="leading text-2xl font-bold text-gray-800">
