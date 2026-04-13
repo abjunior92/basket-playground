@@ -105,10 +105,9 @@ export default function Index() {
 									to="https://www.instagram.com/torneodilongara/"
 									target="_blank"
 									rel="noreferrer"
-									className="nav-button"
 								>
 									<InstagramIcon size={24} />
-									<span>Instagram</span>
+									<span className="sr-only">Instagram</span>
 								</Link>
 							</li>
 						</ul>
