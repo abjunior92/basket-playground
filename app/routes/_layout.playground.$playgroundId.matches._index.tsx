@@ -316,6 +316,15 @@ export default function Matches() {
 			{Object.keys(matchesByDay).map((day) => {
 				const dayNumber = Number(day)
 				const isHidden = hiddenDays.has(dayNumber)
+				const matchesForDay = matchesByDay[dayNumber] ?? []
+				const matchesByTimeSlot = matchesForDay.reduce(
+					(acc, match) => {
+						acc[match.timeSlot] = acc[match.timeSlot] || []
+						acc[match.timeSlot]?.push(match)
+						return acc
+					},
+					{} as Record<string, typeof matchesForDay>,
+				)
 
 				return (
 					<div key={day} className="py-4">
@@ -332,6 +341,8 @@ export default function Matches() {
 								variant="outline"
 								onClick={() => toggleDayVisibility(dayNumber)}
 								className="w-32"
+								aria-expanded={!isHidden}
+								aria-controls={`matches-day-${day}`}
 							>
 								{isHidden ? (
 									<>
@@ -347,8 +358,144 @@ export default function Matches() {
 							</Button>
 						</div>
 						{!isHidden ? (
-							<div className="overflow-hidden rounded-lg border border-gray-300">
-								<Table className="w-full border-collapse">
+							<div
+								id={`matches-day-${day}`}
+								className="overflow-hidden rounded-lg border border-gray-300"
+							>
+								<div className="md:hidden">
+									{Object.entries(matchesByTimeSlot).map(
+										([timeSlot, matches]) => (
+											<div
+												key={`${day}-${timeSlot}`}
+												className="space-y-3 border-b border-gray-200 bg-white p-4 last:border-b-0"
+											>
+												<div className="flex items-center justify-between gap-3">
+													<div className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700">
+														⏱️ {timeSlot}
+													</div>
+												</div>
+
+												<div className="space-y-3">
+													{matches.map((match) => {
+														const isTeam1Winner = match.winner === match.team1Id
+														const isTeam2Winner = match.winner === match.team2Id
+
+														return (
+															<div
+																key={match.id}
+																className="space-y-3 rounded-md border border-gray-200 bg-gray-50 p-3"
+															>
+																<div className="text-xs font-medium tracking-wide text-gray-600 uppercase">
+																	📍 Campo {match.field}
+																</div>
+
+																<div className="space-y-2">
+																	<div className="rounded-md border border-gray-200 bg-white p-2">
+																		<div className="flex items-center justify-between gap-2">
+																			<div className="flex flex-col items-start">
+																				<span className="font-medium">
+																					{isTeam1Winner && '🏆 '}
+																					{match.team1.name}
+																				</span>
+																				<Badge
+																					className={cn(
+																						'inline-table',
+																						colorGroupClasses[
+																							match.team1.group.color
+																						],
+																					)}
+																				>
+																					{match.team1.group.name}
+																				</Badge>
+																			</div>
+																			<span
+																				className={cn(
+																					isTeam1Winner &&
+																						'font-bold text-green-600',
+																				)}
+																			>
+																				{match.score1}
+																			</span>
+																		</div>
+																	</div>
+																	<div className="rounded-md border border-gray-200 bg-white p-2">
+																		<div className="flex items-center justify-between gap-2">
+																			<div className="flex flex-col items-start">
+																				<span className="font-medium">
+																					{isTeam2Winner && '🏆 '}
+																					{match.team2.name}
+																				</span>
+																				<Badge
+																					className={cn(
+																						'inline-table',
+																						colorGroupClasses[
+																							match.team2.group.color
+																						],
+																					)}
+																				>
+																					{match.team2.group.name}
+																				</Badge>
+																			</div>
+																			<span
+																				className={cn(
+																					isTeam2Winner &&
+																						'font-bold text-green-600',
+																				)}
+																			>
+																				{match.score2}
+																			</span>
+																		</div>
+																	</div>
+																</div>
+																<div className="flex justify-end gap-2">
+																	<Button asChild variant="outline" size="sm">
+																		<Link
+																			to={`/playground/${params.playgroundId}/matches/${match.id}/edit`}
+																		>
+																			<Pencil className="h-4 w-4" />
+																		</Link>
+																	</Button>
+																	<Form
+																		id={`deleteMatchForm-mobile-${match.id}`}
+																		method="post"
+																	>
+																		<input
+																			type="hidden"
+																			name="intent"
+																			value="delete-match"
+																		/>
+																		<input
+																			type="hidden"
+																			name="matchId"
+																			value={match.id}
+																		/>
+																		<DialogAlert
+																			trigger={
+																				<Button
+																					type="button"
+																					variant="outline"
+																					size="sm"
+																					className="text-red-600 hover:bg-red-50 hover:text-red-700"
+																				>
+																					<Trash2 className="h-4 w-4" />
+																				</Button>
+																			}
+																			title="Elimina partita"
+																			description="Sei sicuro di voler eliminare questa partita? Questa azione non può essere annullata ed eliminerà anche tutti i risultati e i punteggi dei giocatori."
+																			formId={`deleteMatchForm-mobile-${match.id}`}
+																		/>
+																	</Form>
+																</div>
+															</div>
+														)
+													})}
+												</div>
+											</div>
+										),
+									)}
+								</div>
+
+								<Table className="hidden w-full border-collapse md:table">
 									<TableHeader>
 										<TableRow className="bg-gray-100">
 											<TableHead className="w-auto">
