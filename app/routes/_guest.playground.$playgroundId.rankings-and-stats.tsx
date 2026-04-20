@@ -273,9 +273,9 @@ export default function Standings() {
 												<TableHead>Nome squadra</TableHead>
 												<TableHead>Partite vinte</TableHead>
 												<TableHead>Partite giocate</TableHead>
+												<TableHead>% vittorie</TableHead>
 												<TableHead>Punti fatti</TableHead>
 												<TableHead>Punti subiti</TableHead>
-												<TableHead>% vittorie</TableHead>
 												<TableHead>+/-</TableHead>
 											</TableRow>
 										</TableHeader>
@@ -286,11 +286,11 @@ export default function Standings() {
 														<TableCell>{team.name}</TableCell>
 														<TableCell>{team.matchesWon}</TableCell>
 														<TableCell>{team.matchesPlayed}</TableCell>
-														<TableCell>{team.pointsScored}</TableCell>
-														<TableCell>{team.pointsConceded}</TableCell>
 														<TableCell>
 															{team.winPercentage.toFixed(2)}
 														</TableCell>
+														<TableCell>{team.pointsScored}</TableCell>
+														<TableCell>{team.pointsConceded}</TableCell>
 														<TableCell>{team.pointsDifference}</TableCell>
 													</TableRow>
 												)
