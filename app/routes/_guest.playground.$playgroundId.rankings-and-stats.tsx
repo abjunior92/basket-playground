@@ -230,7 +230,7 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 	return { groups, topPlayersGroups, topPlayersFinals }
 }
 
-export default function Standings() {
+export default function Rankings() {
 	const { topPlayersGroups, topPlayersFinals, groups } =
 		useLoaderData<typeof loader>()
 	const params = useParams()
