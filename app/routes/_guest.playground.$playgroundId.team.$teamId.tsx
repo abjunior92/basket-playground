@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 import { type LoaderFunctionArgs, type MetaFunction } from '@remix-run/node'
-import { Link, useLoaderData, useParams } from '@remix-run/react'
+import { Link, useLoaderData, useParams, useSearchParams } from '@remix-run/react'
 import { BarChart3, Medal, Shield, Users } from 'lucide-react'
 import invariant from 'tiny-invariant'
 import Header from '~/components/Header'
@@ -143,12 +143,17 @@ export default function GuestTeamProfile() {
 	const { team, stats, lastMatches, topScorers } =
 		useLoaderData<typeof loader>()
 	const { playgroundId } = useParams()
+	const [searchParams] = useSearchParams()
+	const fromPlayerId = searchParams.get('fromPlayerId')
+	const backLink = fromPlayerId
+		? `/playground/${playgroundId}/player/${fromPlayerId}`
+		: `/playground/${playgroundId}/rankings-and-stats`
 
 	return (
 		<div className="mx-auto max-w-lg space-y-4 p-4">
 			<Header
 				title={team.name}
-				backLink={`/playground/${playgroundId}/rankings-and-stats`}
+				backLink={backLink}
 				icon={<Shield />}
 			/>
 

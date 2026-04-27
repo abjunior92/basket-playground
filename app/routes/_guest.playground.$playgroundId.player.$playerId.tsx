@@ -147,7 +147,7 @@ export default function GuestPlayerProfile() {
 
 				<div className="mt-3 flex flex-wrap gap-2">
 					<Link
-						to={`/playground/${playgroundId}/team/${player.teamId}`}
+						to={`/playground/${playgroundId}/team/${player.teamId}?fromPlayerId=${player.id}`}
 						className="guest-link-pill"
 					>
 						<Shield className="h-3.5 w-3.5" />
