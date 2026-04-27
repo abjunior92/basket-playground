@@ -140,22 +140,28 @@ export default function Index() {
 						<ul className="grid grid-flow-col gap-2">
 							<li>
 								<Link
+									aria-label="Apri Facebook del torneo"
+									className="group inline-flex rounded-full p-1 transition-colors duration-200 hover:bg-blue-100 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:outline-none"
 									to="https://www.facebook.com/Torneo3vs3Longara"
 									target="_blank"
 									rel="noreferrer"
 								>
-									<FacebookIcon />
-									<span className="sr-only">Facebook</span>
+									<span className="transition-transform duration-200 motion-safe:group-hover:-translate-y-0.5 motion-safe:group-hover:scale-110">
+										<FacebookIcon />
+									</span>
 								</Link>
 							</li>
 							<li>
 								<Link
+									aria-label="Apri Instagram del torneo"
+									className="group inline-flex rounded-full p-1 transition-colors duration-200 hover:bg-pink-100 focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:outline-none"
 									to="https://www.instagram.com/torneodilongara/"
 									target="_blank"
 									rel="noreferrer"
 								>
-									<InstagramIcon />
-									<span className="sr-only">Instagram</span>
+									<span className="transition-transform duration-200 motion-safe:group-hover:-translate-y-0.5 motion-safe:group-hover:scale-110">
+										<InstagramIcon />
+									</span>
 								</Link>
 							</li>
 						</ul>

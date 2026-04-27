@@ -284,7 +284,6 @@ export default function Index() {
 									<span className="transition-transform duration-200 motion-safe:group-hover:-translate-y-0.5 motion-safe:group-hover:scale-110">
 										<FacebookIcon />
 									</span>
-									<span className="sr-only">Facebook</span>
 								</Link>
 							</li>
 							<li>
@@ -298,7 +297,6 @@ export default function Index() {
 									<span className="transition-transform duration-200 motion-safe:group-hover:-translate-y-0.5 motion-safe:group-hover:scale-110">
 										<InstagramIcon />
 									</span>
-									<span className="sr-only">Instagram</span>
 								</Link>
 							</li>
 						</ul>
