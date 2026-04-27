@@ -343,7 +343,7 @@ export default function Matches() {
 																					</Badge>
 																					<Link
 																						to={`/playground/${params.playgroundId}/team/${match.team1.id}`}
-																						className="inline-flex items-center gap-1 rounded-md border border-blue-200 bg-blue-50 px-2 py-1 font-medium underline-offset-2 hover:underline"
+																						className="guest-link-pill font-medium"
 																						aria-label={`Apri profilo squadra ${match.team1.name}`}
 																					>
 																						<span>
@@ -368,7 +368,7 @@ export default function Matches() {
 																				<div className="flex flex-col items-start gap-1">
 																					<Link
 																						to={`/playground/${params.playgroundId}/team/${match.team2.id}`}
-																						className="inline-flex items-center gap-1 rounded-md border border-blue-200 bg-blue-50 px-2 py-1 font-medium underline-offset-2 hover:underline"
+																						className="guest-link-pill font-medium"
 																						aria-label={`Apri profilo squadra ${match.team2.name}`}
 																					>
 																						<span>
@@ -446,7 +446,7 @@ export default function Matches() {
 														<div className="flex flex-col items-center justify-center gap-1">
 															<Link
 																to={`/playground/${params.playgroundId}/team/${match.team1.id}`}
-																className="inline-flex items-center gap-1 rounded-md border border-blue-200 bg-blue-50 px-2 py-1 underline-offset-2 hover:underline"
+																className="guest-link-pill"
 																aria-label={`Apri profilo squadra ${match.team1.name}`}
 															>
 																<span>
@@ -469,7 +469,7 @@ export default function Matches() {
 														<div className="flex flex-col items-center justify-center gap-1">
 															<Link
 																to={`/playground/${params.playgroundId}/team/${match.team2.id}`}
-																className="inline-flex items-center gap-1 rounded-md border border-blue-200 bg-blue-50 px-2 py-1 underline-offset-2 hover:underline"
+																className="guest-link-pill"
 																aria-label={`Apri profilo squadra ${match.team2.name}`}
 															>
 																<span>

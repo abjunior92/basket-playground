@@ -286,7 +286,7 @@ export default function Rankings() {
 														<TableCell>
 															<Link
 																to={`/playground/${params.playgroundId}/team/${team.id}`}
-																className="inline-flex w-[stretch] items-center justify-between gap-1 rounded-md border border-blue-200 bg-blue-50 px-2 py-1 underline-offset-2 hover:underline"
+																className="guest-link-pill w-[stretch] justify-between"
 																aria-label={`Apri profilo squadra ${team.name}`}
 															>
 																<span>{team.name}</span>
@@ -336,7 +336,16 @@ export default function Rankings() {
 										})}
 									>
 										<TableCell>
-											{player.name} {player.surname}
+											<Link
+												to={`/playground/${params.playgroundId}/player/${player.id}`}
+												className="guest-link-pill w-[stretch] justify-between"
+												aria-label={`Apri profilo giocatore ${player.name} ${player.surname}`}
+											>
+												<span>
+													{player.name} {player.surname}
+												</span>
+												<ChevronRight className="h-3.5 w-3.5 opacity-80" />
+											</Link>
 										</TableCell>
 										<TableCell>{player.team.name}</TableCell>
 										<TableCell>
@@ -378,7 +387,16 @@ export default function Rankings() {
 										})}
 									>
 										<TableCell>
-											{player.name} {player.surname}
+											<Link
+												to={`/playground/${params.playgroundId}/player/${player.id}`}
+												className="guest-link-pill w-[stretch] justify-between"
+												aria-label={`Apri profilo giocatore ${player.name} ${player.surname}`}
+											>
+												<span>
+													{player.name} {player.surname}
+												</span>
+												<ChevronRight className="h-3.5 w-3.5 opacity-80" />
+											</Link>
 										</TableCell>
 										<TableCell>{player.team.name}</TableCell>
 										<TableCell>
