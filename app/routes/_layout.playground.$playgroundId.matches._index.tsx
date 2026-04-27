@@ -13,7 +13,15 @@ import {
 	Form,
 	useFetcher,
 } from '@remix-run/react'
-import { CalendarRange, Pencil, Plus, Trash2, Eye, EyeOff } from 'lucide-react'
+import {
+	CalendarRange,
+	Pencil,
+	Plus,
+	Trash2,
+	Eye,
+	EyeOff,
+	ArrowLeftRight,
+} from 'lucide-react'
 import { useState } from 'react'
 import invariant from 'tiny-invariant'
 import DialogAlert from '~/components/DialogAlert'
@@ -450,6 +458,13 @@ export default function Matches() {
 																<div className="flex justify-end gap-2">
 																	<Button asChild variant="outline" size="sm">
 																		<Link
+																			to={`/playground/${params.playgroundId}/matches/${match.id}/switch`}
+																		>
+																			<ArrowLeftRight className="h-4 w-4" />
+																		</Link>
+																	</Button>
+																	<Button asChild variant="outline" size="sm">
+																		<Link
 																			to={`/playground/${params.playgroundId}/matches/${match.id}/edit`}
 																		>
 																			<Pencil className="h-4 w-4" />
@@ -583,6 +598,13 @@ export default function Matches() {
 													</TableCell>
 													<TableCell>
 														<div className="flex flex-col justify-center gap-2 sm:flex-row">
+															<Button asChild variant="outline" size="sm">
+																<Link
+																	to={`/playground/${params.playgroundId}/matches/${match.id}/switch`}
+																>
+																	<ArrowLeftRight className="h-4 w-4" />
+																</Link>
+															</Button>
 															<Button asChild variant="outline" size="sm">
 																<Link
 																	to={`/playground/${params.playgroundId}/matches/${match.id}/edit`}
