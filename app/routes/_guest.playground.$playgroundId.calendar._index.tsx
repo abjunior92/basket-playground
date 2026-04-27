@@ -6,8 +6,8 @@ import {
 	type LoaderFunctionArgs,
 	type MetaFunction,
 } from '@remix-run/node'
-import { useFetcher, useLoaderData, useParams } from '@remix-run/react'
-import { CalendarRange, Eye, EyeOff } from 'lucide-react'
+import { Link, useFetcher, useLoaderData, useParams } from '@remix-run/react'
+import { CalendarRange, ChevronRight, Eye, EyeOff } from 'lucide-react'
 import { useState } from 'react'
 import invariant from 'tiny-invariant'
 import Header from '~/components/Header'
@@ -330,11 +330,7 @@ export default function Matches() {
 																	<div className="space-y-2">
 																		<div className="rounded-md border border-gray-200 bg-white p-2">
 																			<div className="flex items-center justify-between gap-2">
-																				<div className="flex flex-col items-start">
-																					<span className="font-medium">
-																						{isTeam1Winner && '🏆 '}
-																						{match.team1.name}
-																					</span>
+																				<div className="flex flex-col items-start gap-1">
 																					<Badge
 																						className={cn(
 																							'inline-table',
@@ -345,6 +341,17 @@ export default function Matches() {
 																					>
 																						{match.team1.group.name}
 																					</Badge>
+																					<Link
+																						to={`/playground/${params.playgroundId}/team/${match.team1.id}`}
+																						className="inline-flex items-center gap-1 rounded-md border border-blue-200 bg-blue-50 px-2 py-1 font-medium underline-offset-2 hover:underline"
+																						aria-label={`Apri profilo squadra ${match.team1.name}`}
+																					>
+																						<span>
+																							{isTeam1Winner && '🏆 '}
+																							{match.team1.name}
+																						</span>
+																						<ChevronRight className="h-3.5 w-3.5 opacity-80" />
+																					</Link>
 																				</div>
 																				<span
 																					className={cn(
@@ -358,11 +365,18 @@ export default function Matches() {
 																		</div>
 																		<div className="rounded-md border border-gray-200 bg-white p-2">
 																			<div className="flex items-center justify-between gap-2">
-																				<div className="flex flex-col items-start">
-																					<span className="font-medium">
-																						{isTeam2Winner && '🏆 '}
-																						{match.team2.name}
-																					</span>
+																				<div className="flex flex-col items-start gap-1">
+																					<Link
+																						to={`/playground/${params.playgroundId}/team/${match.team2.id}`}
+																						className="inline-flex items-center gap-1 rounded-md border border-blue-200 bg-blue-50 px-2 py-1 font-medium underline-offset-2 hover:underline"
+																						aria-label={`Apri profilo squadra ${match.team2.name}`}
+																					>
+																						<span>
+																							{isTeam2Winner && '🏆 '}
+																							{match.team2.name}
+																						</span>
+																						<ChevronRight className="h-3.5 w-3.5 opacity-80" />
+																					</Link>
 																					<Badge
 																						className={cn(
 																							'inline-table',
@@ -429,11 +443,18 @@ export default function Matches() {
 													<TableCell>{match.timeSlot}</TableCell>
 													<TableCell>{match.field}</TableCell>
 													<TableCell>
-														<div className="flex flex-col items-center justify-center">
-															<span>
-																{isTeam1Winner && '🏆 '}
-																{match.team1.name}
-															</span>
+														<div className="flex flex-col items-center justify-center gap-1">
+															<Link
+																to={`/playground/${params.playgroundId}/team/${match.team1.id}`}
+																className="inline-flex items-center gap-1 rounded-md border border-blue-200 bg-blue-50 px-2 py-1 underline-offset-2 hover:underline"
+																aria-label={`Apri profilo squadra ${match.team1.name}`}
+															>
+																<span>
+																	{isTeam1Winner && '🏆 '}
+																	{match.team1.name}
+																</span>
+																<ChevronRight className="h-3.5 w-3.5 opacity-80" />
+															</Link>
 															<Badge
 																className={cn(
 																	'inline-table',
@@ -445,11 +466,18 @@ export default function Matches() {
 														</div>
 													</TableCell>
 													<TableCell>
-														<div className="flex flex-col items-center justify-center">
-															<span>
-																{isTeam2Winner && '🏆 '}
-																{match.team2.name}
-															</span>
+														<div className="flex flex-col items-center justify-center gap-1">
+															<Link
+																to={`/playground/${params.playgroundId}/team/${match.team2.id}`}
+																className="inline-flex items-center gap-1 rounded-md border border-blue-200 bg-blue-50 px-2 py-1 underline-offset-2 hover:underline"
+																aria-label={`Apri profilo squadra ${match.team2.name}`}
+															>
+																<span>
+																	{isTeam2Winner && '🏆 '}
+																	{match.team2.name}
+																</span>
+																<ChevronRight className="h-3.5 w-3.5 opacity-80" />
+															</Link>
 															<Badge
 																className={cn(
 																	'inline-table',

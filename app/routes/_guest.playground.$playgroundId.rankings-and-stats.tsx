@@ -1,7 +1,7 @@
 import { type ColorGroup, PrismaClient } from '@prisma/client'
 import { type LoaderFunctionArgs, type MetaFunction } from '@remix-run/node'
-import { useLoaderData, useParams } from '@remix-run/react'
-import { Medal } from 'lucide-react'
+import { Link, useLoaderData, useParams } from '@remix-run/react'
+import { ChevronRight, Medal } from 'lucide-react'
 import invariant from 'tiny-invariant'
 import Header from '~/components/Header'
 import { Badge } from '~/components/ui/badge'
@@ -283,7 +283,16 @@ export default function Rankings() {
 											{teams.map((team) => {
 												return (
 													<TableRow key={team.id} className="text-center">
-														<TableCell>{team.name}</TableCell>
+														<TableCell>
+															<Link
+																to={`/playground/${params.playgroundId}/team/${team.id}`}
+																className="inline-flex w-[stretch] items-center justify-between gap-1 rounded-md border border-blue-200 bg-blue-50 px-2 py-1 underline-offset-2 hover:underline"
+																aria-label={`Apri profilo squadra ${team.name}`}
+															>
+																<span>{team.name}</span>
+																<ChevronRight className="h-3.5 w-3.5 opacity-80" />
+															</Link>
+														</TableCell>
 														<TableCell>{team.matchesWon}</TableCell>
 														<TableCell>{team.matchesPlayed}</TableCell>
 														<TableCell>
