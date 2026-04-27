@@ -12,7 +12,11 @@ import {
 	Trophy,
 } from 'lucide-react'
 import invariant from 'tiny-invariant'
-import { cn, getTournamentDayCandidates, parseTimeSlot } from '~/lib/utils'
+import {
+	cn,
+	getLiveAndUpcomingMatches,
+	getTournamentDayCandidates,
+} from '~/lib/utils'
 
 const prisma = new PrismaClient()
 
@@ -50,32 +54,12 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 		orderBy: [{ day: 'asc' }, { timeSlot: 'asc' }],
 	})
 
-	const now = new Date()
-	const currentMinutes = now.getHours() * 60 + now.getMinutes()
-	const currentDayCandidates = getTournamentDayCandidates(now)
-
-	const inProgressMatches = matches.filter((match) => {
-		if (match.winner !== null) return false
-		if (!currentDayCandidates.includes(match.day)) return false
-
-		const slot = parseTimeSlot(match.timeSlot)
-		if (!slot) return false
-
-		// Consideriamo "in corso" la finestra ufficiale del timeslot.
-		return (
-			currentMinutes >= slot.startMinutes && currentMinutes <= slot.endMinutes
-		)
-	})
-
-	const upcomingMatches = matches
-		.filter((match) => {
-			if (match.winner !== null) return false
-			if (!currentDayCandidates.includes(match.day)) return false
-			const slot = parseTimeSlot(match.timeSlot)
-			if (!slot) return false
-			return slot.startMinutes > currentMinutes
-		})
-		.slice(0, 5)
+	const currentDayCandidates = getTournamentDayCandidates(new Date())
+	const { inProgressMatches, upcomingMatches } = getLiveAndUpcomingMatches(
+		matches,
+		currentDayCandidates,
+		5,
+	)
 	const latestResults = matches
 		.filter((match) => match.winner !== null)
 		.reverse()

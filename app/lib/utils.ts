@@ -329,3 +329,58 @@ export const parseTimeSlot = (timeSlot: string) => {
 		endMinutes: end.hour * 60 + end.minute,
 	}
 }
+
+export const getLiveAndUpcomingMatches = <
+	T extends Pick<Match, 'day' | 'timeSlot' | 'winner'>,
+>(
+	matches: T[],
+	dayCandidates: number[],
+	upcomingLimit = 5,
+) => {
+	const sortedMatches = [...matches].sort((a, b) => {
+		if (a.day !== b.day) return a.day - b.day
+
+		const aSlot = parseTimeSlot(a.timeSlot)
+		const bSlot = parseTimeSlot(b.timeSlot)
+
+		if (aSlot && bSlot) {
+			return aSlot.startMinutes - bSlot.startMinutes
+		}
+
+		return a.timeSlot.localeCompare(b.timeSlot)
+	})
+
+	const activeDay = dayCandidates.find((day) =>
+		sortedMatches.some((match) => match.day === day && match.winner === null),
+	)
+
+	if (activeDay === undefined) {
+		return {
+			inProgressMatches: [] as T[],
+			upcomingMatches: [] as T[],
+		}
+	}
+
+	const pendingMatches = sortedMatches.filter(
+		(match) => match.day === activeDay && match.winner === null,
+	)
+	const firstPending = pendingMatches[0]
+	if (!firstPending) {
+		return {
+			inProgressMatches: [] as T[],
+			upcomingMatches: [] as T[],
+		}
+	}
+
+	const inProgressMatches = pendingMatches.filter(
+		(match) => match.timeSlot === firstPending.timeSlot,
+	)
+	const upcoming = pendingMatches.filter(
+		(match) => match.timeSlot !== firstPending.timeSlot,
+	)
+
+	return {
+		inProgressMatches,
+		upcomingMatches: upcoming.slice(0, upcomingLimit),
+	}
+}
