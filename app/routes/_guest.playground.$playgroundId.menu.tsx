@@ -3,9 +3,16 @@ import { type LoaderFunctionArgs, type MetaFunction } from '@remix-run/node'
 import { Link, useLoaderData } from '@remix-run/react'
 import { FacebookIcon } from 'icons/lucide-facebook'
 import { InstagramIcon } from 'icons/lucide-instagram'
-import { Award, BookOpenText, CalendarCog, Medal, Trophy } from 'lucide-react'
+import {
+	Activity,
+	Award,
+	BookOpenText,
+	CalendarDays,
+	Medal,
+	Trophy,
+} from 'lucide-react'
 import invariant from 'tiny-invariant'
-import { cn } from '~/lib/utils'
+import { cn, getTournamentDayCandidates, parseTimeSlot } from '~/lib/utils'
 
 const prisma = new PrismaClient()
 
@@ -26,14 +33,73 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 		select: { year: true },
 		orderBy: { year: 'desc' },
 	})
+	const matches = await prisma.match.findMany({
+		where: { playgroundId: params.playgroundId },
+		include: {
+			team1: {
+				include: {
+					group: true,
+				},
+			},
+			team2: {
+				include: {
+					group: true,
+				},
+			},
+		},
+		orderBy: [{ day: 'asc' }, { timeSlot: 'asc' }],
+	})
+
+	const now = new Date()
+	const currentMinutes = now.getHours() * 60 + now.getMinutes()
+	const currentDayCandidates = getTournamentDayCandidates(now)
+
+	const inProgressMatches = matches.filter((match) => {
+		if (match.winner !== null) return false
+		if (!currentDayCandidates.includes(match.day)) return false
+
+		const slot = parseTimeSlot(match.timeSlot)
+		if (!slot) return false
+
+		// Consideriamo "in corso" la finestra ufficiale del timeslot.
+		return (
+			currentMinutes >= slot.startMinutes && currentMinutes <= slot.endMinutes
+		)
+	})
+
+	const upcomingMatches = matches
+		.filter((match) => {
+			if (match.winner !== null) return false
+			if (!currentDayCandidates.includes(match.day)) return false
+			const slot = parseTimeSlot(match.timeSlot)
+			if (!slot) return false
+			return slot.startMinutes > currentMinutes
+		})
+		.slice(0, 5)
+	const latestResults = matches
+		.filter((match) => match.winner !== null)
+		.reverse()
+		.slice(0, 3)
 
 	if (!playground) throw new Response('Not Found', { status: 404 })
 
-	return { playground, palmaresList }
+	return {
+		playground,
+		palmaresList,
+		inProgressMatches,
+		upcomingMatches,
+		latestResults,
+	}
 }
 
 export default function Index() {
-	const { playground, palmaresList } = useLoaderData<typeof loader>()
+	const {
+		playground,
+		palmaresList,
+		inProgressMatches,
+		upcomingMatches,
+		latestResults,
+	} = useLoaderData<typeof loader>()
 
 	return (
 		<main className="flex px-4 py-4 md:h-screen md:items-center md:justify-center">
@@ -51,15 +117,119 @@ export default function Index() {
 							🏀
 						</span>
 					</h1>
-					<p className="mt-2 inline-flex items-center gap-2 rounded-full bg-amber-100/80 px-3 py-1 text-xs font-semibold tracking-wide text-amber-900 uppercase">
-						<span aria-hidden="true">🔥</span>
-						<span>Ogni possesso conta</span>
-					</p>
 					<p className="mt-2 text-sm text-slate-700">
 						Accedi rapidamente alle sezioni principali, visualizza i tornei e le
 						statistiche da un unico punto.
 					</p>
 				</header>
+
+				<section className="section-blur">
+					<h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
+						<Activity className="h-5 w-5" />
+						<span>Attività torneo</span>
+					</h2>
+					<div className="space-y-3">
+						{inProgressMatches.length > 0 ? (
+							<>
+								<p className="text-sm font-medium text-emerald-700">
+									Live now 🔥
+								</p>
+								<ul className="space-y-2">
+									{inProgressMatches.map((match) => (
+										<li
+											key={match.id}
+											className="rounded-lg border border-emerald-200 bg-emerald-50/80 p-3"
+										>
+											<div className="flex items-center gap-2">
+												<div className="h-2 w-2 animate-pulse rounded-full bg-red-700">
+													<span className="sr-only">Live</span>
+												</div>
+												<div className="flex flex-col">
+													<div className="mb-1 text-xs font-semibold tracking-wide text-emerald-900 uppercase">
+														Giorno {match.day} · {match.timeSlot} · Campo{' '}
+														{match.field}
+													</div>
+													<p className="text-sm text-slate-800">
+														{match.team1.name} - {match.team2.name}
+													</p>
+												</div>
+											</div>
+										</li>
+									))}
+								</ul>
+							</>
+						) : (
+							<p className="text-sm text-slate-700">
+								Al momento non ci sono partite in corso.
+							</p>
+						)}
+
+						{upcomingMatches.length > 0 ? (
+							<>
+								<p className="pt-2 text-sm font-medium text-slate-700">
+									Prossime partite
+								</p>
+								<ul className="space-y-2">
+									{upcomingMatches.map((match) => (
+										<li
+											key={match.id}
+											className="rounded-lg border border-amber-200 bg-amber-50/80 p-3"
+										>
+											<div className="mb-1 text-xs font-semibold tracking-wide text-slate-600 uppercase">
+												Giorno {match.day} · {match.timeSlot} · Campo{' '}
+												{match.field}
+											</div>
+											<p className="text-sm text-slate-800">
+												{match.team1.name} vs {match.team2.name}
+											</p>
+										</li>
+									))}
+								</ul>
+							</>
+						) : null}
+
+						{latestResults.length > 0 ? (
+							<>
+								<p className="pt-2 text-sm font-medium text-slate-700">
+									Ultimi risultati
+								</p>
+								<ul className="space-y-2">
+									{latestResults.map((match) => (
+										<li
+											key={match.id}
+											className="rounded-lg border border-slate-200 bg-white/80 p-3"
+										>
+											<div className="mb-1 text-xs font-semibold tracking-wide text-slate-600 uppercase">
+												Giorno {match.day} · {match.timeSlot}
+											</div>
+											<p className="text-sm text-slate-800">
+												{match.team1.name}{' '}
+												<span className="font-semibold">
+													{match.score1 ?? '-'}
+												</span>{' '}
+												-{' '}
+												<span className="font-semibold">
+													{match.score2 ?? '-'}
+												</span>{' '}
+												{match.team2.name}
+											</p>
+										</li>
+									))}
+								</ul>
+							</>
+						) : null}
+					</div>
+					<div className="mt-4">
+						<Link
+							className="nav-button group justify-center"
+							to={`/playground/${playground.id}/calendar`}
+						>
+							<span className="nav-button-animate-text">
+								Apri calendario completo
+							</span>
+						</Link>
+					</div>
+				</section>
 
 				<section className="section-blur">
 					<h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
@@ -159,7 +329,7 @@ const resources = [
 	{
 		href: '/calendar',
 		text: 'Calendario partite',
-		icon: <CalendarCog />,
+		icon: <CalendarDays />,
 	},
 	{
 		href: '/finals',

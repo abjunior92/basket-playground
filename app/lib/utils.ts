@@ -284,3 +284,48 @@ export const sortTeamsWithTiebreaker = (
 
 	return validTeams
 }
+
+export const getTournamentDayCandidates = (date: Date): number[] => {
+	const jsDay = date.getDay()
+	switch (jsDay) {
+		case 0:
+			// Domenica del girone (1) o domenica finali (7).
+			return [1, 7]
+		case 1:
+			return [2]
+		case 2:
+			return [3]
+		case 3:
+			return [4]
+		case 4:
+			return [5]
+		case 5:
+			return [6]
+		default:
+			// Sabato: nessuna giornata in calendario.
+			return []
+	}
+}
+
+export const parseTimeSlot = (timeSlot: string) => {
+	const [startRaw, endRaw] = timeSlot.split(' > ')
+	if (!startRaw || !endRaw) return null
+
+	const parseClock = (clock: string) => {
+		const [hourRaw, minuteRaw] = clock.split(':')
+		if (hourRaw === undefined || minuteRaw === undefined) return null
+		const hour = Number(hourRaw)
+		const minute = Number(minuteRaw)
+		if (Number.isNaN(hour) || Number.isNaN(minute)) return null
+		return { hour, minute }
+	}
+
+	const start = parseClock(startRaw)
+	const end = parseClock(endRaw)
+	if (!start || !end) return null
+
+	return {
+		startMinutes: start.hour * 60 + start.minute,
+		endMinutes: end.hour * 60 + end.minute,
+	}
+}
