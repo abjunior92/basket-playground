@@ -52,10 +52,10 @@ export default function Index() {
 							{resources.map(({ href, text, icon }) => (
 								<li key={href}>
 									<Link
-										className="nav-button"
+										className="nav-button group"
 										to={`/playground/${playground.id}${href}`}
 									>
-										<span>{icon}</span>
+										<span className="nav-button-animate-icon">{icon}</span>
 										<span>{text}</span>
 									</Link>
 								</li>

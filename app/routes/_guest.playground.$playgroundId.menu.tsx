@@ -42,7 +42,19 @@ export default function Index() {
 					<p className="text-sm font-medium tracking-wide text-slate-600">
 						{playground.name}
 					</p>
-					<h1 className="mt-2 text-3xl font-bold md:text-4xl">Il Tralcio 🏀</h1>
+					<h1 className="mt-2 flex items-center gap-2 text-3xl font-bold md:text-4xl">
+						<span>Il Tralcio</span>
+						<span
+							aria-hidden="true"
+							className="inline-block motion-safe:animate-bounce"
+						>
+							🏀
+						</span>
+					</h1>
+					<p className="mt-2 inline-flex items-center gap-2 rounded-full bg-amber-100/80 px-3 py-1 text-xs font-semibold tracking-wide text-amber-900 uppercase">
+						<span aria-hidden="true">🔥</span>
+						<span>Ogni possesso conta</span>
+					</p>
 					<p className="mt-2 text-sm text-slate-700">
 						Accedi rapidamente alle sezioni principali, visualizza i tornei e le
 						statistiche da un unico punto.
@@ -59,10 +71,10 @@ export default function Index() {
 							{resources.map(({ href, text, icon }) => (
 								<li key={href}>
 									<Link
-										className="nav-button"
+										className="nav-button group"
 										to={`/playground/${playground.id}${href}`}
 									>
-										<span>{icon}</span>
+										<span className="nav-button-animate-icon">{icon}</span>
 										<span>{text}</span>
 									</Link>
 								</li>
@@ -82,15 +94,20 @@ export default function Index() {
 								palmaresList.map(({ year }) => (
 									<li key={year}>
 										<Link
-											className={cn('nav-button', 'justify-center')}
+											className={cn('nav-button', 'group justify-center')}
 											to={`/playground/${playground.id}/palmares/${year}`}
 										>
-											<span>Anno {year}</span>
+											<span className="nav-button-animate-text">
+												Anno {year}
+											</span>
 										</Link>
 									</li>
 								))
 							) : (
-								<li>Nessun palmares salvato</li>
+								<li className="rounded-xl border border-amber-200 bg-amber-50/80 px-4 py-3 text-sm text-amber-900">
+									🏅 Nessun palmares salvato per ora: si gioca per scrivere la
+									storia.
+								</li>
 							)}
 						</ul>
 					</nav>
@@ -104,21 +121,29 @@ export default function Index() {
 						<ul className="grid grid-flow-col gap-2">
 							<li>
 								<Link
+									aria-label="Apri Facebook del torneo"
+									className="group inline-flex rounded-full p-1 transition-colors duration-200 hover:bg-blue-100 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:outline-none"
 									to="https://www.facebook.com/Torneo3vs3Longara"
 									target="_blank"
 									rel="noreferrer"
 								>
-									<FacebookIcon />
+									<span className="transition-transform duration-200 motion-safe:group-hover:-translate-y-0.5 motion-safe:group-hover:scale-110">
+										<FacebookIcon />
+									</span>
 									<span className="sr-only">Facebook</span>
 								</Link>
 							</li>
 							<li>
 								<Link
+									aria-label="Apri Instagram del torneo"
+									className="group inline-flex rounded-full p-1 transition-colors duration-200 hover:bg-pink-100 focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:outline-none"
 									to="https://www.instagram.com/torneodilongara/"
 									target="_blank"
 									rel="noreferrer"
 								>
-									<InstagramIcon />
+									<span className="transition-transform duration-200 motion-safe:group-hover:-translate-y-0.5 motion-safe:group-hover:scale-110">
+										<InstagramIcon />
+									</span>
 									<span className="sr-only">Instagram</span>
 								</Link>
 							</li>

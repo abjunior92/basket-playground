@@ -39,7 +39,15 @@ export default function Index() {
 					<p className="text-sm font-medium tracking-wide text-slate-600">
 						Longara 3vs3 Playground
 					</p>
-					<h1 className="mt-2 text-3xl font-bold md:text-4xl">Il Tralcio 🏀</h1>
+					<h1 className="mt-2 flex items-center gap-2 text-3xl font-bold md:text-4xl">
+						<span>Il Tralcio</span>
+						<span
+							aria-hidden="true"
+							className="inline-block motion-safe:animate-bounce"
+						>
+							🏀
+						</span>
+					</h1>
 					<p className="mt-2 text-sm text-slate-700">
 						Accedi rapidamente alle sezioni principali, gestisci i tornei e le
 						statistiche da un unico punto.
@@ -55,8 +63,8 @@ export default function Index() {
 						<ul className="grid gap-2 md:grid-cols-2">
 							{resources.map(({ href, text, icon }) => (
 								<li key={href}>
-									<Link to={href} className="nav-button">
-										<span>{icon}</span>
+									<Link to={href} className="nav-button group">
+										<span className="nav-button-animate-icon">{icon}</span>
 										<span>{text}</span>
 									</Link>
 								</li>
@@ -77,9 +85,9 @@ export default function Index() {
 									<li key={id}>
 										<Link
 											to={`/playground/${id}`}
-											className={cn('nav-button', 'justify-center')}
+											className={cn('nav-button group', 'justify-center')}
 										>
-											{name}
+											<span className="nav-button-animate-text">{name}</span>
 										</Link>
 									</li>
 								))
@@ -104,9 +112,11 @@ export default function Index() {
 									<li key={year}>
 										<Link
 											to={`/palmares/${year}`}
-											className={cn('nav-button', 'justify-center')}
+											className={cn('nav-button group', 'justify-center')}
 										>
-											Anno {year}
+											<span className="nav-button-animate-text">
+												Anno {year}
+											</span>
 										</Link>
 									</li>
 								))
