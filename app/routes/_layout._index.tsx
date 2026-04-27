@@ -1,6 +1,8 @@
 import { PrismaClient } from '@prisma/client'
 import { type LoaderFunctionArgs, type MetaFunction } from '@remix-run/node'
 import { Form, Link, useLoaderData } from '@remix-run/react'
+import { FacebookIcon } from 'icons/lucide-facebook'
+import { InstagramIcon } from 'icons/lucide-instagram'
 import { Award, Cog, LogOut, Trophy, UserCog } from 'lucide-react'
 import { Button } from '~/components/ui/button'
 import { cn } from '~/lib/utils'
@@ -117,12 +119,38 @@ export default function Index() {
 					</nav>
 				</section>
 
-				<Form method="post" action="/logout" className="self-start">
-					<Button type="submit" variant="outline">
-						<LogOut className="h-5 w-5" />
-						Logout
-					</Button>
-				</Form>
+				<div className="flex items-center justify-between">
+					<Form method="post" action="/logout" className="self-start">
+						<Button type="submit" variant="outline">
+							<LogOut className="h-5 w-5" />
+							Logout
+						</Button>
+					</Form>
+					<nav className="flex items-center justify-center gap-2">
+						<ul className="grid grid-flow-col gap-2">
+							<li>
+								<Link
+									to="https://www.facebook.com/Torneo3vs3Longara"
+									target="_blank"
+									rel="noreferrer"
+								>
+									<FacebookIcon />
+									<span className="sr-only">Facebook</span>
+								</Link>
+							</li>
+							<li>
+								<Link
+									to="https://www.instagram.com/torneodilongara/"
+									target="_blank"
+									rel="noreferrer"
+								>
+									<InstagramIcon />
+									<span className="sr-only">Instagram</span>
+								</Link>
+							</li>
+						</ul>
+					</nav>
+				</div>
 			</div>
 		</main>
 	)

@@ -1,16 +1,17 @@
 {
-  "include": [
-    "**/*.ts",
-    "**/*.tsx",
-    "**/.server/**/*.ts",
-    "**/.server/**/*.tsx",
-    "**/.client/**/*.ts",
-    "**/.client/**/*.tsx"
-  ],
-  "extends": ["@epic-web/config/typescript"],
-  "compilerOptions": {
-    "paths": {
-      "~/*": ["./app/*"]
-    },
-  }
+	"include": [
+		"**/*.ts",
+		"**/*.tsx",
+		"**/.server/**/*.ts",
+		"**/.server/**/*.tsx",
+		"**/.client/**/*.ts",
+		"**/.client/**/*.tsx"
+	],
+	"extends": ["@epic-web/config/typescript"],
+	"compilerOptions": {
+		"paths": {
+			"~/*": ["./app/*"],
+			"icons/*": ["./components/icons/*"]
+		}
+	}
 }

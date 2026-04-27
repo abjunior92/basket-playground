@@ -1,9 +1,10 @@
 import { PrismaClient } from '@prisma/client'
 import { type LoaderFunctionArgs, type MetaFunction } from '@remix-run/node'
 import { Link, useLoaderData } from '@remix-run/react'
+import { FacebookIcon } from 'icons/lucide-facebook'
+import { InstagramIcon } from 'icons/lucide-instagram'
 import { Award, BookOpenText, CalendarCog, Medal, Trophy } from 'lucide-react'
 import invariant from 'tiny-invariant'
-import InstagramIcon from '~/components/icons/Instagram'
 import { cn } from '~/lib/utils'
 
 const prisma = new PrismaClient()
@@ -38,9 +39,10 @@ export default function Index() {
 		<main className="flex px-4 py-4 md:h-screen md:items-center md:justify-center">
 			<div className="mx-auto flex w-full max-w-lg flex-col items-center gap-4 md:gap-8">
 				<header className={cn('section-blur', 'p-6')}>
-					<h1 className="leading text-2xl font-bold text-gray-800">
+					<p className="text-sm font-medium tracking-wide text-slate-600">
 						{playground.name}
-					</h1>
+					</p>
+					<h1 className="mt-2 text-3xl font-bold md:text-4xl">Il Tralcio 🏀</h1>
 					<p className="mt-2 text-sm text-slate-700">
 						Accedi rapidamente alle sezioni principali, visualizza i tornei e le
 						statistiche da un unico punto.
@@ -94,19 +96,29 @@ export default function Index() {
 					</nav>
 				</section>
 
-				<section className="section-blur">
+				<section>
 					<h2 className="mb-4 flex items-center justify-center gap-2 text-lg font-semibold">
 						<span>Seguici sui social</span>
 					</h2>
 					<nav className="flex items-center justify-center gap-2">
-						<ul className="grid gap-2">
+						<ul className="grid grid-flow-col gap-2">
+							<li>
+								<Link
+									to="https://www.facebook.com/Torneo3vs3Longara"
+									target="_blank"
+									rel="noreferrer"
+								>
+									<FacebookIcon />
+									<span className="sr-only">Facebook</span>
+								</Link>
+							</li>
 							<li>
 								<Link
 									to="https://www.instagram.com/torneodilongara/"
 									target="_blank"
 									rel="noreferrer"
 								>
-									<InstagramIcon size={24} />
+									<InstagramIcon />
 									<span className="sr-only">Instagram</span>
 								</Link>
 							</li>
