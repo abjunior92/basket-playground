@@ -6,7 +6,7 @@ import {
 	type LoaderFunctionArgs,
 	type MetaFunction,
 } from '@remix-run/node'
-import { Link, useFetcher, useLoaderData, useParams } from '@remix-run/react'
+import { Link, useFetcher, useLoaderData, useLocation, useParams } from '@remix-run/react'
 import { CalendarRange, ChevronRight, Eye, EyeOff } from 'lucide-react'
 import { useState } from 'react'
 import invariant from 'tiny-invariant'
@@ -164,8 +164,10 @@ export default function Matches() {
 	const { matchesByDay, teams, groups, selectedTeamId, selectedGroupId } =
 		useLoaderData<typeof loader>()
 	const params = useParams()
+	const location = useLocation()
 	const [hiddenDays, setHiddenDays] = useState<Set<number>>(new Set())
 	const fetcher = useFetcher()
+	const currentPath = `${location.pathname}${location.search}`
 
 	const toggleDayVisibility = (day: number) => {
 		setHiddenDays((prev) => {
@@ -342,7 +344,7 @@ export default function Matches() {
 																						{match.team1.group.name}
 																					</Badge>
 																					<Link
-																						to={`/playground/${params.playgroundId}/team/${match.team1.id}`}
+																						to={`/playground/${params.playgroundId}/team/${match.team1.id}?returnTo=${encodeURIComponent(currentPath)}`}
 																						className="guest-link-pill font-medium"
 																						aria-label={`Apri profilo squadra ${match.team1.name}`}
 																					>
@@ -367,7 +369,7 @@ export default function Matches() {
 																			<div className="flex items-center justify-between gap-2">
 																				<div className="flex flex-col items-start gap-1">
 																					<Link
-																						to={`/playground/${params.playgroundId}/team/${match.team2.id}`}
+																						to={`/playground/${params.playgroundId}/team/${match.team2.id}?returnTo=${encodeURIComponent(currentPath)}`}
 																						className="guest-link-pill font-medium"
 																						aria-label={`Apri profilo squadra ${match.team2.name}`}
 																					>
@@ -445,7 +447,7 @@ export default function Matches() {
 													<TableCell>
 														<div className="flex flex-col items-center justify-center gap-1">
 															<Link
-																to={`/playground/${params.playgroundId}/team/${match.team1.id}`}
+																to={`/playground/${params.playgroundId}/team/${match.team1.id}?returnTo=${encodeURIComponent(currentPath)}`}
 																className="guest-link-pill"
 																aria-label={`Apri profilo squadra ${match.team1.name}`}
 															>
@@ -468,7 +470,7 @@ export default function Matches() {
 													<TableCell>
 														<div className="flex flex-col items-center justify-center gap-1">
 															<Link
-																to={`/playground/${params.playgroundId}/team/${match.team2.id}`}
+																to={`/playground/${params.playgroundId}/team/${match.team2.id}?returnTo=${encodeURIComponent(currentPath)}`}
 																className="guest-link-pill"
 																aria-label={`Apri profilo squadra ${match.team2.name}`}
 															>

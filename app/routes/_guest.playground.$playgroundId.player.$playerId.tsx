@@ -1,6 +1,12 @@
 import { PrismaClient } from '@prisma/client'
 import { type LoaderFunctionArgs, type MetaFunction } from '@remix-run/node'
-import { Link, useLoaderData, useParams } from '@remix-run/react'
+import {
+	Link,
+	useLoaderData,
+	useLocation,
+	useParams,
+	useSearchParams,
+} from '@remix-run/react'
 import { BarChart3, ChevronRight, Shield, UserRound } from 'lucide-react'
 import invariant from 'tiny-invariant'
 import Header from '~/components/Header'
@@ -117,12 +123,21 @@ export default function GuestPlayerProfile() {
 	const { player, aggregates, pointsByDay, recentMatches } =
 		useLoaderData<typeof loader>()
 	const { playgroundId } = useParams()
+	const location = useLocation()
+	const [searchParams] = useSearchParams()
+	const returnTo = searchParams.get('returnTo')
+	const fallbackBackLink = `/playground/${playgroundId}/rankings-and-stats`
+	const backLink =
+		returnTo && returnTo.startsWith(`/playground/${playgroundId}/`)
+			? returnTo
+			: fallbackBackLink
+	const currentPath = `${location.pathname}${location.search}`
 
 	return (
 		<div className="mx-auto max-w-lg space-y-4 p-4">
 			<Header
 				title={`${player.name} ${player.surname}`}
-				backLink={`/playground/${playgroundId}/rankings-and-stats`}
+				backLink={backLink}
 				icon={<UserRound />}
 			/>
 
@@ -147,7 +162,7 @@ export default function GuestPlayerProfile() {
 
 				<div className="mt-3 flex flex-wrap gap-2">
 					<Link
-						to={`/playground/${playgroundId}/team/${player.teamId}?fromPlayerId=${player.id}`}
+						to={`/playground/${playgroundId}/team/${player.teamId}?returnTo=${encodeURIComponent(currentPath)}`}
 						className="guest-link-pill"
 					>
 						<Shield className="h-3.5 w-3.5" />
@@ -216,7 +231,7 @@ export default function GuestPlayerProfile() {
 								<p className="mt-1 text-sm">
 									vs{' '}
 									<Link
-										to={`/playground/${playgroundId}/team/${match.opponent.id}`}
+										to={`/playground/${playgroundId}/team/${match.opponent.id}?returnTo=${encodeURIComponent(currentPath)}`}
 										className="font-medium underline-offset-2 hover:underline"
 									>
 										{match.opponent.name}

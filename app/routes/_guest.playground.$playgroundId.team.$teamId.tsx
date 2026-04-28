@@ -1,6 +1,12 @@
 import { PrismaClient } from '@prisma/client'
 import { type LoaderFunctionArgs, type MetaFunction } from '@remix-run/node'
-import { Link, useLoaderData, useParams, useSearchParams } from '@remix-run/react'
+import {
+	Link,
+	useLoaderData,
+	useLocation,
+	useParams,
+	useSearchParams,
+} from '@remix-run/react'
 import { BarChart3, Medal, Shield, Users } from 'lucide-react'
 import invariant from 'tiny-invariant'
 import Header from '~/components/Header'
@@ -143,11 +149,15 @@ export default function GuestTeamProfile() {
 	const { team, stats, lastMatches, topScorers } =
 		useLoaderData<typeof loader>()
 	const { playgroundId } = useParams()
+	const location = useLocation()
 	const [searchParams] = useSearchParams()
-	const fromPlayerId = searchParams.get('fromPlayerId')
-	const backLink = fromPlayerId
-		? `/playground/${playgroundId}/player/${fromPlayerId}`
-		: `/playground/${playgroundId}/rankings-and-stats`
+	const returnTo = searchParams.get('returnTo')
+	const fallbackBackLink = `/playground/${playgroundId}/rankings-and-stats`
+	const backLink =
+		returnTo && returnTo.startsWith(`/playground/${playgroundId}/`)
+			? returnTo
+			: fallbackBackLink
+	const currentPath = `${location.pathname}${location.search}`
 
 	return (
 		<div className="mx-auto max-w-lg space-y-4 p-4">
@@ -238,7 +248,7 @@ export default function GuestTeamProfile() {
 									<p className="mt-1 text-sm">
 										<span className="font-medium">{team.name}</span> vs{' '}
 										<Link
-											to={`/playground/${playgroundId}/team/${match.opponent.id}`}
+											to={`/playground/${playgroundId}/team/${match.opponent.id}?returnTo=${encodeURIComponent(currentPath)}`}
 											className="font-medium underline-offset-2 hover:underline"
 										>
 											{match.opponent.name}

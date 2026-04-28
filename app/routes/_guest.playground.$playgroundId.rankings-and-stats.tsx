@@ -1,6 +1,6 @@
 import { type ColorGroup, PrismaClient } from '@prisma/client'
 import { type LoaderFunctionArgs, type MetaFunction } from '@remix-run/node'
-import { Link, useLoaderData, useParams } from '@remix-run/react'
+import { Link, useLoaderData, useLocation, useParams } from '@remix-run/react'
 import { ChevronRight, Medal } from 'lucide-react'
 import invariant from 'tiny-invariant'
 import Header from '~/components/Header'
@@ -234,6 +234,8 @@ export default function Rankings() {
 	const { topPlayersGroups, topPlayersFinals, groups } =
 		useLoaderData<typeof loader>()
 	const params = useParams()
+	const location = useLocation()
+	const currentPath = `${location.pathname}${location.search}`
 
 	return (
 		<div className="p-4">
@@ -285,7 +287,7 @@ export default function Rankings() {
 													<TableRow key={team.id} className="text-center">
 														<TableCell>
 															<Link
-																to={`/playground/${params.playgroundId}/team/${team.id}`}
+																to={`/playground/${params.playgroundId}/team/${team.id}?returnTo=${encodeURIComponent(currentPath)}`}
 																className="guest-link-pill w-[stretch] justify-between"
 																aria-label={`Apri profilo squadra ${team.name}`}
 															>
@@ -337,7 +339,7 @@ export default function Rankings() {
 									>
 										<TableCell>
 											<Link
-												to={`/playground/${params.playgroundId}/player/${player.id}`}
+												to={`/playground/${params.playgroundId}/player/${player.id}?returnTo=${encodeURIComponent(currentPath)}`}
 												className="guest-link-pill w-[stretch] justify-between"
 												aria-label={`Apri profilo giocatore ${player.name} ${player.surname}`}
 											>
@@ -388,7 +390,7 @@ export default function Rankings() {
 									>
 										<TableCell>
 											<Link
-												to={`/playground/${params.playgroundId}/player/${player.id}`}
+												to={`/playground/${params.playgroundId}/player/${player.id}?returnTo=${encodeURIComponent(currentPath)}`}
 												className="guest-link-pill w-[stretch] justify-between"
 												aria-label={`Apri profilo giocatore ${player.name} ${player.surname}`}
 											>
