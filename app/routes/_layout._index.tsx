@@ -82,7 +82,7 @@ export default function Index() {
 						<ul className="space-y-3">
 							{playgrounds.length > 0 ? (
 								playgrounds.map(({ id, name }) => (
-									<li key={id}>
+									<li key={id} className="space-y-2">
 										<Link
 											to={`/playground/${id}`}
 											className={cn('nav-button group', 'justify-center')}

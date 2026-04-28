@@ -4,6 +4,7 @@ import { Link, useLoaderData } from '@remix-run/react'
 import {
 	Award,
 	CalendarCog,
+	Flame,
 	Home,
 	Medal,
 	PersonStanding,
@@ -90,6 +91,11 @@ const resources = [
 		href: '/rankings',
 		text: 'Classifiche',
 		icon: <Medal />,
+	},
+	{
+		href: '/highlights',
+		text: 'Highlights',
+		icon: <Flame />,
 	},
 	{
 		href: '/playoff',

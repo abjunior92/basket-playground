@@ -8,6 +8,7 @@ import {
 	Award,
 	BookOpenText,
 	CalendarDays,
+	Flame,
 	Medal,
 	Trophy,
 } from 'lucide-react'
@@ -109,10 +110,19 @@ export default function Index() {
 				</header>
 
 				<section className="section-blur">
-					<h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
-						<Activity className="h-5 w-5" />
-						<span>Attività torneo</span>
-					</h2>
+					<div className="mb-4 flex items-center justify-between">
+						<h2 className="flex items-center gap-2 text-lg font-semibold">
+							<Activity className="h-5 w-5" />
+							<span>Attività torneo</span>
+						</h2>
+						<Link
+							to={`/playground/${playground.id}/highlights`}
+							className="guest-link-pill"
+						>
+							<span>Highlights</span>
+							<Flame className="h-3.5 w-3.5" />
+						</Link>
+					</div>
 					<div className="space-y-3">
 						{inProgressMatches.length > 0 ? (
 							<>
