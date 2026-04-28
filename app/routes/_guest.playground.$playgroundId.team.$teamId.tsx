@@ -12,7 +12,7 @@ import invariant from 'tiny-invariant'
 import Header from '~/components/Header'
 import { Badge } from '~/components/ui/badge'
 import { colorGroupClasses } from '~/lib/types'
-import { cn } from '~/lib/utils'
+import { cn, getDayLabel } from '~/lib/utils'
 
 const prisma = new PrismaClient()
 
@@ -161,11 +161,7 @@ export default function GuestTeamProfile() {
 
 	return (
 		<div className="mx-auto max-w-lg space-y-4 p-4">
-			<Header
-				title={team.name}
-				backLink={backLink}
-				icon={<Shield />}
-			/>
+			<Header title={team.name} backLink={backLink} icon={<Shield />} />
 
 			<section className="section-blur">
 				<div className="flex items-center justify-between gap-3">
@@ -240,13 +236,19 @@ export default function GuestTeamProfile() {
 							return (
 								<li
 									key={match.id}
-									className="rounded-lg border border-slate-200 bg-white/80 p-3"
+									className={cn(
+										'rounded-lg border border-slate-200 bg-white/80 p-3',
+										isWon
+											? 'border-emerald-200 bg-emerald-50/80'
+											: 'border-rose-200 bg-rose-50/80',
+									)}
 								>
-									<div className="text-xs font-semibold tracking-wide text-slate-600 uppercase">
-										Giorno {match.day} · {match.timeSlot} · Campo {match.field}
+									<div className="text-xs font-semibold tracking-wide text-slate-600">
+										{getDayLabel(match.day.toString())} · {match.timeSlot} ·
+										Campo {match.field}
 									</div>
 									<p className="mt-1 text-sm">
-										<span className="font-medium">{team.name}</span> vs{' '}
+										vs{' '}
 										<Link
 											to={`/playground/${playgroundId}/team/${match.opponent.id}?returnTo=${encodeURIComponent(currentPath)}`}
 											className="font-medium underline-offset-2 hover:underline"
@@ -254,21 +256,23 @@ export default function GuestTeamProfile() {
 											{match.opponent.name}
 										</Link>
 									</p>
-									<p className="mt-1 text-sm text-slate-700">
-										{isCompleted
-											? `Risultato: ${match.teamScore ?? '-'} - ${match.opponentScore ?? '-'}`
-											: 'Partita non conclusa'}
-									</p>
-									{isCompleted ? (
-										<p
-											className={cn(
-												'mt-1 text-xs font-semibold',
-												isWon ? 'text-emerald-700' : 'text-rose-700',
-											)}
-										>
-											{isWon ? 'Vittoria' : 'Sconfitta'}
+									<div className="flex items-center justify-between gap-1">
+										<p className="mt-1 text-sm text-slate-700">
+											{isCompleted
+												? `Risultato: ${match.teamScore ?? '-'} - ${match.opponentScore ?? '-'}`
+												: 'Partita non conclusa'}
 										</p>
-									) : null}
+										{isCompleted ? (
+											<p
+												className={cn(
+													'mt-1 text-xs font-semibold',
+													isWon ? 'text-emerald-700' : 'text-rose-700',
+												)}
+											>
+												{isWon ? 'Vittoria' : 'Sconfitta'}
+											</p>
+										) : null}
+									</div>
 								</li>
 							)
 						})}

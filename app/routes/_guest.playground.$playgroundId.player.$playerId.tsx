@@ -12,7 +12,7 @@ import invariant from 'tiny-invariant'
 import Header from '~/components/Header'
 import { Badge } from '~/components/ui/badge'
 import { colorGroupClasses } from '~/lib/types'
-import { cn } from '~/lib/utils'
+import { cn, getDayLabel } from '~/lib/utils'
 
 const prisma = new PrismaClient()
 
@@ -53,10 +53,7 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 						},
 					},
 				},
-				orderBy: [
-					{ match: { day: 'desc' } },
-					{ match: { timeSlot: 'desc' } },
-				],
+				orderBy: [{ match: { day: 'desc' } }, { match: { timeSlot: 'desc' } }],
 			},
 		},
 	})
@@ -109,7 +106,10 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 			isExpelled: player.isExpelled,
 		},
 		aggregates: {
-			totalPoints: player.matchStats.reduce((sum, stat) => sum + stat.points, 0),
+			totalPoints: player.matchStats.reduce(
+				(sum, stat) => sum + stat.points,
+				0,
+			),
 			groupPoints: groupStats.reduce((sum, stat) => sum + stat.points, 0),
 			finalsPoints: finalsStats.reduce((sum, stat) => sum + stat.points, 0),
 			matchesPlayed: player.matchStats.length,
@@ -148,13 +148,12 @@ export default function GuestPlayerProfile() {
 						<h2 className="text-xl font-bold">
 							{player.name} {player.surname}
 						</h2>
-						<p className="mt-1 text-sm text-slate-700">Anno {player.birthYear}</p>
+						<p className="mt-1 text-sm text-slate-700">
+							Anno {player.birthYear}
+						</p>
 					</div>
 					<Badge
-						className={cn(
-							'capitalize',
-							colorGroupClasses[player.groupColor],
-						)}
+						className={cn('capitalize', colorGroupClasses[player.groupColor])}
 					>
 						{player.groupName}
 					</Badge>
@@ -177,7 +176,9 @@ export default function GuestPlayerProfile() {
 							Ammonizioni: {player.warnings}
 						</Badge>
 					) : (
-						<Badge className="bg-emerald-100 text-emerald-800">Nessun richiamo</Badge>
+						<Badge className="bg-emerald-100 text-emerald-800">
+							Nessun richiamo
+						</Badge>
 					)}
 				</div>
 			</section>
@@ -204,7 +205,14 @@ export default function GuestPlayerProfile() {
 								key={item.day}
 								className="flex items-center justify-between rounded-lg border border-slate-200 bg-white/80 px-3 py-2"
 							>
-								<span className="text-sm">Giorno {item.day}</span>
+								<div className="flex items-center gap-1">
+									<span className="text-sm">
+										{getDayLabel(item.day.toString())}
+									</span>
+									<span className="text-xs text-slate-600">
+										- giorno {item.day}
+									</span>
+								</div>
 								<span className="text-sm font-semibold">{item.points} pt</span>
 							</li>
 						))}
@@ -225,8 +233,9 @@ export default function GuestPlayerProfile() {
 								key={match.id}
 								className="rounded-lg border border-slate-200 bg-white/80 p-3"
 							>
-								<div className="text-xs font-semibold tracking-wide text-slate-600 uppercase">
-									Giorno {match.day} · {match.timeSlot} · Campo {match.field}
+								<div className="text-xs font-semibold tracking-wide text-slate-600">
+									{getDayLabel(match.day.toString())} · {match.timeSlot} · Campo{' '}
+									{match.field}
 								</div>
 								<p className="mt-1 text-sm">
 									vs{' '}
@@ -238,7 +247,8 @@ export default function GuestPlayerProfile() {
 									</Link>
 								</p>
 								<p className="mt-1 text-sm text-slate-700">
-									Punti segnati: <span className="font-semibold">{match.points}</span>
+									Punti segnati:{' '}
+									<span className="font-semibold">{match.points}</span>
 								</p>
 							</li>
 						))}

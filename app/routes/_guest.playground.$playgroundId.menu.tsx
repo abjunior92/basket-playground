@@ -14,6 +14,7 @@ import {
 import invariant from 'tiny-invariant'
 import {
 	cn,
+	getDayLabel,
 	getLiveAndUpcomingMatches,
 	getTournamentDayCandidates,
 } from '~/lib/utils'
@@ -129,9 +130,9 @@ export default function Index() {
 													<span className="sr-only">Live</span>
 												</div>
 												<div className="flex flex-col">
-													<div className="mb-1 text-xs font-semibold tracking-wide text-emerald-900 uppercase">
-														Giorno {match.day} · {match.timeSlot} · Campo{' '}
-														{match.field}
+													<div className="mb-1 text-xs font-semibold tracking-wide text-emerald-900">
+														{getDayLabel(match.day.toString())} ·{' '}
+														{match.timeSlot} · Campo {match.field}
 													</div>
 													<p className="text-sm text-slate-800">
 														{match.team1.name} - {match.team2.name}
@@ -159,9 +160,9 @@ export default function Index() {
 											key={match.id}
 											className="rounded-lg border border-amber-200 bg-amber-50/80 p-3"
 										>
-											<div className="mb-1 text-xs font-semibold tracking-wide text-slate-600 uppercase">
-												Giorno {match.day} · {match.timeSlot} · Campo{' '}
-												{match.field}
+											<div className="mb-1 text-xs font-semibold tracking-wide text-slate-600">
+												{getDayLabel(match.day.toString())} · {match.timeSlot} ·
+												Campo {match.field}
 											</div>
 											<p className="text-sm text-slate-800">
 												{match.team1.name} vs {match.team2.name}
@@ -183,8 +184,9 @@ export default function Index() {
 											key={match.id}
 											className="rounded-lg border border-slate-200 bg-white/80 p-3"
 										>
-											<div className="mb-1 text-xs font-semibold tracking-wide text-slate-600 uppercase">
-												Giorno {match.day} · {match.timeSlot}
+											<div className="mb-1 text-xs font-semibold tracking-wide text-slate-600">
+												{getDayLabel(match.day.toString())} · {match.timeSlot} ·
+												Campo {match.field}
 											</div>
 											<p className="text-sm text-slate-800">
 												{match.team1.name}{' '}
