@@ -85,6 +85,10 @@ export const getTournamentHighlightsByDay = async (
 		day: number
 		points: number
 	} | null = null
+	let topThreePointLeader: {
+		playerName: string
+		score: number
+	} | null = null
 
 	if (selectedDay !== null) {
 		const dayStats = await prisma.playerMatchStats.findMany({
@@ -130,6 +134,17 @@ export const getTournamentHighlightsByDay = async (
 		}
 	}
 
+	const threePointLeader = await prisma.threePointChallengeParticipant.findFirst({
+		where: { playgroundId },
+		orderBy: [{ score: 'desc' }, { surname: 'asc' }, { name: 'asc' }],
+	})
+	if (threePointLeader) {
+		topThreePointLeader = {
+			playerName: `${threePointLeader.name} ${threePointLeader.surname}`,
+			score: threePointLeader.score,
+		}
+	}
+
 	const highlights = [
 		biggestWin
 			? {
@@ -156,6 +171,15 @@ export const getTournamentHighlightsByDay = async (
 					title: 'Top scorer di giornata',
 					text: `${topScorerOfDay.playerName} (${topScorerOfDay.teamName})`,
 					meta: `${topScorerOfDay.points} punti totali`,
+				}
+			: null,
+		topThreePointLeader
+			? {
+					key: 'three-point-leader',
+					icon: '🎯',
+					title: 'Leader 3PT Challenge',
+					text: topThreePointLeader.playerName,
+					meta: `${topThreePointLeader.score} punti`,
 				}
 			: null,
 	].filter((highlight): highlight is TournamentHighlight => Boolean(highlight))
