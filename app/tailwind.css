@@ -69,6 +69,7 @@
 			height: 0;
 		}
 	}
+
 }
 
 /*
@@ -129,6 +130,44 @@
 
 	.section-blur {
 		@apply w-full rounded-2xl border border-white/60 bg-white/35 p-5 shadow-lg ring-1 shadow-slate-900/10 ring-white/40 backdrop-blur-xl;
+	}
+
+	.menu-hero-card {
+		@apply relative isolate w-full overflow-hidden rounded-3xl border border-white/65 p-6 shadow-xl ring-1 shadow-slate-900/15 ring-white/50 backdrop-blur-2xl transition-transform duration-300 motion-safe:hover:-translate-y-0.5;
+	}
+
+	/* Backup della versione precedente (indigo/sky/amber). */
+	.menu-hero-card-v1 {
+		@apply bg-linear-to-br from-indigo-100/70 via-sky-100/55 to-amber-100/70;
+	}
+
+	/* Nuova palette richiesta: blu + rosso + bianco. */
+	.menu-hero-card-v2 {
+		@apply bg-linear-to-br from-blue-100/75 via-white/70 to-rose-100/70;
+	}
+
+	.menu-hero-overlay-v1 {
+		background-image: radial-gradient(
+				circle at 18% 20%,
+				rgba(79, 70, 229, 0.35),
+				transparent 42%
+			),
+			radial-gradient(circle at 82% 0%, rgba(14, 165, 233, 0.3), transparent 38%),
+			radial-gradient(circle at 55% 100%, rgba(245, 158, 11, 0.27), transparent 44%);
+	}
+
+	.menu-hero-overlay-v2 {
+		background-image: radial-gradient(
+				circle at 14% 18%,
+				rgba(37, 99, 235, 0.33),
+				transparent 44%
+			),
+			radial-gradient(circle at 86% 20%, rgba(220, 38, 38, 0.3), transparent 42%),
+			radial-gradient(circle at 52% 94%, rgba(255, 255, 255, 0.45), transparent 52%);
+	}
+
+	.menu-hero-grain {
+		background-image: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27180%27 height=%27180%27 viewBox=%270 0 180 180%27%3E%3Cfilter id=%27n%27%3E%3CfeTurbulence type=%27fractalNoise%27 baseFrequency=%270.95%27 numOctaves=%272%27 stitchTiles=%27stitch%27/%3E%3C/filter%3E%3Crect width=%27180%27 height=%27180%27 filter=%27url(%23n)%27 opacity=%270.2%27/%3E%3C/svg%3E");
 	}
 
 	.guest-link-pill {

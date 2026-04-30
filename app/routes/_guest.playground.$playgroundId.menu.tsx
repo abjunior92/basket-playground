@@ -91,23 +91,35 @@ export default function Index() {
 	return (
 		<main className="flex px-4 py-4 md:min-h-screen md:items-center md:justify-center">
 			<div className="mx-auto flex w-full max-w-lg flex-col items-center gap-4 md:gap-8">
-				<header className={cn('section-blur', 'p-6')}>
-					<p className="text-sm font-medium tracking-wide text-slate-600">
-						{playground.name}
-					</p>
-					<h1 className="mt-2 flex items-center gap-2 text-3xl font-bold md:text-4xl">
-						<span>Il Tralcio</span>
-						<span
-							aria-hidden="true"
-							className="inline-block motion-safe:animate-bounce"
-						>
-							🏀
-						</span>
-					</h1>
-					<p className="mt-2 text-sm text-slate-700">
-						Accedi rapidamente alle sezioni principali, visualizza i tornei e le
-						statistiche da un unico punto.
-					</p>
+				<header className={cn('menu-hero-card', 'menu-hero-card-v2')}>
+					<div
+						aria-hidden="true"
+						className="menu-hero-overlay-v2 pointer-events-none absolute inset-0"
+					/>
+					<div
+						aria-hidden="true"
+						className="menu-hero-grain pointer-events-none absolute inset-0 opacity-25 mix-blend-soft-light"
+					/>
+					<div className="relative">
+						<p className="text-sm font-medium tracking-wide text-slate-700/95">
+							{playground.name}
+						</p>
+						<h1 className="mt-2 flex items-center gap-2 text-3xl font-black tracking-tight text-slate-900 md:text-4xl">
+							<span className="drop-shadow-[0_1px_0_rgba(255,255,255,0.4)]">
+								Il Tralcio
+							</span>
+							<span
+								aria-hidden="true"
+								className="inline-block transition-transform duration-300 ease-out motion-safe:animate-bounce motion-safe:hover:scale-110 motion-safe:hover:rotate-12"
+							>
+								🏀
+							</span>
+						</h1>
+						<p className="mt-2 max-w-[46ch] text-sm leading-relaxed text-slate-800/95">
+							Accedi rapidamente alle sezioni principali, visualizza i tornei e
+							le statistiche da un unico punto.
+						</p>
+					</div>
 				</header>
 
 				<section className="section-blur">
