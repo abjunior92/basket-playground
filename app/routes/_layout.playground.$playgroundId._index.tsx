@@ -104,7 +104,7 @@ const resources = [
 	},
 	{
 		href: '/three-points-challenge',
-		text: 'Gara da 3 punti',
+		text: '3PT Challenge',
 		icon: <Swords />,
 	},
 	{

@@ -3,6 +3,7 @@ import {
 	type ActionFunctionArgs,
 	type LoaderFunctionArgs,
 	json,
+	type MetaFunction,
 } from '@remix-run/node'
 import {
 	useLoaderData,
@@ -39,6 +40,13 @@ import {
 import { useToast } from '~/hooks/use-toast'
 
 const prisma = new PrismaClient()
+
+export const meta: MetaFunction = () => {
+	return [
+		{ title: '3PT Challenge' },
+		{ name: 'description', content: '3PT Challenge' },
+	]
+}
 
 export const loader = async ({ params }: LoaderFunctionArgs) => {
 	invariant(params.playgroundId, 'playgroundId is required')
@@ -124,7 +132,7 @@ export default function ThreePointChallenge() {
 		<div className="md:p-4">
 			<div className="mb-4 flex items-center justify-between">
 				<Header
-					title="Gara da 3 punti"
+					title="3PT Challenge"
 					backLink={`/playground/${params.playgroundId}`}
 					icon={<Swords />}
 				/>

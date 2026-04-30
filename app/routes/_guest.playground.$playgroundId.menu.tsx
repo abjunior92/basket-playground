@@ -10,6 +10,7 @@ import {
 	CalendarDays,
 	Flame,
 	Medal,
+	Swords,
 	Trophy,
 } from 'lucide-react'
 import invariant from 'tiny-invariant'
@@ -88,7 +89,7 @@ export default function Index() {
 	} = useLoaderData<typeof loader>()
 
 	return (
-		<main className="flex px-4 py-4 md:h-screen md:items-center md:justify-center">
+		<main className="flex px-4 py-4 md:min-h-screen md:items-center md:justify-center">
 			<div className="mx-auto flex w-full max-w-lg flex-col items-center gap-4 md:gap-8">
 				<header className={cn('section-blur', 'p-6')}>
 					<p className="text-sm font-medium tracking-wide text-slate-600">
@@ -334,6 +335,11 @@ const resources = [
 		href: '/rankings-and-stats',
 		text: 'Classifiche',
 		icon: <Medal />,
+	},
+	{
+		href: '/three-points-challenge-ranking',
+		text: '3PT Challenge',
+		icon: <Swords />,
 	},
 	{
 		href: '/rules',

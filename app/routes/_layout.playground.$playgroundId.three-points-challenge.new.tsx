@@ -3,6 +3,7 @@ import {
 	type LoaderFunctionArgs,
 	type ActionFunctionArgs,
 	redirect,
+	type MetaFunction,
 } from '@remix-run/node'
 import { Form, useLoaderData, useNavigation, useParams } from '@remix-run/react'
 import { UserPlus } from 'lucide-react'
@@ -22,6 +23,13 @@ import {
 } from '~/components/ui/select'
 
 const prisma = new PrismaClient()
+
+export const meta: MetaFunction = () => {
+	return [
+		{ title: 'Aggiungi Partecipante 3PT Challenge' },
+		{ name: 'description', content: 'Aggiungi Partecipante 3PT Challenge' },
+	]
+}
 
 export const loader = async ({ params }: LoaderFunctionArgs) => {
 	invariant(params.playgroundId, 'playgroundId is required')
