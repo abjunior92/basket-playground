@@ -119,7 +119,7 @@ export default function HighlightsPage() {
 							{highlights.map((highlight) => (
 								<li
 									key={highlight.key}
-									className="rounded-lg border border-rose-300/80 bg-rose-50/85 p-3"
+									className="bg-white-50/85 rounded-lg p-3"
 								>
 									<p className="text-xs font-semibold tracking-wide text-rose-900 uppercase">
 										{highlight.icon} {highlight.title}
@@ -127,14 +127,16 @@ export default function HighlightsPage() {
 									<p className="mt-1 text-sm font-semibold text-slate-950">
 										{highlight.text}
 									</p>
-									<p className="mt-1 text-xs text-slate-700">{highlight.meta}</p>
+									<p className="mt-1 text-xs text-slate-700">
+										{highlight.meta}
+									</p>
 								</li>
 							))}
 						</ul>
 					) : (
 						<p className="text-sm text-slate-800">
-							Ancora pochi risultati disponibili: i momenti salienti compariranno
-							man mano che si gioca.
+							Ancora pochi risultati disponibili: i momenti salienti
+							compariranno man mano che si gioca.
 						</p>
 					)}
 				</div>
