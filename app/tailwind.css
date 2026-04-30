@@ -69,7 +69,6 @@
 			height: 0;
 		}
 	}
-
 }
 
 /*
@@ -147,27 +146,53 @@
 	}
 
 	.menu-hero-overlay-v1 {
-		background-image: radial-gradient(
+		background-image:
+			radial-gradient(
 				circle at 18% 20%,
 				rgba(79, 70, 229, 0.35),
 				transparent 42%
 			),
-			radial-gradient(circle at 82% 0%, rgba(14, 165, 233, 0.3), transparent 38%),
-			radial-gradient(circle at 55% 100%, rgba(245, 158, 11, 0.27), transparent 44%);
+			radial-gradient(
+				circle at 82% 0%,
+				rgba(14, 165, 233, 0.3),
+				transparent 38%
+			),
+			radial-gradient(
+				circle at 55% 100%,
+				rgba(245, 158, 11, 0.27),
+				transparent 44%
+			);
 	}
 
 	.menu-hero-overlay-v2 {
-		background-image: radial-gradient(
+		background-image:
+			radial-gradient(
 				circle at 14% 18%,
 				rgba(37, 99, 235, 0.33),
 				transparent 44%
 			),
-			radial-gradient(circle at 86% 20%, rgba(220, 38, 38, 0.3), transparent 42%),
-			radial-gradient(circle at 52% 94%, rgba(255, 255, 255, 0.45), transparent 52%);
+			radial-gradient(
+				circle at 86% 20%,
+				rgba(220, 38, 38, 0.3),
+				transparent 42%
+			),
+			radial-gradient(
+				circle at 52% 94%,
+				rgba(255, 255, 255, 0.45),
+				transparent 52%
+			);
 	}
 
 	.menu-hero-grain {
-		background-image: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27180%27 height=%27180%27 viewBox=%270 0 180 180%27%3E%3Cfilter id=%27n%27%3E%3CfeTurbulence type=%27fractalNoise%27 baseFrequency=%270.95%27 numOctaves=%272%27 stitchTiles=%27stitch%27/%3E%3C/filter%3E%3Crect width=%27180%27 height=%27180%27 filter=%27url(%23n)%27 opacity=%270.2%27/%3E%3C/svg%3E");
+		background-image: url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27180%27 height=%27180%27 viewBox=%270 0 180 180%27%3E%3Cfilter id=%27n%27%3E%3CfeTurbulence type=%27fractalNoise%27 baseFrequency=%270.95%27 numOctaves=%272%27 stitchTiles=%27stitch%27/%3E%3C/filter%3E%3Crect width=%27180%27 height=%27180%27 filter=%27url(%23n)%27 opacity=%270.2%27/%3E%3C/svg%3E');
+	}
+
+	.highlights-card-v1 {
+		@apply relative isolate overflow-hidden border-white/65 bg-linear-to-br from-indigo-100/65 via-sky-100/55 to-amber-100/65 shadow-slate-900/15 ring-white/55;
+	}
+
+	.highlights-card-v2 {
+		@apply relative isolate overflow-hidden border-white/65 bg-linear-to-br from-blue-100/65 via-white/65 to-rose-100/65 shadow-slate-900/15 ring-white/55;
 	}
 
 	.guest-link-pill {

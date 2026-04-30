@@ -122,174 +122,204 @@ export default function Index() {
 					</div>
 				</header>
 
-				<section className="section-blur">
-					<div className="mb-4 flex items-center justify-between">
-						<h2 className="flex items-center gap-2 text-lg font-semibold">
-							<Activity className="h-5 w-5" />
-							<span>Attività torneo</span>
-						</h2>
-						<Link
-							to={`/playground/${playground.id}/highlights`}
-							className="guest-link-pill"
-						>
-							<span>Highlights</span>
-							<Flame className="h-3.5 w-3.5" />
-						</Link>
-					</div>
-					<div className="space-y-3">
-						{inProgressMatches.length > 0 ? (
-							<>
-								<p className="text-sm font-medium text-emerald-700">
-									Live now 🔥
-								</p>
-								<ul className="space-y-2">
-									{inProgressMatches.map((match) => (
-										<li
-											key={match.id}
-											className="rounded-lg border border-emerald-200 bg-emerald-50/80 p-3"
-										>
-											<div className="flex items-center gap-2">
-												<div className="h-2 w-2 animate-pulse rounded-full bg-red-700">
-													<span className="sr-only">Live</span>
-												</div>
-												<div className="flex flex-col">
-													<div className="mb-1 text-xs font-semibold tracking-wide text-emerald-900">
-														{getDayLabel(match.day.toString())} ·{' '}
-														{match.timeSlot} · Campo {match.field}
+				<section className={cn('section-blur', 'highlights-card-v2')}>
+					<div
+						aria-hidden="true"
+						className="menu-hero-overlay-v2 pointer-events-none absolute inset-0"
+					/>
+					<div
+						aria-hidden="true"
+						className="menu-hero-grain pointer-events-none absolute inset-0 opacity-20 mix-blend-soft-light"
+					/>
+					<div className="relative">
+						<div className="mb-4 flex items-center justify-between">
+							<h2 className="flex items-center gap-2 text-lg font-semibold text-slate-900">
+								<Activity className="h-5 w-5" />
+								<span>Attività torneo</span>
+							</h2>
+							<Link
+								to={`/playground/${playground.id}/highlights`}
+								className="guest-link-pill border-blue-200 bg-blue-50/90 text-blue-900 hover:bg-blue-100"
+							>
+								<span>Highlights</span>
+								<Flame className="h-3.5 w-3.5" />
+							</Link>
+						</div>
+						<div className="space-y-3">
+							{inProgressMatches.length > 0 ? (
+								<>
+									<p className="text-sm font-semibold text-emerald-900">
+										Live now 🔥
+									</p>
+									<ul className="space-y-2">
+										{inProgressMatches.map((match) => (
+											<li
+												key={match.id}
+												className="rounded-lg border border-emerald-200 bg-emerald-50/80 p-3"
+											>
+												<div className="flex items-center gap-2">
+													<div className="h-2 w-2 animate-pulse rounded-full bg-red-700">
+														<span className="sr-only">Live</span>
 													</div>
-													<p className="text-sm text-slate-800">
-														{match.team1.name} - {match.team2.name}
-													</p>
+													<div className="flex flex-col">
+														<div className="mb-1 text-xs font-semibold tracking-wide text-emerald-900">
+															{getDayLabel(match.day.toString())} ·{' '}
+															{match.timeSlot} · Campo {match.field}
+														</div>
+														<p className="text-sm text-slate-800">
+															{match.team1.name} - {match.team2.name}
+														</p>
+													</div>
 												</div>
-											</div>
-										</li>
-									))}
-								</ul>
-							</>
-						) : (
-							<p className="text-sm text-slate-700">
-								Al momento non ci sono partite in corso.
-							</p>
-						)}
-
-						{upcomingMatches.length > 0 ? (
-							<>
-								<p className="pt-2 text-sm font-medium text-slate-700">
-									Prossime partite
+											</li>
+										))}
+									</ul>
+								</>
+							) : (
+								<p className="text-sm text-slate-800">
+									Al momento non ci sono partite in corso.
 								</p>
-								<ul className="space-y-2">
-									{upcomingMatches.map((match) => (
-										<li
-											key={match.id}
-											className="rounded-lg border border-amber-200 bg-amber-50/80 p-3"
-										>
-											<div className="mb-1 text-xs font-semibold tracking-wide text-slate-600">
-												{getDayLabel(match.day.toString())} · {match.timeSlot} ·
-												Campo {match.field}
-											</div>
-											<p className="text-sm text-slate-800">
-												{match.team1.name} vs {match.team2.name}
-											</p>
-										</li>
-									))}
-								</ul>
-							</>
-						) : null}
+							)}
 
-						{latestResults.length > 0 ? (
-							<>
-								<p className="pt-2 text-sm font-medium text-slate-700">
-									Ultimi risultati
-								</p>
-								<ul className="space-y-2">
-									{latestResults.map((match) => (
-										<li
-											key={match.id}
-											className="rounded-lg border border-slate-200 bg-white/80 p-3"
-										>
-											<div className="mb-1 text-xs font-semibold tracking-wide text-slate-600">
-												{getDayLabel(match.day.toString())} · {match.timeSlot} ·
-												Campo {match.field}
-											</div>
-											<p className="text-sm text-slate-800">
-												{match.team1.name}{' '}
-												<span className="font-semibold">
-													{match.score1 ?? '-'}
-												</span>{' '}
-												-{' '}
-												<span className="font-semibold">
-													{match.score2 ?? '-'}
-												</span>{' '}
-												{match.team2.name}
-											</p>
-										</li>
-									))}
-								</ul>
-							</>
-						) : null}
-					</div>
-					<div className="mt-4">
-						<Link
-							className="nav-button group justify-center"
-							to={`/playground/${playground.id}/calendar`}
-						>
-							<span className="nav-button-animate-text">
-								Apri calendario completo
-							</span>
-						</Link>
+							{upcomingMatches.length > 0 ? (
+								<>
+									<p className="pt-2 text-sm font-semibold text-slate-800">
+										Prossime partite
+									</p>
+									<ul className="space-y-2">
+										{upcomingMatches.map((match) => (
+											<li
+												key={match.id}
+												className="rounded-lg border border-amber-200 bg-amber-50/80 p-3"
+											>
+												<div className="mb-1 text-xs font-semibold tracking-wide text-slate-700">
+													{getDayLabel(match.day.toString())} · {match.timeSlot}{' '}
+													· Campo {match.field}
+												</div>
+												<p className="text-sm text-slate-900">
+													{match.team1.name} vs {match.team2.name}
+												</p>
+											</li>
+										))}
+									</ul>
+								</>
+							) : null}
+
+							{latestResults.length > 0 ? (
+								<>
+									<p className="pt-2 text-sm font-semibold text-slate-800">
+										Ultimi risultati
+									</p>
+									<ul className="space-y-2">
+										{latestResults.map((match) => (
+											<li
+												key={match.id}
+												className="rounded-lg border border-slate-200 bg-white/80 p-3"
+											>
+												<div className="mb-1 text-xs font-semibold tracking-wide text-slate-700">
+													{getDayLabel(match.day.toString())} · {match.timeSlot}{' '}
+													· Campo {match.field}
+												</div>
+												<p className="text-sm text-slate-900">
+													{match.team1.name}{' '}
+													<span className="font-semibold">
+														{match.score1 ?? '-'}
+													</span>{' '}
+													-{' '}
+													<span className="font-semibold">
+														{match.score2 ?? '-'}
+													</span>{' '}
+													{match.team2.name}
+												</p>
+											</li>
+										))}
+									</ul>
+								</>
+							) : null}
+						</div>
+						<div className="mt-4">
+							<Link
+								className="nav-button group justify-center"
+								to={`/playground/${playground.id}/calendar`}
+							>
+								<span className="nav-button-animate-text">
+									Apri calendario completo
+								</span>
+							</Link>
+						</div>
 					</div>
 				</section>
 
-				<section className="section-blur">
-					<h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
-						<Trophy className="h-5 w-5" />
-						<span>Torneo</span>
-					</h2>
-					<nav>
-						<ul className="grid gap-2 md:grid-cols-2">
-							{resources.map(({ href, text, icon }) => (
-								<li key={href}>
-									<Link
-										className="nav-button group"
-										to={`/playground/${playground.id}${href}`}
-									>
-										<span className="nav-button-animate-icon">{icon}</span>
-										<span>{text}</span>
-									</Link>
-								</li>
-							))}
-						</ul>
-					</nav>
-				</section>
-
-				<section className="section-blur">
-					<h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
-						<Award className="h-5 w-5" />
-						<span>Palmares</span>
-					</h2>
-					<nav>
-						<ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-							{palmaresList.length > 0 ? (
-								palmaresList.map(({ year }) => (
-									<li key={year}>
+				<section className={cn('section-blur', 'highlights-card-v2')}>
+					<div
+						aria-hidden="true"
+						className="menu-hero-overlay-v2 pointer-events-none absolute inset-0"
+					/>
+					<div
+						aria-hidden="true"
+						className="menu-hero-grain pointer-events-none absolute inset-0 opacity-20 mix-blend-soft-light"
+					/>
+					<div className="relative">
+						<h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-slate-900">
+							<Trophy className="h-5 w-5" />
+							<span>Torneo</span>
+						</h2>
+						<nav>
+							<ul className="grid gap-2 md:grid-cols-2">
+								{resources.map(({ href, text, icon }) => (
+									<li key={href}>
 										<Link
-											className={cn('nav-button', 'group justify-center')}
-											to={`/playground/${playground.id}/palmares/${year}`}
+											className="nav-button group"
+											to={`/playground/${playground.id}${href}`}
 										>
-											<span className="nav-button-animate-text">
-												Anno {year}
-											</span>
+											<span className="nav-button-animate-icon">{icon}</span>
+											<span>{text}</span>
 										</Link>
 									</li>
-								))
-							) : (
-								<li className="rounded-xl border border-amber-200 bg-amber-50/80 px-4 py-3 text-sm text-amber-900">
-									🏅 Nessun palmares salvato per ora: si gioca per scrivere la
-									storia.
-								</li>
-							)}
-						</ul>
-					</nav>
+								))}
+							</ul>
+						</nav>
+					</div>
+				</section>
+
+				<section className={cn('section-blur', 'highlights-card-v2')}>
+					<div
+						aria-hidden="true"
+						className="menu-hero-overlay-v2 pointer-events-none absolute inset-0"
+					/>
+					<div
+						aria-hidden="true"
+						className="menu-hero-grain pointer-events-none absolute inset-0 opacity-20 mix-blend-soft-light"
+					/>
+					<div className="relative">
+						<h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-slate-900">
+							<Award className="h-5 w-5" />
+							<span>Palmares</span>
+						</h2>
+						<nav>
+							<ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+								{palmaresList.length > 0 ? (
+									palmaresList.map(({ year }) => (
+										<li key={year}>
+											<Link
+												className={cn('nav-button', 'group justify-center')}
+												to={`/playground/${playground.id}/palmares/${year}`}
+											>
+												<span className="nav-button-animate-text">
+													Anno {year}
+												</span>
+											</Link>
+										</li>
+									))
+								) : (
+									<li className="rounded-xl border border-amber-300 bg-amber-100/90 px-4 py-3 text-sm text-amber-950">
+										🏅 Nessun palmares salvato per ora: si gioca per scrivere la
+										storia.
+									</li>
+								)}
+							</ul>
+						</nav>
+					</div>
 				</section>
 
 				<section>

@@ -89,45 +89,55 @@ export default function HighlightsPage() {
 				</div>
 			</section>
 
-			<section className="section-blur pt-2">
-				<div className="mb-2 flex items-center gap-1 place-self-center rounded-full px-2 py-0.5 font-semibold tracking-wide text-amber-900">
-					<Flame className="h-3.5 w-3.5 shrink-0" />
-					Highlights
-				</div>
-				<div className="mb-3 rounded-xl border border-amber-200 bg-linear-to-r from-amber-50/90 via-white to-orange-50/90 px-4 py-3">
-					<p className="text-xs font-semibold tracking-wide text-slate-500 uppercase">
-						{selectedDay
-							? `${getDayLabel(selectedDay.toString())} · Giorno ${selectedDay}`
-							: 'Giornata non disponibile'}
-					</p>
+			<section className="section-blur highlights-card-v2 pt-2">
+				<div
+					aria-hidden="true"
+					className="menu-hero-overlay-v2 pointer-events-none absolute inset-0"
+				/>
+				<div
+					aria-hidden="true"
+					className="menu-hero-grain pointer-events-none absolute inset-0 opacity-20 mix-blend-soft-light"
+				/>
+				<div className="relative">
+					<div className="mb-2 flex items-center gap-1 place-self-center rounded-full px-2 py-0.5 font-semibold tracking-wide text-rose-950">
+						<Flame className="h-3.5 w-3.5 shrink-0" />
+						Highlights
+					</div>
+					<div className="mb-3 rounded-xl border border-slate-300/80 bg-white/80 px-4 py-3">
+						<p className="text-xs font-semibold tracking-wide text-slate-700 uppercase">
+							{selectedDay
+								? `${getDayLabel(selectedDay.toString())} · Giorno ${selectedDay}`
+								: 'Giornata non disponibile'}
+						</p>
 
-					<p className="mt-1 text-base font-extrabold tracking-tight text-slate-900 md:text-lg">
-						<span aria-hidden="true">🏀</span> Torneo 3vs3 Longara
-					</p>
+						<p className="mt-1 text-base font-extrabold tracking-tight text-slate-950 md:text-lg">
+							<span aria-hidden="true">🏀</span> Torneo 3vs3 Longara
+						</p>
+					</div>
+					{highlights.length > 0 ? (
+						<ul className="space-y-2">
+							{highlights.map((highlight) => (
+								<li
+									key={highlight.key}
+									className="rounded-lg border border-rose-300/80 bg-rose-50/85 p-3"
+								>
+									<p className="text-xs font-semibold tracking-wide text-rose-900 uppercase">
+										{highlight.icon} {highlight.title}
+									</p>
+									<p className="mt-1 text-sm font-semibold text-slate-950">
+										{highlight.text}
+									</p>
+									<p className="mt-1 text-xs text-slate-700">{highlight.meta}</p>
+								</li>
+							))}
+						</ul>
+					) : (
+						<p className="text-sm text-slate-800">
+							Ancora pochi risultati disponibili: i momenti salienti compariranno
+							man mano che si gioca.
+						</p>
+					)}
 				</div>
-				{highlights.length > 0 ? (
-					<ul className="space-y-2">
-						{highlights.map((highlight) => (
-							<li
-								key={highlight.key}
-								className="rounded-lg border border-rose-200 bg-rose-50/80 p-3"
-							>
-								<p className="text-xs font-semibold tracking-wide text-rose-800 uppercase">
-									{highlight.icon} {highlight.title}
-								</p>
-								<p className="mt-1 text-sm font-medium text-slate-900">
-									{highlight.text}
-								</p>
-								<p className="mt-1 text-xs text-slate-600">{highlight.meta}</p>
-							</li>
-						))}
-					</ul>
-				) : (
-					<p className="text-sm text-slate-700">
-						Ancora pochi risultati disponibili: i momenti salienti compariranno
-						man mano che si gioca.
-					</p>
-				)}
 			</section>
 		</div>
 	)
