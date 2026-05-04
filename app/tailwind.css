@@ -108,6 +108,7 @@
 		-moz-background-size: cover;
 		-o-background-size: cover;
 		background-size: cover;
+		transition: background-image 1s ease-in;
 	}
 	.h-fill-available {
 		height: -webkit-fill-available;

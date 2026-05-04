@@ -89,7 +89,7 @@ export default function Index() {
 	} = useLoaderData<typeof loader>()
 
 	return (
-		<main className="flex px-4 py-4 md:min-h-screen md:items-center md:justify-center">
+		<main className="flex px-4 py-4 md:min-h-screen md:items-center md:justify-center md:py-12">
 			<div className="mx-auto flex w-full max-w-lg flex-col items-center gap-4 md:gap-8">
 				<header className={cn('menu-hero-card', 'menu-hero-card-v2')}>
 					<div
@@ -119,6 +119,14 @@ export default function Index() {
 							Accedi rapidamente alle sezioni principali, visualizza i tornei e
 							le statistiche da un unico punto.
 						</p>
+						<div className="mt-4 flex flex-col gap-2 sm:flex-row">
+							<Link
+								className="nav-button group justify-center"
+								to={`/playground/showcase`}
+							>
+								<span className="nav-button-animate-text">Bacheca torneo</span>
+							</Link>
+						</div>
 					</div>
 				</header>
 

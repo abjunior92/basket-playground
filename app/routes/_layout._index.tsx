@@ -63,6 +63,14 @@ export default function Index() {
 							Accedi rapidamente alle sezioni principali, gestisci i tornei e le
 							statistiche da un unico punto.
 						</p>
+						<div className="mt-4 flex flex-col gap-2 sm:flex-row">
+							<Link
+								className="nav-button group justify-center"
+								to={`/playground/showcase`}
+							>
+								<span className="nav-button-animate-text">Bacheca torneo</span>
+							</Link>
+						</div>
 					</div>
 				</header>
 
