@@ -1,4 +1,4 @@
-import { type ColorGroup, PrismaClient } from '@prisma/client'
+import { type ColorGroup } from '@prisma/client'
 import { type LoaderFunctionArgs, type MetaFunction } from '@remix-run/node'
 import { Link, useLoaderData, useLocation, useParams } from '@remix-run/react'
 import { ChevronRight, Medal } from 'lucide-react'
@@ -14,10 +14,9 @@ import {
 	TableRow,
 } from '~/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
-import { colorGroupClasses, type TeamWithStatsType } from '~/lib/types'
-import { calculateTiebreaker, cn } from '~/lib/utils'
-
-const prisma = new PrismaClient()
+import { groupAccentClasses, getRankingsData, groupBorderClasses } from '~/lib/rankings'
+import { colorGroupClasses } from '~/lib/types'
+import { cn } from '~/lib/utils'
 
 export const meta: MetaFunction = () => {
 	return [
@@ -28,214 +27,22 @@ export const meta: MetaFunction = () => {
 
 export const loader = async ({ params }: LoaderFunctionArgs) => {
 	invariant(params.playgroundId, 'playgroundId is required')
-	const teams = await prisma.team.findMany({
-		where: { group: { playgroundId: params.playgroundId } },
-		include: {
-			group: true,
-			matchesAsTeam1: {
-				where: { day: { in: [1, 2, 3, 4, 6] } }, // Solo partite della fase a gironi
-				select: {
-					id: true,
-					winner: true,
-					score1: true,
-					score2: true,
-					day: true,
-				},
-			},
-			matchesAsTeam2: {
-				where: { day: { in: [1, 2, 3, 4, 6] } }, // Solo partite della fase a gironi
-				select: {
-					id: true,
-					winner: true,
-					score1: true,
-					score2: true,
-					day: true,
-				},
-			},
-		},
-	})
-
-	// Recupera tutti i giocatori
-	const allPlayers = await prisma.player.findMany({
-		where: { playgroundId: params.playgroundId },
-		include: {
-			team: { include: { group: true } },
-		},
-	})
-
-	// Recupera le statistiche dei giocatori per partita
-	const playerStats = await prisma.playerMatchStats.findMany({
-		where: {
-			player: {
-				playgroundId: params.playgroundId,
-			},
-		},
-		include: {
-			match: {
-				select: { day: true },
-			},
-			player: {
-				select: { id: true },
-			},
-		},
-	})
-
-	// Calcola i punti per i gironi (giorni 1,2,3,4,6)
-	const playersWithGroupStats = allPlayers.map((player) => {
-		const groupMatches = playerStats.filter(
-			(stat) =>
-				stat.playerId === player.id &&
-				stat.match.day !== 5 &&
-				stat.match.day !== 7,
-		)
-		const groupPoints = groupMatches.reduce((sum, stat) => sum + stat.points, 0)
-
-		return {
-			...player,
-			groupPoints,
-		}
-	})
-
-	// Calcola i punti per le finali (giorni 5,7)
-	const playersWithFinalsStats = allPlayers.map((player) => {
-		const finalsMatches = playerStats.filter(
-			(stat) =>
-				stat.playerId === player.id &&
-				(stat.match.day === 5 || stat.match.day === 7),
-		)
-		const finalsPoints = finalsMatches.reduce(
-			(sum, stat) => sum + stat.points,
-			0,
-		)
-
-		return {
-			...player,
-			finalsPoints,
-		}
-	})
-
-	// Top 10 giocatori per gironi
-	const topPlayersGroups = playersWithGroupStats
-		.sort((a, b) => b.groupPoints - a.groupPoints)
-		.slice(0, 100)
-
-	// Top 10 giocatori per finali
-	const topPlayersFinals = playersWithFinalsStats
-		.sort((a, b) => b.finalsPoints - a.finalsPoints)
-		.slice(0, 50)
-
-	// Raggruppiamo le squadre per girone
-	const groups = teams.reduce(
-		(acc, team) => {
-			const allMatches = [...team.matchesAsTeam1, ...team.matchesAsTeam2]
-
-			const matchesPlayed = allMatches.filter(
-				(match) => match.winner !== null,
-			).length
-			const matchesWon = allMatches.filter(
-				(match) => match.winner === team.id,
-			).length
-
-			// Calcolo della differenza punti
-			let pointsScored = 0
-			let pointsConceded = 0
-
-			allMatches.forEach((match) => {
-				if (match.winner !== null) {
-					if (team.matchesAsTeam1.some((m) => m.id === match.id)) {
-						pointsScored += match.score1 || 0
-						pointsConceded += match.score2 || 0
-					} else {
-						pointsScored += match.score2 || 0
-						pointsConceded += match.score1 || 0
-					}
-				}
-			})
-
-			const pointsDifference = pointsScored - pointsConceded
-			const winPercentage = matchesPlayed > 0 ? matchesWon / matchesPlayed : 0
-
-			const teamData = {
-				id: team.id,
-				name: team.name,
-				matchesPlayed,
-				matchesWon,
-				pointsScored,
-				pointsConceded,
-				winPercentage,
-				pointsDifference,
-				pointsGroup: matchesWon * 2,
-			}
-
-			if (!acc[`${team.group.name}_${team.group.color}`]) {
-				acc[`${team.group.name}_${team.group.color}`] = []
-			}
-
-			acc[`${team.group.name}_${team.group.color}`]?.push(teamData)
-			return acc
-		},
-		{} as Record<string, TeamWithStatsType[]>,
-	)
-
-	// Ordiniamo le squadre di ogni girone con la nuova logica:
-	// 1. Ordina per percentuale vittorie
-	// 2. Se ci sono squadre con la stessa percentuale vittorie, applica la classifica avulsa
-	Object.keys(groups).forEach((groupName) => {
-		const group = groups[groupName]
-		if (group) {
-			// Prima ordina per percentuale vittorie
-			group.sort((a, b) => {
-				if (!a || !b) return 0
-				return b.winPercentage - a.winPercentage
-			})
-
-			// Poi applica la classifica avulsa per squadre con stessa percentuale
-			let currentIndex = 0
-			while (currentIndex < group.length) {
-				const currentTeam = group[currentIndex]
-				if (!currentTeam) {
-					currentIndex++
-					continue
-				}
-
-				const currentWinPercentage = currentTeam.winPercentage
-				let endIndex = currentIndex + 1
-
-				// Trova tutte le squadre con la stessa percentuale vittorie
-				while (
-					endIndex < group.length &&
-					group[endIndex]?.winPercentage === currentWinPercentage
-				) {
-					endIndex++
-				}
-
-				// Se ci sono più squadre con la stessa percentuale, applica la classifica avulsa
-				if (endIndex - currentIndex > 1) {
-					const tiedTeams = group.slice(currentIndex, endIndex).filter(Boolean)
-					const sortedTiedTeams = calculateTiebreaker(tiedTeams, teams)
-
-					// Sostituisci le squadre ordinate
-					for (let i = 0; i < sortedTiedTeams.length; i++) {
-						if (group[currentIndex + i] && sortedTiedTeams[i]) {
-							group[currentIndex + i] = sortedTiedTeams[i]!
-						}
-					}
-				}
-
-				currentIndex = endIndex
-			}
-		}
-	})
-
-	return { groups, topPlayersGroups, topPlayersFinals }
+	return getRankingsData(params.playgroundId)
 }
 
 export default function Rankings() {
-	const { topPlayersGroups, topPlayersFinals, groups } =
-		useLoaderData<typeof loader>()
+	const {
+		topPlayersGroups,
+		topPlayersFinals,
+		groups,
+		directPlayoffTeamIds,
+		playinTeamIds,
+	} = useLoaderData<typeof loader>()
 	const params = useParams()
 	const location = useLocation()
 	const currentPath = `${location.pathname}${location.search}`
+	const directPlayoffSet = new Set(directPlayoffTeamIds)
+	const playinSet = new Set(playinTeamIds)
 
 	return (
 		<div className="p-4">
@@ -260,31 +67,77 @@ export default function Rankings() {
 						const [name, color] = groupName.split('_')
 						return (
 							<div key={groupName} className="mt-4">
-								<Badge
+								<div
 									className={cn(
-										'mb-2 text-lg',
-										colorGroupClasses[color as ColorGroup],
+										'overflow-hidden rounded-lg border border-gray-300',
+										groupBorderClasses[color as ColorGroup],
 									)}
 								>
-									{name}
-								</Badge>
-								<div className="overflow-hidden rounded-lg border border-gray-300">
+									<div
+										className={cn(
+											'rounded-lg rounded-b-none border px-4 py-3 backdrop-blur-xl',
+											groupAccentClasses[color as ColorGroup],
+										)}
+									>
+										<div className="relative flex items-center justify-between gap-3">
+											<Badge
+												className={cn(
+													colorGroupClasses[color as ColorGroup],
+													'text-base',
+												)}
+											>
+												{name}
+											</Badge>
+											<div className="flex flex-wrap items-center gap-2 text-xs font-medium">
+												<span className="rounded-md bg-emerald-500/50 px-2 py-1 text-emerald-950 dark:text-emerald-200">
+													Playoff
+												</span>
+												<span className="rounded-md bg-amber-500/50 px-2 py-1 text-amber-950 dark:text-amber-200">
+													Play-in
+												</span>
+											</div>
+										</div>
+									</div>
 									<Table className="w-full border-collapse">
 										<TableHeader>
 											<TableRow className="bg-gray-100">
-												<TableHead>Nome squadra</TableHead>
-												<TableHead>Partite vinte</TableHead>
-												<TableHead>Partite giocate</TableHead>
-												<TableHead>% vittorie</TableHead>
-												<TableHead>Punti fatti</TableHead>
-												<TableHead>Punti subiti</TableHead>
+												<TableHead>#</TableHead>
+												<TableHead>Squadra</TableHead>
+												<TableHead>V</TableHead>
+												<TableHead>P</TableHead>
+												<TableHead>%</TableHead>
+												<TableHead>PF</TableHead>
+												<TableHead>PS</TableHead>
 												<TableHead>+/-</TableHead>
 											</TableRow>
 										</TableHeader>
 										<TableBody>
-											{teams.map((team) => {
+											{teams.map((team, index) => {
+												const isDirectPlayoff = directPlayoffSet.has(team.id)
+												const isPlayin = playinSet.has(team.id)
+
 												return (
-													<TableRow key={team.id} className="text-center">
+													<TableRow
+														key={team.id}
+														className="text-center backdrop-blur-xl"
+													>
+														<TableCell className="text-center font-semibold text-slate-700">
+															<span
+																className={cn(
+																	'inline-flex h-7 min-w-7 items-center justify-center rounded-full px-1.5 text-xs font-bold leading-none sm:h-8 sm:min-w-8 sm:px-2 sm:text-sm',
+																	{
+																		'bg-emerald-500 text-white ring-2 ring-emerald-300/70':
+																			isDirectPlayoff,
+																		'bg-amber-500 text-amber-950 ring-2 ring-amber-300/70':
+																			!isDirectPlayoff && isPlayin,
+																		'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-100':
+																			!isDirectPlayoff && !isPlayin,
+																	},
+																)}
+															>
+																{index + 1}
+															</span>
+														</TableCell>
 														<TableCell>
 															<Link
 																to={`/playground/${params.playgroundId}/team/${team.id}?returnTo=${encodeURIComponent(currentPath)}`}
@@ -296,7 +149,9 @@ export default function Rankings() {
 															</Link>
 														</TableCell>
 														<TableCell>{team.matchesWon}</TableCell>
-														<TableCell>{team.matchesPlayed}</TableCell>
+														<TableCell>
+															{team.matchesPlayed - team.matchesWon}
+														</TableCell>
 														<TableCell>
 															{team.winPercentage.toFixed(2)}
 														</TableCell>
