@@ -1,8 +1,6 @@
-import { type ColorGroup, PrismaClient } from '@prisma/client'
+import { type ColorGroup, type PrismaClient } from '@prisma/client'
 import { type TeamWithPlayoffStats, type TeamWithStatsType } from '~/lib/types'
 import { calculateTiebreaker, sortTeamsWithTiebreaker } from '~/lib/utils'
-
-const prisma = new PrismaClient()
 
 export const groupAccentClasses: Record<ColorGroup, string> = {
 	red: 'bg-red-500/10 text-red-700 dark:text-red-300',
@@ -36,7 +34,10 @@ export const groupBorderClasses: Record<ColorGroup, string> = {
 	cyan: 'border-cyan-500/40',
 }
 
-export const getRankingsData = async (playgroundId: string) => {
+export const getRankingsData = async (
+	prisma: PrismaClient,
+	playgroundId: string,
+) => {
 	const teams = await prisma.team.findMany({
 		where: { group: { playgroundId } },
 		include: {
