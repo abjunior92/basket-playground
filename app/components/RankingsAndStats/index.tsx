@@ -29,6 +29,152 @@ type RankingsAndStatsProps = {
 	currentPath?: string
 }
 
+type RankedPlayer =
+	| RankingsData['topPlayersGroups'][number]
+	| RankingsData['topPlayersFinals'][number]
+
+const getRankPillClasses = (position: number) => {
+	if (position === 1) {
+		return 'bg-yellow-400 text-yellow-950 ring-2 ring-yellow-200/80'
+	}
+
+	if (position === 2) {
+		return 'bg-slate-300 text-slate-950 ring-2 ring-slate-200/80'
+	}
+
+	if (position === 3) {
+		return 'bg-amber-800 text-amber-50 ring-2 ring-amber-200/80'
+	}
+
+	return 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-100'
+}
+
+const getScoreTextClasses = (position: number) => {
+	if (position === 1) {
+		return 'text-3xl sm:text-4xl bg-radial from-yellow-100 via-yellow-600 to-yellow-500 bg-clip-text text-transparent'
+	}
+
+	if (position === 2) {
+		return 'text-2xl sm:text-3xl bg-radial from-slate-100 via-slate-600 to-slate-500 bg-clip-text text-transparent'
+	}
+
+	if (position === 3) {
+		return 'text-xl sm:text-2xl bg-radial from-amber-100 via-amber-600 to-amber-500 bg-clip-text text-transparent'
+	}
+
+	return 'text-lg sm:text-xl'
+}
+
+type PlayerRankingListProps<T extends RankedPlayer> = {
+	title: string
+	players: T[]
+	withLinks: boolean
+	playgroundId: string
+	currentPath?: string
+	getScore: (player: T) => number
+	showGroupBadge?: boolean
+}
+
+const PlayerRankingList = <T extends RankedPlayer>({
+	title,
+	players,
+	withLinks,
+	playgroundId,
+	currentPath,
+	getScore,
+	showGroupBadge = false,
+}: PlayerRankingListProps<T>) => {
+	return (
+		<div className="mt-4 overflow-hidden rounded-xl border border-amber-300/70 shadow-sm backdrop-blur-xl dark:bg-slate-900">
+			<div className="flex items-center justify-between border-b border-amber-300/60 bg-linear-to-r from-amber-400 via-yellow-300 to-amber-200 px-4 py-3 backdrop-blur-xl">
+				<h3 className="bg- text-base font-extrabold text-amber-950 sm:text-lg">
+					{title}
+				</h3>
+				<div className="mt-1 text-[11px] font-semibold tracking-wide text-slate-500 uppercase dark:text-slate-400">
+					Punti
+				</div>
+			</div>
+
+			<div className="space-y-1.5 p-2 sm:p-3">
+				{players.map((player, index) => {
+					const position = index + 1
+
+					return (
+						<div
+							key={player.id}
+							className={cn(
+								'flex items-center gap-3 rounded-xl px-2.5 py-3 sm:gap-4 sm:px-3',
+								{
+									'bg-red-500/15': player.isExpelled,
+									'bg-yellow-500/15': player.warnings === 1,
+								},
+							)}
+						>
+							<div className="shrink-0">
+								<span
+									className={cn(
+										'inline-flex h-8 min-w-8 items-center justify-center rounded-full px-2 text-sm leading-none font-bold sm:h-9 sm:min-w-9 sm:text-base',
+										getRankPillClasses(position),
+									)}
+								>
+									{position}
+								</span>
+							</div>
+
+							<div className="min-w-0 flex-1">
+								{withLinks ? (
+									<Link
+										to={`/playground/${playgroundId}/player/${player.id}?returnTo=${encodeURIComponent(currentPath ?? '')}`}
+										className="group inline-flex max-w-full items-center gap-2"
+										aria-label={`Apri profilo giocatore ${player.name} ${player.surname}`}
+									>
+										<span className="truncate text-base font-extrabold text-slate-900 sm:text-lg dark:text-slate-100">
+											{player.name} {player.surname}
+										</span>
+										<ChevronRight className="h-4 w-4 shrink-0 opacity-70 transition group-hover:translate-x-0.5 group-hover:opacity-100" />
+									</Link>
+								) : (
+									<div className="truncate text-base font-extrabold text-slate-900 sm:text-lg dark:text-slate-100">
+										{player.name} {player.surname}
+									</div>
+								)}
+
+								<div className="mt-0.5 flex flex-wrap items-center gap-2">
+									<span className="truncate text-xs font-medium text-slate-500 sm:text-sm dark:text-slate-400">
+										{player.team.name}
+									</span>
+
+									{showGroupBadge ? (
+										<Badge
+											className={cn(
+												colorGroupClasses[player.team.group.color],
+												'text-[10px] sm:text-xs',
+											)}
+										>
+											{player.team.group.name}
+										</Badge>
+									) : null}
+								</div>
+							</div>
+
+							<div className="shrink-0 text-right">
+								<div
+									className={cn(
+										'leading-none font-black text-slate-900 dark:text-slate-100',
+										getScoreTextClasses(position),
+									)}
+								>
+									{getScore(player)}
+								</div>
+							</div>
+						</div>
+					)
+				})}
+			</div>
+		</div>
+	)
+}
+
 const RankingsAndStats = ({
 	data,
 	playgroundId,
@@ -172,117 +318,26 @@ const RankingsAndStats = ({
 				</TabsContent>
 
 				<TabsContent value="players">
-					<h3 className="text-lg font-bold">Top 100</h3>
-					<div className="mt-4 overflow-hidden rounded-lg border border-gray-300">
-						<Table className="w-full border-collapse">
-							<TableHeader>
-								<TableRow className="bg-gray-100">
-									<TableHead>Nome Cognome</TableHead>
-									<TableHead>Squadra</TableHead>
-									<TableHead>Girone</TableHead>
-									<TableHead>Punti gironi</TableHead>
-								</TableRow>
-							</TableHeader>
-							<TableBody>
-								{topPlayersGroups.map((player) => (
-									<TableRow
-										key={player.id}
-										className={cn('text-center', {
-											'bg-red-500/20': player.isExpelled,
-											'hover:bg-red-500/30': player.isExpelled,
-											'bg-yellow-500/20': player.warnings === 1,
-											'hover:bg-yellow-500/30': player.warnings === 1,
-										})}
-									>
-										<TableCell>
-											{withLinks ? (
-												<Link
-													to={`/playground/${playgroundId}/player/${player.id}?returnTo=${encodeURIComponent(currentPath ?? '')}`}
-													className="guest-link-pill w-[stretch] justify-between"
-													aria-label={`Apri profilo giocatore ${player.name} ${player.surname}`}
-												>
-													<span>
-														{player.name} {player.surname}
-													</span>
-													<ChevronRight className="h-3.5 w-3.5 opacity-80" />
-												</Link>
-											) : (
-												<>
-													{player.name} {player.surname}
-												</>
-											)}
-										</TableCell>
-										<TableCell>{player.team.name}</TableCell>
-										<TableCell>
-											<Badge
-												className={colorGroupClasses[player.team.group.color]}
-											>
-												{player.team.group.name}
-											</Badge>
-										</TableCell>
-										<TableCell>{player.groupPoints}</TableCell>
-									</TableRow>
-								))}
-							</TableBody>
-						</Table>
-					</div>
+					<PlayerRankingList
+						title="Top 100"
+						players={topPlayersGroups}
+						withLinks={withLinks}
+						playgroundId={playgroundId}
+						currentPath={currentPath}
+						getScore={(player) => player.groupPoints}
+						showGroupBadge
+					/>
 				</TabsContent>
 
 				<TabsContent value="finals">
-					<h3 className="text-lg font-bold">Top 50</h3>
-					<div className="mt-4 overflow-hidden rounded-lg border border-gray-300">
-						<Table className="w-full border-collapse">
-							<TableHeader>
-								<TableRow className="bg-gray-100">
-									<TableHead>Nome Cognome</TableHead>
-									<TableHead>Squadra</TableHead>
-									<TableHead>Girone</TableHead>
-									<TableHead>Punti finals</TableHead>
-								</TableRow>
-							</TableHeader>
-							<TableBody>
-								{topPlayersFinals.map((player) => (
-									<TableRow
-										key={player.id}
-										className={cn('text-center', {
-											'bg-red-500/20': player.isExpelled,
-											'hover:bg-red-500/30': player.isExpelled,
-											'bg-yellow-500/20': player.warnings === 1,
-											'hover:bg-yellow-500/30': player.warnings === 1,
-										})}
-									>
-										<TableCell>
-											{withLinks ? (
-												<Link
-													to={`/playground/${playgroundId}/player/${player.id}?returnTo=${encodeURIComponent(currentPath ?? '')}`}
-													className="guest-link-pill w-[stretch] justify-between"
-													aria-label={`Apri profilo giocatore ${player.name} ${player.surname}`}
-												>
-													<span>
-														{player.name} {player.surname}
-													</span>
-													<ChevronRight className="h-3.5 w-3.5 opacity-80" />
-												</Link>
-											) : (
-												<>
-													{player.name} {player.surname}
-												</>
-											)}
-										</TableCell>
-										<TableCell>{player.team.name}</TableCell>
-										<TableCell>
-											<Badge
-												className={colorGroupClasses[player.team.group.color]}
-											>
-												{player.team.group.name}
-											</Badge>
-										</TableCell>
-										<TableCell>{player.finalsPoints}</TableCell>
-									</TableRow>
-								))}
-							</TableBody>
-						</Table>
-					</div>
+					<PlayerRankingList
+						title="Top 50"
+						players={topPlayersFinals}
+						withLinks={withLinks}
+						playgroundId={playgroundId}
+						currentPath={currentPath}
+						getScore={(player) => player.finalsPoints}
+					/>
 				</TabsContent>
 			</Tabs>
 		</div>
