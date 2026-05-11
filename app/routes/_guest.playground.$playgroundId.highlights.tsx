@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 import { type LoaderFunctionArgs, type MetaFunction } from '@remix-run/node'
 import { Form, useLoaderData, useParams, useSubmit } from '@remix-run/react'
-import { Flame } from 'lucide-react'
+import { Flame, Plane, Scale, Star, Target } from 'lucide-react'
 import invariant from 'tiny-invariant'
 import Header from '~/components/Header'
 import {
@@ -42,6 +42,25 @@ export default function HighlightsPage() {
 	const backLink = isAdmin
 		? `/playground/${params.playgroundId}`
 		: `/playground/${params.playgroundId}/menu`
+
+	const highlightBgIconClass =
+		'h-36 w-36 shrink-0 stroke-[1.15] text-rose-300/25 sm:h-40 sm:w-40'
+
+	const getIconByHighlightKey = (key: string) => {
+		if (key.includes('biggest-')) {
+			return <Plane className={highlightBgIconClass} />
+		}
+		if (key.includes('closest-')) {
+			return <Scale className={highlightBgIconClass} />
+		}
+		if (key.includes('top-scorer-day-')) {
+			return <Star className={highlightBgIconClass} />
+		}
+		if (key.includes('three-point-leader')) {
+			return <Target className={highlightBgIconClass} />
+		}
+		return null
+	}
 
 	return (
 		<div className="mx-auto max-w-lg space-y-4 p-4">
@@ -110,28 +129,41 @@ export default function HighlightsPage() {
 								: 'Giornata non disponibile'}
 						</p>
 
-						<p className="mt-1 text-base font-extrabold tracking-tight text-slate-950 md:text-lg">
+						<p className="mt-1 text-lg font-extrabold tracking-tight text-slate-950 md:text-xl">
 							<span aria-hidden="true">🏀</span> Torneo 3vs3 Longara
 						</p>
 					</div>
 					{highlights.length > 0 ? (
 						<ul className="space-y-2">
-							{highlights.map((highlight) => (
-								<li
-									key={highlight.key}
-									className="bg-white-50/85 rounded-lg p-3"
-								>
-									<p className="text-xs font-semibold tracking-wide text-rose-900 uppercase">
-										{highlight.icon} {highlight.title}
-									</p>
-									<p className="mt-1 text-sm font-semibold text-slate-950">
-										{highlight.text}
-									</p>
-									<p className="mt-1 text-xs text-slate-700">
-										{highlight.meta}
-									</p>
-								</li>
-							))}
+							{highlights.map((highlight) => {
+								const bgIcon = getIconByHighlightKey(highlight.key)
+								return (
+									<li
+										key={highlight.key}
+										className="bg-white-50/85 section-blur relative min-h-36 overflow-hidden rounded-lg p-3 sm:min-h-40"
+									>
+										{bgIcon ? (
+											<div
+												aria-hidden="true"
+												className="pointer-events-none absolute -right-6 -bottom-6 flex items-end justify-end"
+											>
+												{bgIcon}
+											</div>
+										) : null}
+										<div className="relative z-10 flex w-full flex-col text-left">
+											<p className="text-sm font-semibold tracking-wide text-rose-900 uppercase">
+												{highlight.title}
+											</p>
+											<p className="mt-1 text-lg font-semibold text-slate-950">
+												{highlight.text}
+											</p>
+											<p className="mt-1 text-xs text-slate-700">
+												{highlight.meta}
+											</p>
+										</div>
+									</li>
+								)
+							})}
 						</ul>
 					) : (
 						<p className="text-sm text-slate-800">

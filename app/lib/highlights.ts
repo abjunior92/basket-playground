@@ -3,7 +3,6 @@ import { getTournamentDayCandidates } from '~/lib/utils'
 
 export type TournamentHighlight = {
 	key: string
-	icon: string
 	title: string
 	text: string
 	meta: string
@@ -134,10 +133,11 @@ export const getTournamentHighlightsByDay = async (
 		}
 	}
 
-	const threePointLeader = await prisma.threePointChallengeParticipant.findFirst({
-		where: { playgroundId },
-		orderBy: [{ score: 'desc' }, { surname: 'asc' }, { name: 'asc' }],
-	})
+	const threePointLeader =
+		await prisma.threePointChallengeParticipant.findFirst({
+			where: { playgroundId },
+			orderBy: [{ score: 'desc' }, { surname: 'asc' }, { name: 'asc' }],
+		})
 	if (threePointLeader) {
 		topThreePointLeader = {
 			playerName: `${threePointLeader.name} ${threePointLeader.surname}`,
@@ -149,7 +149,6 @@ export const getTournamentHighlightsByDay = async (
 		biggestWin
 			? {
 					key: `biggest-${biggestWin.id}`,
-					icon: '🔥',
 					title: 'Vittoria con più margine',
 					text: `${biggestWin.team1.name} ${biggestWin.score1} - ${biggestWin.score2} ${biggestWin.team2.name}`,
 					meta: `Scarto di ${Math.abs((biggestWin.score1 ?? 0) - (biggestWin.score2 ?? 0))} punti`,
@@ -158,7 +157,6 @@ export const getTournamentHighlightsByDay = async (
 		closestMatch
 			? {
 					key: `closest-${closestMatch.id}`,
-					icon: '⚖️',
 					title: 'Partita più equilibrata',
 					text: `${closestMatch.team1.name} ${closestMatch.score1} - ${closestMatch.score2} ${closestMatch.team2.name}`,
 					meta: `Scarto di ${Math.abs((closestMatch.score1 ?? 0) - (closestMatch.score2 ?? 0))} punto/i`,
@@ -167,7 +165,6 @@ export const getTournamentHighlightsByDay = async (
 		topScorerOfDay
 			? {
 					key: `top-scorer-day-${topScorerOfDay.day}`,
-					icon: '⭐',
 					title: 'Top scorer di giornata',
 					text: `${topScorerOfDay.playerName} (${topScorerOfDay.teamName})`,
 					meta: `${topScorerOfDay.points} punti totali`,
@@ -176,7 +173,6 @@ export const getTournamentHighlightsByDay = async (
 		topThreePointLeader
 			? {
 					key: 'three-point-leader',
-					icon: '🎯',
 					title: 'Leader 3PT Challenge',
 					text: topThreePointLeader.playerName,
 					meta: `${topThreePointLeader.score} punti`,
