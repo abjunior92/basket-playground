@@ -262,3 +262,5 @@ export const getRankingsData = async (playgroundId: string) => {
 		playinTeamIds,
 	}
 }
+
+export type RankingsData = Awaited<ReturnType<typeof getRankingsData>>
