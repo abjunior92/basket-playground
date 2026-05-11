@@ -211,7 +211,7 @@ const RankingsAndStats = ({
 					{Object.entries(groups).map(([groupName, teams]) => {
 						const [name, color] = groupName.split('_')
 						return (
-							<div key={groupName} className="mt-4">
+							<div key={groupName} className="mt-4 backdrop-blur-xl">
 								<div
 									className={cn(
 										'overflow-hidden rounded-lg border border-gray-300',
@@ -220,7 +220,7 @@ const RankingsAndStats = ({
 								>
 									<div
 										className={cn(
-											'rounded-lg rounded-b-none border px-4 py-3 backdrop-blur-xl',
+											'rounded-lg rounded-b-none border border-b-0 px-4 py-3',
 											groupAccentClasses[color as ColorGroup],
 										)}
 									>
@@ -243,9 +243,14 @@ const RankingsAndStats = ({
 											</div>
 										</div>
 									</div>
-									<Table className="w-full border-collapse">
+									<Table className="w-full border-collapse backdrop-blur-xl **:border-none">
 										<TableHeader>
-											<TableRow className="bg-gray-100">
+											<TableRow
+												className={cn(
+													'border-none backdrop-blur-xl',
+													groupAccentClasses[color as ColorGroup],
+												)}
+											>
 												<TableHead>#</TableHead>
 												<TableHead>Squadra</TableHead>
 												<TableHead>V</TableHead>
@@ -263,7 +268,7 @@ const RankingsAndStats = ({
 												return (
 													<TableRow
 														key={team.id}
-														className="text-center backdrop-blur-xl"
+														className="bg-transparent text-center"
 													>
 														<TableCell className="text-center font-semibold text-slate-700">
 															<span
@@ -282,18 +287,18 @@ const RankingsAndStats = ({
 																{index + 1}
 															</span>
 														</TableCell>
-														<TableCell>
+														<TableCell align="left">
 															{withLinks ? (
 																<Link
 																	to={`/playground/${playgroundId}/team/${team.id}?returnTo=${encodeURIComponent(currentPath ?? '')}`}
-																	className="guest-link-pill w-[stretch] justify-between"
+																	className="guest-link-pill w-[stretch] justify-between font-bold"
 																	aria-label={`Apri profilo squadra ${team.name}`}
 																>
 																	<span>{team.name}</span>
 																	<ChevronRight className="h-3.5 w-3.5 opacity-80" />
 																</Link>
 															) : (
-																team.name
+																<span className="font-bold">{team.name}</span>
 															)}
 														</TableCell>
 														<TableCell>{team.matchesWon}</TableCell>
