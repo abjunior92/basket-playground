@@ -87,7 +87,7 @@ export default function GuestThreePointChallengeRanking() {
 											{participant.playerId ? (
 												<Link
 													to={`/playground/${params.playgroundId}/player/${participant.playerId}?returnTo=${encodeURIComponent(currentPath)}`}
-													className="guest-link-pill w-[stretch] justify-between"
+													className="guest-link-pill-bordered w-[stretch] justify-between"
 													aria-label={`Apri profilo giocatore ${participant.name} ${participant.surname}`}
 												>
 													{participant.name} {participant.surname}

@@ -6,8 +6,23 @@ import {
 	type LoaderFunctionArgs,
 	type MetaFunction,
 } from '@remix-run/node'
-import { Link, useFetcher, useLoaderData, useLocation, useParams } from '@remix-run/react'
-import { CalendarRange, ChevronRight, Eye, EyeOff } from 'lucide-react'
+import {
+	Link,
+	useFetcher,
+	useLoaderData,
+	useLocation,
+	useParams,
+} from '@remix-run/react'
+import {
+	CalendarRange,
+	ChevronRight,
+	Clock,
+	Eye,
+	EyeOff,
+	MapPin,
+	Pencil,
+	Users,
+} from 'lucide-react'
 import { useState } from 'react'
 import invariant from 'tiny-invariant'
 import Header from '~/components/Header'
@@ -202,7 +217,12 @@ export default function Matches() {
 				/>
 			</div>
 
-			<div className="flex flex-col md:flex-row md:gap-4 md:[&>div]:w-96">
+			<div
+				className={cn(
+					'section-blur',
+					'flex flex-col md:flex-row md:gap-4 md:[&>div]:w-96',
+				)}
+			>
 				{/* Select per filtrare per girone */}
 				<div className="mb-6 w-full md:w-auto">
 					<span className="text-sm">
@@ -309,8 +329,9 @@ export default function Matches() {
 													className="space-y-3 border-b border-gray-200 bg-white p-4 last:border-b-0"
 												>
 													<div className="flex items-center justify-between gap-3">
-														<div className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700">
-															⏱️ {timeSlot}
+														<div className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700">
+															<Clock className="h-3 w-3 text-red-500" />{' '}
+															{timeSlot}
 														</div>
 													</div>
 
@@ -320,45 +341,62 @@ export default function Matches() {
 																match.winner === match.team1Id
 															const isTeam2Winner =
 																match.winner === match.team2Id
+															const isSameGroup =
+																match.team1.group.id === match.team2.group.id
 
 															return (
 																<div
 																	key={match.id}
 																	className="space-y-2 rounded-md border border-gray-200 bg-gray-50 p-3"
 																>
-																	<div className="text-xs font-medium tracking-wide text-gray-600 uppercase">
-																		📍 Campo {match.field}
+																	<div className="flex items-center justify-between">
+																		<div className="inline-flex items-center gap-1 text-xs font-medium tracking-wide text-gray-600">
+																			<MapPin className="h-3 w-3 text-red-500" />{' '}
+																			Campo {match.field}
+																		</div>
+																		{isSameGroup && (
+																			<Badge
+																				className={cn(
+																					'inline-table text-[10px]',
+																					colorGroupClasses[
+																						match.team1.group.color
+																					],
+																				)}
+																			>
+																				{match.team1.group.name}
+																			</Badge>
+																		)}
 																	</div>
 																	<div className="space-y-2">
 																		<div className="rounded-md border border-gray-200 bg-white p-2">
 																			<div className="flex items-center justify-between gap-2">
 																				<div className="flex flex-col items-start gap-1">
-																					<Badge
-																						className={cn(
-																							'inline-table',
-																							colorGroupClasses[
-																								match.team1.group.color
-																							],
-																						)}
-																					>
-																						{match.team1.group.name}
-																					</Badge>
 																					<Link
 																						to={`/playground/${params.playgroundId}/team/${match.team1.id}?returnTo=${encodeURIComponent(currentPath)}`}
 																						className="guest-link-pill font-medium"
 																						aria-label={`Apri profilo squadra ${match.team1.name}`}
 																					>
-																						<span>
-																							{isTeam1Winner && '🏆 '}
-																							{match.team1.name}
-																						</span>
+																						<span>{match.team1.name}</span>
 																						<ChevronRight className="h-3.5 w-3.5 opacity-80" />
 																					</Link>
+																					{!isSameGroup && (
+																						<Badge
+																							className={cn(
+																								'inline-table text-[10px]',
+																								colorGroupClasses[
+																									match.team1.group.color
+																								],
+																							)}
+																						>
+																							{match.team1.group.name}
+																						</Badge>
+																					)}
 																				</div>
 																				<span
 																					className={cn(
 																						isTeam1Winner &&
 																							'font-bold text-green-600',
+																						'text-2xl',
 																					)}
 																				>
 																					{match.score1}
@@ -373,27 +411,27 @@ export default function Matches() {
 																						className="guest-link-pill font-medium"
 																						aria-label={`Apri profilo squadra ${match.team2.name}`}
 																					>
-																						<span>
-																							{isTeam2Winner && '🏆 '}
-																							{match.team2.name}
-																						</span>
+																						<span>{match.team2.name}</span>
 																						<ChevronRight className="h-3.5 w-3.5 opacity-80" />
 																					</Link>
-																					<Badge
-																						className={cn(
-																							'inline-table',
-																							colorGroupClasses[
-																								match.team2.group.color
-																							],
-																						)}
-																					>
-																						{match.team2.group.name}
-																					</Badge>
+																					{!isSameGroup && (
+																						<Badge
+																							className={cn(
+																								'inline-table text-[10px]',
+																								colorGroupClasses[
+																									match.team2.group.color
+																								],
+																							)}
+																						>
+																							{match.team2.group.name}
+																						</Badge>
+																					)}
 																				</div>
 																				<span
 																					className={cn(
 																						isTeam2Winner &&
 																							'font-bold text-green-600',
+																						'text-2xl',
 																					)}
 																				>
 																					{match.score2}
@@ -415,24 +453,34 @@ export default function Matches() {
 									<TableHeader>
 										<TableRow className="bg-gray-100">
 											<TableHead className="w-auto">
-												⏱️ <br />
-												<span className="hidden md:inline">Orario</span>
+												<div className="flex items-center justify-center gap-1">
+													<Clock className="h-3 w-3 shrink-0 text-red-500" />
+													<span className="hidden md:inline">Orario</span>
+												</div>
 											</TableHead>
-											<TableHead className="max-w-12">
-												📍 <br />
-												<span className="hidden md:block">Campo</span>
+											<TableHead className="max-w-14">
+												<div className="flex items-center justify-center gap-1">
+													<MapPin className="h-3 w-3 shrink-0 text-red-500" />
+													<span className="hidden md:block">Campo</span>
+												</div>
 											</TableHead>
 											<TableHead className="w-auto">
-												👥 <br />
-												<span className="hidden md:inline">Squadra 1</span>
+												<div className="flex items-center justify-center gap-1">
+													<Users className="h-3 w-3 shrink-0 text-red-500" />
+													<span className="hidden md:inline">Squadra 1</span>
+												</div>
 											</TableHead>
 											<TableHead className="w-auto">
-												👥 <br />
-												<span className="hidden md:inline">Squadra 2</span>
+												<div className="flex items-center justify-center gap-1">
+													<Users className="h-3 w-3 shrink-0 text-red-500" />
+													<span className="hidden md:inline">Squadra 2</span>
+												</div>
 											</TableHead>
 											<TableHead className="min-w-16 md:w-auto">
-												📝 <br />
-												<span className="hidden md:inline">Risultato</span>
+												<div className="flex items-center justify-center gap-1">
+													<Pencil className="h-3 w-3 shrink-0 text-red-500" />
+													<span className="hidden md:inline">Risultato</span>
+												</div>
 											</TableHead>
 										</TableRow>
 									</TableHeader>

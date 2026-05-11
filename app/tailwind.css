@@ -198,7 +198,11 @@
 	}
 
 	.guest-link-pill {
-		@apply inline-flex items-center gap-1 rounded-md border border-blue-200 bg-blue-50 px-2 py-1 text-sm text-blue-800 underline-offset-2 transition-colors duration-200 hover:bg-blue-100 hover:underline focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:outline-none;
+		@apply inline-flex items-center gap-1 underline-offset-2 transition-colors duration-200 hover:underline focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:outline-none;
+	}
+
+	.guest-link-pill-bordered {
+		@apply inline-flex items-center gap-1 rounded-lg border border-blue-200 bg-blue-50/90 px-2 py-1 text-blue-900 underline-offset-2 transition-colors duration-200 hover:bg-blue-100 hover:underline focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:outline-none;
 	}
 
 	.cta-arrow {

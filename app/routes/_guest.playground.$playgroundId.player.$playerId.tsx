@@ -162,7 +162,7 @@ export default function GuestPlayerProfile() {
 				<div className="mt-3 flex flex-wrap gap-2">
 					<Link
 						to={`/playground/${playgroundId}/team/${player.teamId}?returnTo=${encodeURIComponent(currentPath)}`}
-						className="guest-link-pill"
+						className="guest-link-pill-bordered"
 					>
 						<Shield className="h-3.5 w-3.5" />
 						<span>{player.teamName}</span>

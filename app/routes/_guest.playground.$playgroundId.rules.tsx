@@ -47,7 +47,7 @@ export default function Rules() {
 						<a
 							key={section.id}
 							href={`#${section.id}`}
-							className="guest-link-pill justify-between"
+							className="guest-link-pill-bordered justify-between"
 						>
 							<span>{section.title}</span>
 						</a>

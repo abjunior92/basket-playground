@@ -147,7 +147,7 @@ export default function Index() {
 							</h2>
 							<Link
 								to={`/playground/${playground.id}/highlights`}
-								className="guest-link-pill border-blue-200 bg-blue-50/90 text-blue-900 hover:bg-blue-100"
+								className="guest-link-pill-bordered"
 							>
 								<span>Highlights</span>
 								<Flame className="h-3.5 w-3.5" />
