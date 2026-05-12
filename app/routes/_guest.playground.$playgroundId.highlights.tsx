@@ -1,9 +1,11 @@
 import { PrismaClient } from '@prisma/client'
 import { type LoaderFunctionArgs, type MetaFunction } from '@remix-run/node'
 import { Form, useLoaderData, useParams, useSubmit } from '@remix-run/react'
-import { Flame, Scale, Star, Target } from 'lucide-react'
+import { Download, Flame, Loader2, Scale, Star, Target } from 'lucide-react'
+import { useRef, useState } from 'react'
 import invariant from 'tiny-invariant'
 import Header from '~/components/Header'
+import { Button } from '~/components/ui/button'
 import {
 	Select,
 	SelectContent,
@@ -11,6 +13,11 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '~/components/ui/select'
+import {
+	createHighlightsImageDataUrl,
+	downloadDataUrl,
+	getHighlightsImageFileName,
+} from '~/lib/highlight-image-download'
 import { getHighlightPresentation } from '~/lib/highlight-presentation'
 import { getTournamentHighlightsByDay } from '~/lib/highlights'
 import { getDayLabel } from '~/lib/utils'
@@ -40,6 +47,10 @@ export default function HighlightsPage() {
 		useLoaderData<typeof loader>()
 	const params = useParams()
 	const submit = useSubmit()
+	const highlightsCardRef = useRef<HTMLElement>(null)
+	const [downloadStatus, setDownloadStatus] = useState<
+		'idle' | 'saving' | 'done' | 'error'
+	>('idle')
 	const backLink = isAdmin
 		? `/playground/${params.playgroundId}`
 		: `/playground/${params.playgroundId}/menu`
@@ -50,6 +61,40 @@ export default function HighlightsPage() {
 		star: Star,
 		target: Target,
 	}
+
+	const handleDownloadHighlights = async () => {
+		if (!highlightsCardRef.current || downloadStatus === 'saving') {
+			return
+		}
+
+		setDownloadStatus('saving')
+
+		try {
+			const { toPng } = await import('html-to-image')
+			const dataUrl = await createHighlightsImageDataUrl(
+				highlightsCardRef.current,
+				toPng,
+			)
+			downloadDataUrl({
+				dataUrl,
+				document: window.document,
+				fileName: getHighlightsImageFileName(selectedDay),
+			})
+			setDownloadStatus('done')
+		} catch (error) {
+			console.error("Errore durante il download dell'immagine:", error)
+			setDownloadStatus('error')
+		}
+	}
+
+	const downloadStatusMessage =
+		downloadStatus === 'saving'
+			? 'Sto preparando il PNG degli highlights.'
+			: downloadStatus === 'done'
+				? 'Immagine salvata: pronta per essere condivisa nelle storie.'
+				: downloadStatus === 'error'
+					? "Non sono riuscito a salvare l'immagine. Riprova tra poco."
+					: 'Scarica una card PNG pronta per le storie social.'
 
 	return (
 		<div className="mx-auto max-w-lg space-y-4 p-4">
@@ -97,7 +142,44 @@ export default function HighlightsPage() {
 				</div>
 			</section>
 
-			<section className="section-blur highlights-card-v2 pt-2">
+			<section className="section-blur space-y-3">
+				<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+					<div className="space-y-1">
+						<p className="text-xs font-semibold tracking-wide text-slate-500 uppercase">
+							Condivisione social
+						</p>
+						<p
+							id="highlights-download-status"
+							className="text-sm text-slate-700"
+							aria-live="polite"
+						>
+							{downloadStatusMessage}
+						</p>
+					</div>
+					<Button
+						type="button"
+						variant="default"
+						onClick={handleDownloadHighlights}
+						disabled={downloadStatus === 'saving' || highlights.length === 0}
+						aria-describedby="highlights-download-status"
+					>
+						{downloadStatus === 'saving' ? (
+							<Loader2 className="animate-spin" aria-hidden="true" />
+						) : (
+							<Download aria-hidden="true" />
+						)}
+						{downloadStatus === 'saving'
+							? 'Preparo immagine'
+							: 'Scarica immagine'}
+					</Button>
+				</div>
+			</section>
+
+			<section
+				ref={highlightsCardRef}
+				className="section-blur highlights-card-v2 pt-2"
+				aria-busy={downloadStatus === 'saving'}
+			>
 				<div
 					aria-hidden="true"
 					className="menu-hero-overlay-v2 pointer-events-none absolute inset-0"
