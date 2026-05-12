@@ -197,6 +197,125 @@
 		@apply relative isolate overflow-hidden border-white/65 bg-linear-to-br from-blue-100/65 via-white/65 to-rose-100/65 shadow-slate-900/15 ring-white/55;
 	}
 
+	.highlight-social-cover {
+		@apply relative overflow-hidden rounded-2xl border px-4 py-4 shadow-sm ring-1;
+		background: oklch(98% 0.012 70 / 0.78);
+		border-color: oklch(99% 0.01 70 / 0.74);
+		box-shadow: 0 14px 32px -30px oklch(24% 0.07 258 / 0.35);
+		--tw-ring-color: oklch(99% 0.01 70 / 0.68);
+	}
+
+	.highlight-social-cover::after {
+		content: '';
+		position: absolute;
+		right: -2.5rem;
+		bottom: -4rem;
+		width: 8rem;
+		height: 8rem;
+		border: 1px solid oklch(42% 0.1 250 / 0.08);
+		border-radius: 999px;
+		pointer-events: none;
+	}
+
+	.highlight-social-item {
+		--highlight-accent: oklch(48% 0.11 252);
+		--highlight-ink: oklch(30% 0.05 260);
+		/* --highlight-paper: oklch(98% 0.01 245); */
+		--highlight-paper: oklch(96% 0.02 262);
+		@apply relative isolate min-h-32 overflow-hidden rounded-2xl border p-4 ring-1 transition-transform duration-200;
+		background:
+			radial-gradient(
+				circle at 92% 10%,
+				color-mix(in oklch, var(--highlight-accent) 9%, transparent),
+				transparent 28%
+			),
+			var(--highlight-paper);
+		border-color: oklch(92% 0.016 70 / 0.78);
+		box-shadow: 0 16px 34px -30px oklch(24% 0.07 258 / 0.34);
+		color: var(--highlight-ink);
+	}
+
+	.highlight-social-item::before {
+		content: '';
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(
+			115deg,
+			transparent 0 58%,
+			color-mix(in oklch, var(--highlight-accent) 8%, transparent) 58% 59%,
+			transparent 59%
+		);
+		opacity: 0.45;
+		pointer-events: none;
+	}
+
+	.highlight-social-badge {
+		@apply inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[0.64rem] leading-none font-semibold tracking-widest uppercase;
+		background: color-mix(
+			in oklch,
+			var(--highlight-accent) 8%,
+			oklch(99% 0.01 70)
+		);
+		border-color: color-mix(
+			in oklch,
+			var(--highlight-accent) 14%,
+			oklch(99% 0.01 70)
+		);
+		color: var(--highlight-ink);
+	}
+
+	.highlight-social-number {
+		@apply text-2xl leading-none font-bold tracking-tighter tabular-nums;
+		color: color-mix(in oklch, var(--highlight-accent) 26%, transparent);
+	}
+
+	.highlight-social-title {
+		@apply text-xs font-bold tracking-[0.14em] uppercase;
+		color: color-mix(in oklch, var(--highlight-ink) 76%, oklch(38% 0.03 260));
+	}
+
+	.highlight-social-copy {
+		@apply mt-1 max-w-[18rem] text-xl leading-tight font-medium tracking-[-0.025em] text-slate-950 sm:text-2xl;
+		text-wrap: balance;
+	}
+
+	.highlight-social-copy strong {
+		color: inherit;
+		font-weight: 850;
+	}
+
+	.highlight-social-meta {
+		@apply mt-3 inline-flex w-fit rounded-full px-2.5 py-1 text-xs leading-none font-semibold;
+		background: color-mix(
+			in oklch,
+			var(--highlight-accent) 8%,
+			oklch(99% 0.01 70)
+		);
+		color: color-mix(in oklch, var(--highlight-ink) 88%, oklch(12% 0.03 260));
+	}
+
+	.highlight-social-watermark {
+		position: absolute;
+		right: -0.65rem;
+		bottom: -0.9rem;
+		color: color-mix(in oklch, var(--highlight-accent) 16%, transparent);
+		opacity: 0.62;
+		transition:
+			transform 220ms cubic-bezier(0.16, 1, 0.3, 1),
+			opacity 220ms cubic-bezier(0.16, 1, 0.3, 1);
+	}
+
+	@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+		.highlight-social-item:hover {
+			transform: translateY(-2px);
+		}
+
+		.highlight-social-item:hover .highlight-social-watermark {
+			transform: translate(-0.1rem, -0.1rem) scale(1.02);
+			opacity: 0.72;
+		}
+	}
+
 	.guest-link-pill {
 		@apply inline-flex items-center gap-1 underline-offset-2 transition-colors duration-200 hover:underline focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:outline-none;
 	}

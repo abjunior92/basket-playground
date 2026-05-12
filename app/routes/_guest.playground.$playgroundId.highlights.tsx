@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 import { type LoaderFunctionArgs, type MetaFunction } from '@remix-run/node'
 import { Form, useLoaderData, useParams, useSubmit } from '@remix-run/react'
-import { Flame, Plane, Scale, Star, Target } from 'lucide-react'
+import { Flame, Scale, Star, Target } from 'lucide-react'
 import invariant from 'tiny-invariant'
 import Header from '~/components/Header'
 import {
@@ -11,6 +11,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '~/components/ui/select'
+import { getHighlightPresentation } from '~/lib/highlight-presentation'
 import { getTournamentHighlightsByDay } from '~/lib/highlights'
 import { getDayLabel } from '~/lib/utils'
 import { authSessionStorage } from '~/session.server'
@@ -43,23 +44,11 @@ export default function HighlightsPage() {
 		? `/playground/${params.playgroundId}`
 		: `/playground/${params.playgroundId}/menu`
 
-	const highlightBgIconClass =
-		'h-36 w-36 shrink-0 stroke-[1.15] text-rose-300/25 sm:h-40 sm:w-40'
-
-	const getIconByHighlightKey = (key: string) => {
-		if (key.includes('biggest-')) {
-			return <Plane className={highlightBgIconClass} />
-		}
-		if (key.includes('closest-')) {
-			return <Scale className={highlightBgIconClass} />
-		}
-		if (key.includes('top-scorer-day-')) {
-			return <Star className={highlightBgIconClass} />
-		}
-		if (key.includes('three-point-leader')) {
-			return <Target className={highlightBgIconClass} />
-		}
-		return null
+	const iconByHighlightPresentation = {
+		flame: Flame,
+		scale: Scale,
+		star: Star,
+		target: Target,
 	}
 
 	return (
@@ -117,49 +106,57 @@ export default function HighlightsPage() {
 					aria-hidden="true"
 					className="menu-hero-grain pointer-events-none absolute inset-0 opacity-20 mix-blend-soft-light"
 				/>
-				<div className="relative">
-					<div className="mb-2 flex items-center gap-1 place-self-center rounded-full px-2 py-0.5 font-semibold tracking-wide text-rose-950">
-						<Flame className="h-3.5 w-3.5 shrink-0" />
-						Highlights
+				<div className="relative space-y-3">
+					<div className="flex items-center justify-center gap-3">
+						<p className="text-xs font-bold tracking-[0.2em] text-rose-950 uppercase">
+							Highlights
+						</p>
 					</div>
-					<div className="mb-3 rounded-xl border border-slate-300/80 bg-white/80 px-4 py-3">
+					<div className="highlight-social-cover">
 						<p className="text-xs font-semibold tracking-wide text-slate-700 uppercase">
 							{selectedDay
 								? `${getDayLabel(selectedDay.toString())} · Giorno ${selectedDay}`
 								: 'Giornata non disponibile'}
 						</p>
 
-						<p className="mt-1 text-lg font-extrabold tracking-tight text-slate-950 md:text-xl">
+						<p className="mt-1 text-xl leading-tight font-extrabold tracking-tight text-slate-950 md:text-2xl">
 							<span aria-hidden="true">🏀</span> Torneo 3vs3 Longara
 						</p>
 					</div>
 					{highlights.length > 0 ? (
-						<ul className="space-y-2">
-							{highlights.map((highlight) => {
-								const bgIcon = getIconByHighlightKey(highlight.key)
+						<ul className="grid gap-3">
+							{highlights.map((highlight, index) => {
+								const presentation = getHighlightPresentation(highlight.key)
+								const Icon = iconByHighlightPresentation[presentation.icon]
 								return (
 									<li
 										key={highlight.key}
-										className="bg-white-50/85 section-blur relative min-h-36 overflow-hidden rounded-lg p-3 sm:min-h-40"
+										className={`highlight-social-item highlight-social-item--${presentation.tone}`}
 									>
-										{bgIcon ? (
-											<div
-												aria-hidden="true"
-												className="pointer-events-none absolute -right-6 -bottom-6 flex items-end justify-end"
-											>
-												{bgIcon}
-											</div>
-										) : null}
+										<div
+											aria-hidden="true"
+											className="highlight-social-watermark"
+										>
+											<Icon className="h-20 w-20 stroke-[1.1] sm:h-24 sm:w-24" />
+										</div>
 										<div className="relative z-10 flex w-full flex-col text-left">
-											<p className="text-sm font-semibold tracking-wide text-rose-900 uppercase">
+											<div className="mb-3 flex items-center justify-between gap-3">
+												<span className="highlight-social-badge">
+													<Icon className="h-3.5 w-3.5 shrink-0" />
+													{presentation.label}
+												</span>
+												<span className="highlight-social-number">
+													{String(index + 1).padStart(2, '0')}
+												</span>
+											</div>
+											<p className="highlight-social-title">
 												{highlight.title}
 											</p>
-											<p className="mt-1 text-lg font-semibold text-slate-950">
-												{highlight.text}
-											</p>
-											<p className="mt-1 text-xs text-slate-700">
-												{highlight.meta}
-											</p>
+											<p
+												className="highlight-social-copy"
+												dangerouslySetInnerHTML={{ __html: highlight.text }}
+											/>
+											<p className="highlight-social-meta">{highlight.meta}</p>
 										</div>
 									</li>
 								)

@@ -8,6 +8,47 @@ export type TournamentHighlight = {
 	meta: string
 }
 
+const escapeHtml = (value: string) =>
+	value.replace(/[&<>"']/g, (char) => {
+		const entities: Record<string, string> = {
+			'&': '&amp;',
+			'<': '&lt;',
+			'>': '&gt;',
+			'"': '&quot;',
+			"'": '&#39;',
+		}
+
+		return entities[char] ?? char
+	})
+
+const formatMatchHighlightText = (match: {
+	winner: string | null
+	score1: number | null
+	score2: number | null
+	team1Id: string
+	team2Id: string
+	team1: { name: string }
+	team2: { name: string }
+}) => {
+	const team1Name = escapeHtml(match.team1.name)
+	const team2Name = escapeHtml(match.team2.name)
+	const formattedTeam1 =
+		match.winner === match.team1Id ? `<strong>${team1Name}</strong>` : team1Name
+	const formattedTeam2 =
+		match.winner === match.team2Id ? `<strong>${team2Name}</strong>` : team2Name
+	const formattedScore1 =
+		match.winner === match.team1Id
+			? `<strong>${match.score1}</strong>`
+			: match.score1
+	const formattedScore2 =
+		match.winner === match.team2Id
+			? `<strong>${match.score2}</strong>`
+			: match.score2
+	const formattedScore = `(${formattedScore1} - ${formattedScore2})`
+
+	return `${formattedTeam1} ${formattedScore} ${formattedTeam2}`
+}
+
 export const getTournamentHighlightsByDay = async (
 	prisma: PrismaClient,
 	playgroundId: string,
@@ -150,7 +191,7 @@ export const getTournamentHighlightsByDay = async (
 			? {
 					key: `biggest-${biggestWin.id}`,
 					title: 'Vittoria con più margine',
-					text: `${biggestWin.team1.name} ${biggestWin.score1} - ${biggestWin.score2} ${biggestWin.team2.name}`,
+					text: formatMatchHighlightText(biggestWin),
 					meta: `Scarto di ${Math.abs((biggestWin.score1 ?? 0) - (biggestWin.score2 ?? 0))} punti`,
 				}
 			: null,
@@ -158,15 +199,15 @@ export const getTournamentHighlightsByDay = async (
 			? {
 					key: `closest-${closestMatch.id}`,
 					title: 'Partita più equilibrata',
-					text: `${closestMatch.team1.name} ${closestMatch.score1} - ${closestMatch.score2} ${closestMatch.team2.name}`,
-					meta: `Scarto di ${Math.abs((closestMatch.score1 ?? 0) - (closestMatch.score2 ?? 0))} punto/i`,
+					text: formatMatchHighlightText(closestMatch),
+					meta: `Scarto di ${Math.abs((closestMatch.score1 ?? 0) - (closestMatch.score2 ?? 0))} ${Math.abs((closestMatch.score1 ?? 0) - (closestMatch.score2 ?? 0)) === 1 ? 'punto' : 'punti'}`,
 				}
 			: null,
 		topScorerOfDay
 			? {
 					key: `top-scorer-day-${topScorerOfDay.day}`,
 					title: 'Top scorer di giornata',
-					text: `${topScorerOfDay.playerName} (${topScorerOfDay.teamName})`,
+					text: `<strong>${escapeHtml(topScorerOfDay.playerName)}</strong> (${escapeHtml(topScorerOfDay.teamName)})`,
 					meta: `${topScorerOfDay.points} punti totali`,
 				}
 			: null,
@@ -174,7 +215,7 @@ export const getTournamentHighlightsByDay = async (
 			? {
 					key: 'three-point-leader',
 					title: 'Leader 3PT Challenge',
-					text: topThreePointLeader.playerName,
+					text: `<strong>${escapeHtml(topThreePointLeader.playerName)}</strong>`,
 					meta: `${topThreePointLeader.score} punti`,
 				}
 			: null,
