@@ -6,6 +6,7 @@ import {
 	CalendarCog,
 	Flame,
 	Home,
+	LayoutList,
 	Medal,
 	PersonStanding,
 	Shirt,
@@ -81,6 +82,11 @@ const resources = [
 		href: '/matches',
 		text: 'Calendario partite',
 		icon: <CalendarCog />,
+	},
+	{
+		href: '/teams-list',
+		text: 'Squadre',
+		icon: <LayoutList />,
 	},
 	{
 		href: '/players',
