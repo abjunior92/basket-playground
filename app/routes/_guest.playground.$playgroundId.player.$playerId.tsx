@@ -11,7 +11,7 @@ import { BarChart3, ChevronRight, Shield, UserRound } from 'lucide-react'
 import invariant from 'tiny-invariant'
 import Header from '~/components/Header'
 import { Badge } from '~/components/ui/badge'
-import { colorGroupClasses } from '~/lib/types'
+import { colorGroupClasses, playerLevelsTransform } from '~/lib/types'
 import { cn, getDayLabel } from '~/lib/utils'
 
 const prisma = new PrismaClient()
@@ -98,6 +98,7 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 			name: player.name,
 			surname: player.surname,
 			birthYear: player.birthYear,
+			level: player.level,
 			teamId: player.team.id,
 			teamName: player.team.name,
 			groupName: player.team.group.name,
@@ -149,7 +150,7 @@ export default function GuestPlayerProfile() {
 							{player.name} {player.surname}
 						</h2>
 						<p className="mt-1 text-sm text-slate-700">
-							Anno {player.birthYear}
+							Anno {player.birthYear} · {playerLevelsTransform[player.level]}
 						</p>
 					</div>
 					<Badge

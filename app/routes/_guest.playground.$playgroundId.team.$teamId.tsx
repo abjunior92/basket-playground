@@ -7,11 +7,18 @@ import {
 	useParams,
 	useSearchParams,
 } from '@remix-run/react'
-import { BarChart3, Medal, Shield, Users } from 'lucide-react'
+import {
+	BarChart3,
+	ChevronRight,
+	Medal,
+	Shield,
+	UserRound,
+	Users,
+} from 'lucide-react'
 import invariant from 'tiny-invariant'
 import Header from '~/components/Header'
 import { Badge } from '~/components/ui/badge'
-import { colorGroupClasses } from '~/lib/types'
+import { colorGroupClasses, playerLevelsTransform } from '~/lib/types'
 import { cn, getDayLabel } from '~/lib/utils'
 
 const prisma = new PrismaClient()
@@ -126,12 +133,29 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 		.sort((a, b) => b.points - a.points)
 		.slice(0, 3)
 
+	const players = [...team.players]
+		.sort(
+			(a, b) =>
+				a.surname.localeCompare(b.surname, 'it') ||
+				a.name.localeCompare(b.name, 'it'),
+		)
+		.map((p) => ({
+			id: p.id,
+			name: p.name,
+			surname: p.surname,
+			birthYear: p.birthYear,
+			level: p.level,
+			retired: p.retired,
+			isExpelled: p.isExpelled,
+		}))
+
 	return {
 		team: {
 			id: team.id,
 			name: team.name,
 			group: team.group,
-			playersCount: team.players.length,
+			playersCount: players.length,
+			players,
 		},
 		stats: {
 			matchesPlayed: completedMatches.length,
@@ -148,6 +172,7 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 export default function GuestTeamProfile() {
 	const { team, stats, lastMatches, topScorers } =
 		useLoaderData<typeof loader>()
+	const players = team.players
 	const { playgroundId } = useParams()
 	const location = useLocation()
 	const [searchParams] = useSearchParams()
@@ -177,6 +202,51 @@ export default function GuestTeamProfile() {
 					<Users className="h-4 w-4" />
 					{team.playersCount} giocatori a roster
 				</p>
+			</section>
+
+			<section className="section-blur">
+				<h3 className="mb-3 flex items-center gap-2 text-lg font-semibold">
+					<UserRound className="h-5 w-5" />
+					Roster
+				</h3>
+				{players.length > 0 ? (
+					<ul className="space-y-2">
+						{players.map((player) => (
+							<li key={player.id}>
+								<Link
+									to={`/playground/${playgroundId}/player/${player.id}?returnTo=${encodeURIComponent(currentPath)}`}
+									className={cn(
+										'guest-link-pill-bordered flex w-full items-center justify-between gap-2 py-2.5',
+									)}
+								>
+									<span className="min-w-0 flex-1 text-left text-sm font-medium">
+										{player.name} {player.surname}
+										<span className="mt-0.5 block text-xs font-normal text-slate-600">
+											Anno {player.birthYear} ·{' '}
+											{playerLevelsTransform[player.level]}
+										</span>
+									</span>
+									<span className="flex shrink-0 items-center gap-1.5">
+										{player.isExpelled ? (
+											<Badge className="bg-red-100 text-xs text-red-800">
+												Espulso
+											</Badge>
+										) : player.retired ? (
+											<Badge className="bg-slate-200 text-xs text-slate-800">
+												Ritirato
+											</Badge>
+										) : null}
+										<ChevronRight className="h-4 w-4 opacity-70" />
+									</span>
+								</Link>
+							</li>
+						))}
+					</ul>
+				) : (
+					<p className="text-sm text-slate-700">
+						Nessun giocatore associato a questa squadra.
+					</p>
+				)}
 			</section>
 
 			<section className="section-blur">

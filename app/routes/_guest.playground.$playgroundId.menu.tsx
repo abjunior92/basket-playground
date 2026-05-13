@@ -12,6 +12,7 @@ import {
 	Medal,
 	Swords,
 	Trophy,
+	Users,
 } from 'lucide-react'
 import invariant from 'tiny-invariant'
 import {
@@ -371,6 +372,11 @@ export default function Index() {
 }
 
 const resources = [
+	{
+		href: '/teams',
+		text: 'Squadre',
+		icon: <Users />,
+	},
 	{
 		href: '/calendar',
 		text: 'Calendario partite',

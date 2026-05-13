@@ -70,6 +70,14 @@ export default function Index() {
 							>
 								<span className="nav-button-animate-text">Bacheca torneo</span>
 							</Link>
+							{playgrounds.length > 0 && playgrounds[0] && (
+								<Link
+									className="nav-button group justify-center"
+									to={`/playground/${playgrounds[0].id}/menu`}
+								>
+									<span className="nav-button-animate-text">Menu Ospiti</span>
+								</Link>
+							)}
 						</div>
 					</div>
 				</header>
