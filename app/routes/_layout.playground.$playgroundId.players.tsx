@@ -217,7 +217,9 @@ export default function PlayerStatsPage() {
 											<TableCell>
 												{player.size ? playerSizesTransform[player.size] : '-'}
 											</TableCell>
-											<TableCell>{player.totalPoints}</TableCell>
+											<TableCell className="font-mono tabular-nums">
+												{player.totalPoints}
+											</TableCell>
 											<TableCell className="w-10">
 												<Button variant={'link'} size="icon">
 													<ChevronDown className="transition-all duration-300 ease-in-out group-data-[state=open]:rotate-180" />
@@ -250,7 +252,9 @@ export default function PlayerStatsPage() {
 															<div className="text-center">
 																{match.opponent}
 															</div>
-															<div className="text-center">{match.points}</div>
+															<div className="text-center font-mono tabular-nums">
+																{match.points}
+															</div>
 														</div>
 													))}
 												</div>

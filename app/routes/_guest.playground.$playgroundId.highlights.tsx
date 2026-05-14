@@ -238,7 +238,9 @@ export default function HighlightsPage() {
 												className="highlight-social-copy"
 												dangerouslySetInnerHTML={{ __html: highlight.text }}
 											/>
-											<p className="highlight-social-meta">{highlight.meta}</p>
+											<p className="highlight-social-meta font-mono tabular-nums">
+												{highlight.meta}
+											</p>
 										</div>
 									</li>
 								)

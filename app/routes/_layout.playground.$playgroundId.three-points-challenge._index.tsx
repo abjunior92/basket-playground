@@ -164,7 +164,7 @@ export default function ThreePointChallenge() {
 								<TableCell>
 									{p.name} {p.surname}
 								</TableCell>
-								<TableCell>{p.score}</TableCell>
+								<TableCell className="font-mono tabular-nums">{p.score}</TableCell>
 								<TableCell>
 									<div className="flex items-center justify-center gap-2">
 										<Dialog
@@ -209,6 +209,7 @@ export default function ThreePointChallenge() {
 														placeholder="Inserisci il punteggio"
 														inputMode="numeric"
 														required
+														className="font-mono tabular-nums"
 													/>
 												</div>
 												<DialogFooter>

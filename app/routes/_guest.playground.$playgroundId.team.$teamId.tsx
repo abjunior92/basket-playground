@@ -282,7 +282,7 @@ export default function GuestTeamProfile() {
 								<span className="text-sm">
 									{index + 1}. {scorer.name} {scorer.surname}
 								</span>
-								<span className="text-sm font-semibold">
+								<span className="font-mono text-sm font-semibold tabular-nums">
 									{scorer.points} pt
 								</span>
 							</li>
@@ -328,9 +328,20 @@ export default function GuestTeamProfile() {
 									</p>
 									<div className="flex items-center justify-between gap-1">
 										<p className="mt-1 text-sm text-slate-700">
-											{isCompleted
-												? `Risultato: ${match.teamScore ?? '-'} - ${match.opponentScore ?? '-'}`
-												: 'Partita non conclusa'}
+											{isCompleted ? (
+												<>
+													Risultato:{' '}
+													<span className="font-mono font-semibold tabular-nums">
+														{match.teamScore ?? '-'}
+													</span>{' '}
+													-{' '}
+													<span className="font-mono font-semibold tabular-nums">
+														{match.opponentScore ?? '-'}
+													</span>
+												</>
+											) : (
+												'Partita non conclusa'
+											)}
 										</p>
 										{isCompleted ? (
 											<p
@@ -371,7 +382,7 @@ function StatTile({
 			<p className="text-xs text-slate-600">{label}</p>
 			<p
 				className={cn(
-					'text-lg font-semibold text-slate-900',
+					'font-mono text-lg font-semibold text-slate-900 tabular-nums',
 					highlight && 'text-emerald-700',
 				)}
 			>

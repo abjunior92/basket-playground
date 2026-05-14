@@ -231,11 +231,11 @@ export default function Index() {
 												</div>
 												<p className="text-sm text-slate-900">
 													{match.team1.name}{' '}
-													<span className="font-semibold">
+													<span className="font-mono font-semibold tabular-nums">
 														{match.score1 ?? '-'}
 													</span>{' '}
 													-{' '}
-													<span className="font-semibold">
+													<span className="font-mono font-semibold tabular-nums">
 														{match.score2 ?? '-'}
 													</span>{' '}
 													{match.team2.name}

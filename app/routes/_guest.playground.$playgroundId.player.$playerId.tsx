@@ -214,7 +214,9 @@ export default function GuestPlayerProfile() {
 										- giorno {item.day}
 									</span>
 								</div>
-								<span className="text-sm font-semibold">{item.points} pt</span>
+								<span className="font-mono text-sm font-semibold tabular-nums">
+									{item.points} pt
+								</span>
 							</li>
 						))}
 					</ul>
@@ -249,7 +251,9 @@ export default function GuestPlayerProfile() {
 								</p>
 								<p className="mt-1 text-sm text-slate-700">
 									Punti segnati:{' '}
-									<span className="font-semibold">{match.points}</span>
+									<span className="font-mono font-semibold tabular-nums">
+										{match.points}
+									</span>
 								</p>
 							</li>
 						))}
@@ -266,7 +270,9 @@ function StatTile({ label, value }: { label: string; value: number }) {
 	return (
 		<div className="rounded-lg border border-slate-200 bg-white/80 px-3 py-2">
 			<p className="text-xs text-slate-600">{label}</p>
-			<p className="text-lg font-semibold text-slate-900">{value}</p>
+			<p className="font-mono text-lg font-semibold text-slate-900 tabular-nums">
+				{value}
+			</p>
 		</div>
 	)
 }

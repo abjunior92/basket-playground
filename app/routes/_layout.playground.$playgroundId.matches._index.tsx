@@ -450,7 +450,7 @@ export default function Matches() {
 																					className={cn(
 																						isTeam1Winner &&
 																							'font-bold text-green-600',
-																						'text-2xl',
+																						'text-2xl font-mono tabular-nums',
 																					)}
 																				>
 																					{match.score1}
@@ -480,7 +480,7 @@ export default function Matches() {
 																					className={cn(
 																						isTeam2Winner &&
 																							'font-bold text-green-600',
-																						'text-2xl',
+																						'text-2xl font-mono tabular-nums',
 																					)}
 																				>
 																					{match.score2}
@@ -628,6 +628,7 @@ export default function Matches() {
 													<TableCell>
 														<span
 															className={cn(
+																'font-mono tabular-nums',
 																isTeam1Winner && 'font-bold text-green-600',
 															)}
 														>
@@ -636,6 +637,7 @@ export default function Matches() {
 														-{' '}
 														<span
 															className={cn(
+																'font-mono tabular-nums',
 																isTeam2Winner && 'font-bold text-green-600',
 															)}
 														>

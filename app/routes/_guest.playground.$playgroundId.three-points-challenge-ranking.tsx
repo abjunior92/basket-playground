@@ -99,7 +99,7 @@ export default function GuestThreePointChallengeRanking() {
 												</>
 											)}
 										</TableCell>
-										<TableCell className="text-center font-bold">
+										<TableCell className="text-center font-mono font-bold">
 											{participant.score}
 										</TableCell>
 									</TableRow>

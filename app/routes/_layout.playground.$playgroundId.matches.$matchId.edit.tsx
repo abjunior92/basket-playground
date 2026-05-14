@@ -385,7 +385,7 @@ export default function EditMatch() {
 									type="number"
 									name="score1"
 									defaultValue={match.score1 ?? 0}
-									className="w-24 md:w-64"
+									className="w-24 font-mono tabular-nums md:w-64"
 									inputMode="numeric"
 									required
 								/>
@@ -397,7 +397,7 @@ export default function EditMatch() {
 									type="number"
 									name="score2"
 									defaultValue={match.score2 ?? 0}
-									className="w-24 md:w-64"
+									className="w-24 font-mono tabular-nums md:w-64"
 									inputMode="numeric"
 									required
 								/>
@@ -480,7 +480,7 @@ export default function EditMatch() {
 													<Input
 														type="number"
 														name={`player-${player.id}`}
-														className="max-w-16 md:w-64"
+														className="max-w-16 font-mono tabular-nums md:w-64"
 														inputMode="numeric"
 														min="0"
 														defaultValue={playerStatsMap.get(player.id) ?? 0}
@@ -727,7 +727,7 @@ export default function EditMatch() {
 													<Input
 														type="number"
 														name={`player-${player.id}`}
-														className="max-w-16 md:w-64"
+														className="max-w-16 font-mono tabular-nums md:w-64"
 														inputMode="numeric"
 														min="0"
 														defaultValue={playerStatsMap.get(player.id) ?? 0}

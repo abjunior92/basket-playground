@@ -38,12 +38,12 @@ const formatMatchHighlightText = (match: {
 		match.winner === match.team2Id ? `<strong>${team2Name}</strong>` : team2Name
 	const formattedScore1 =
 		match.winner === match.team1Id
-			? `<strong>${match.score1}</strong>`
-			: match.score1
+			? `<strong class="font-mono tabular-nums">${match.score1}</strong>`
+			: `<span class="font-mono tabular-nums">${match.score1}</span>`
 	const formattedScore2 =
 		match.winner === match.team2Id
-			? `<strong>${match.score2}</strong>`
-			: match.score2
+			? `<strong class="font-mono tabular-nums">${match.score2}</strong>`
+			: `<span class="font-mono tabular-nums">${match.score2}</span>`
 	const formattedScore = `(${formattedScore1} - ${formattedScore2})`
 
 	return `${formattedTeam1} ${formattedScore} ${formattedTeam2}`

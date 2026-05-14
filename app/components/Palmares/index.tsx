@@ -92,7 +92,7 @@ const Palmares = ({ palmares }: { palmares: PalmaresData }) => {
 								{palmares.bestGroupScorerName} {palmares.bestGroupScorerSurname}{' '}
 								({bestGroupScorerTeam})
 							</p>
-							<p className="text-muted-foreground text-sm">
+							<p className="text-muted-foreground font-mono text-sm tabular-nums">
 								{palmares.bestGroupScorerPoints} pt
 							</p>
 						</div>
@@ -105,7 +105,7 @@ const Palmares = ({ palmares }: { palmares: PalmaresData }) => {
 								{palmares.bestFinalsScorerName}{' '}
 								{palmares.bestFinalsScorerSurname} ({bestFinalsScorerTeam})
 							</p>
-							<p className="text-muted-foreground text-sm">
+							<p className="text-muted-foreground font-mono text-sm tabular-nums">
 								{palmares.bestFinalsScorerPoints} pt
 							</p>
 						</div>

@@ -160,7 +160,7 @@ const PlayerRankingList = <T extends RankedPlayer>({
 							<div className="shrink-0 text-right">
 								<div
 									className={cn(
-										'leading-none font-black text-slate-900 dark:text-slate-100',
+										'font-mono tabular-nums leading-none font-black text-slate-900 dark:text-slate-100',
 										getScoreTextClasses(position),
 									)}
 								>
@@ -301,16 +301,24 @@ const RankingsAndStats = ({
 																<span className="font-bold">{team.name}</span>
 															)}
 														</TableCell>
-														<TableCell>{team.matchesWon}</TableCell>
-														<TableCell>
+														<TableCell className="font-mono tabular-nums">
+															{team.matchesWon}
+														</TableCell>
+														<TableCell className="font-mono tabular-nums">
 															{team.matchesPlayed - team.matchesWon}
 														</TableCell>
-														<TableCell>
+														<TableCell className="font-mono tabular-nums">
 															{team.winPercentage.toFixed(2)}
 														</TableCell>
-														<TableCell>{team.pointsScored}</TableCell>
-														<TableCell>{team.pointsConceded}</TableCell>
-														<TableCell>{team.pointsDifference}</TableCell>
+														<TableCell className="font-mono tabular-nums">
+															{team.pointsScored}
+														</TableCell>
+														<TableCell className="font-mono tabular-nums">
+															{team.pointsConceded}
+														</TableCell>
+														<TableCell className="font-mono tabular-nums">
+															{team.pointsDifference}
+														</TableCell>
 													</TableRow>
 												)
 											})}

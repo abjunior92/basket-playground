@@ -608,7 +608,7 @@ export default function Playoff() {
 														<div className="flex items-center gap-2">
 															{match.score1 !== null &&
 															match.score2 !== null ? (
-																<div className="text-lg">
+																<div className="text-lg font-mono tabular-nums">
 																	<span
 																		className={cn(
 																			isTeam1Winner &&
@@ -655,7 +655,7 @@ export default function Playoff() {
 															{match.score1 !== null && (
 																<span
 																	className={cn(
-																		'text-lg font-bold',
+																		'text-lg font-bold font-mono tabular-nums',
 																		isTeam1Winner && 'text-green-600',
 																	)}
 																>
@@ -687,7 +687,7 @@ export default function Playoff() {
 															{match.score2 !== null && (
 																<span
 																	className={cn(
-																		'text-lg font-bold',
+																		'text-lg font-bold font-mono tabular-nums',
 																		isTeam2Winner && 'text-green-600',
 																	)}
 																>
@@ -871,7 +871,7 @@ export default function Playoff() {
 														<div className="flex items-center gap-2">
 															{match.score1 !== null &&
 															match.score2 !== null ? (
-																<div className="text-lg">
+																<div className="text-lg font-mono tabular-nums">
 																	<span
 																		className={cn(
 																			isTeam1Winner &&
@@ -918,7 +918,7 @@ export default function Playoff() {
 															{match.score1 !== null && (
 																<span
 																	className={cn(
-																		'text-lg font-bold',
+																		'text-lg font-bold font-mono tabular-nums',
 																		isTeam1Winner && 'text-green-600',
 																	)}
 																>
@@ -950,7 +950,7 @@ export default function Playoff() {
 															{match.score2 !== null && (
 																<span
 																	className={cn(
-																		'text-lg font-bold',
+																		'text-lg font-bold font-mono tabular-nums',
 																		isTeam2Winner && 'text-green-600',
 																	)}
 																>
@@ -1044,7 +1044,7 @@ export default function Playoff() {
 
 																				<span
 																					className={cn(
-																						'text-sm font-bold',
+																						'text-sm font-bold font-mono tabular-nums',
 																						isTeam1Winner && 'text-green-600',
 																					)}
 																				>
@@ -1078,7 +1078,7 @@ export default function Playoff() {
 
 																				<span
 																					className={cn(
-																						'text-sm font-bold',
+																						'text-sm font-bold font-mono tabular-nums',
 																						isTeam2Winner && 'text-green-600',
 																					)}
 																				>
@@ -1167,7 +1167,7 @@ export default function Playoff() {
 																						</div>
 																						<span
 																							className={cn(
-																								'text-sm font-bold',
+																								'text-sm font-bold font-mono tabular-nums',
 																								isTeam1Winner &&
 																									'text-green-600',
 																							)}
@@ -1201,7 +1201,7 @@ export default function Playoff() {
 																						</div>
 																						<span
 																							className={cn(
-																								'text-sm font-bold',
+																								'text-sm font-bold font-mono tabular-nums',
 																								isTeam2Winner &&
 																									'text-green-600',
 																							)}
@@ -1302,7 +1302,7 @@ export default function Playoff() {
 																						</div>
 																						<span
 																							className={cn(
-																								'text-sm font-bold',
+																								'text-sm font-bold font-mono tabular-nums',
 																								isTeam1Winner &&
 																									'text-green-600',
 																							)}
@@ -1336,7 +1336,7 @@ export default function Playoff() {
 																						</div>
 																						<span
 																							className={cn(
-																								'text-sm font-bold',
+																								'text-sm font-bold font-mono tabular-nums',
 																								isTeam2Winner &&
 																									'text-green-600',
 																							)}
@@ -1437,7 +1437,7 @@ export default function Playoff() {
 																							</div>
 																							<span
 																								className={cn(
-																									'text-sm font-bold',
+																									'text-sm font-bold font-mono tabular-nums',
 																									isTeam1Winner &&
 																										'text-green-600',
 																								)}
@@ -1471,7 +1471,7 @@ export default function Playoff() {
 																							</div>
 																							<span
 																								className={cn(
-																									'text-sm font-bold',
+																									'text-sm font-bold font-mono tabular-nums',
 																									isTeam2Winner &&
 																										'text-green-600',
 																								)}
@@ -1570,7 +1570,7 @@ export default function Playoff() {
 																							</div>
 																							<span
 																								className={cn(
-																									'text-sm font-bold',
+																									'text-sm font-bold font-mono tabular-nums',
 																									isTeam1Winner &&
 																										'text-green-600',
 																								)}
@@ -1604,7 +1604,7 @@ export default function Playoff() {
 																							</div>
 																							<span
 																								className={cn(
-																									'text-sm font-bold',
+																									'text-sm font-bold font-mono tabular-nums',
 																									isTeam2Winner &&
 																										'text-green-600',
 																								)}
