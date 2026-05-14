@@ -13,7 +13,15 @@ import {
 	useLocation,
 	useNavigation,
 } from '@remix-run/react'
-import { Ambulance, Minus, Pencil, Plus, Settings, Circle } from 'lucide-react'
+import {
+	Ambulance,
+	Minus,
+	Pencil,
+	Plus,
+	Settings,
+	Circle,
+	CircleAlert,
+} from 'lucide-react'
 import { useState } from 'react'
 import invariant from 'tiny-invariant'
 import ErrorMessage from '~/components/ErrorMessage'
@@ -43,11 +51,27 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '~/components/ui/select'
-import { Separator } from '~/components/ui/separator'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
-import { getDayLabel, getTimeSlots } from '~/lib/utils'
+import { cn, getDayLabel, getTimeSlots } from '~/lib/utils'
 
 const prisma = new PrismaClient()
+
+/** Input punteggio squadra (tabellone) */
+const SCORE_INPUT_CLASS =
+	'h-12 w-full rounded-xl border-slate-200 bg-white text-center text-2xl font-bold tabular-nums shadow-inner focus-visible:border-orange-300 focus-visible:ring-2 focus-visible:ring-orange-400/40 sm:h-14 sm:text-3xl sm:max-w-48 md:h-16 md:text-4xl font-mono'
+
+/** Input punti singolo giocatore */
+const PLAYER_POINTS_INPUT_CLASS =
+	'min-h-10 h-10 w-full min-w-0 flex-1 basis-0 rounded-xl border-slate-200 bg-white px-1 text-center text-xl font-bold tabular-nums shadow-inner focus-visible:ring-2 focus-visible:ring-orange-400/40 sm:min-h-12 sm:h-12 sm:px-2 sm:text-xl md:text-2xl font-mono'
+
+const PLANNER_SELECT_CLASS =
+	'border-slate-200 bg-white/90 shadow-inner focus-visible:ring-orange-400/40'
+
+/** +/− punti giocatore: compatti su mobile per lasciare spazio all'input */
+const PLAYER_STEP_BTN_CLASS =
+	'h-8 w-8 min-h-8 min-w-8 shrink-0 touch-manipulation rounded-lg p-0 shadow-sm sm:h-11 sm:w-11 sm:min-h-11 sm:min-w-11 sm:rounded-xl'
+
+const PLAYER_STEP_ICON_CLASS = 'h-3.5 w-3.5 sm:h-4 sm:w-4'
 
 export const meta: MetaFunction = () => {
 	return [
@@ -332,18 +356,21 @@ export default function EditMatch() {
 					key={i}
 					type="button"
 					onClick={() => handleFoulClick(teamId, i + 1)}
-					className={`transition-colors duration-200 ${
+					className={cn(
+						'rounded-full p-px transition-colors duration-200 active:scale-95 md:p-1',
 						isBonus
-							? 'text-red-500 hover:text-red-600'
+							? 'text-red-600 hover:bg-red-50 hover:text-red-700'
 							: isFilled
-								? 'text-black hover:text-gray-700'
-								: 'text-black hover:text-gray-300'
-					}`}
+								? 'text-slate-800 hover:bg-orange-50 hover:text-orange-800'
+								: 'text-slate-300 hover:bg-slate-100 hover:text-slate-500',
+					)}
 				>
 					<Circle
-						className={`h-5 w-5 md:h-6 md:w-6 ${
-							isFilled ? 'fill-current' : ''
-						} stroke-current`}
+						className={cn(
+							'h-5 w-5 md:h-6 md:w-6',
+							isFilled ? 'fill-current' : '',
+							'stroke-current',
+						)}
 					/>
 				</button>
 			)
@@ -363,78 +390,107 @@ export default function EditMatch() {
 		location.state?.backLink || `/playground/${match.playgroundId}/matches`
 
 	return (
-		<div className="md:p-4">
+		<div className="mx-auto w-full max-w-5xl min-w-0 space-y-5 pb-10 md:space-y-6 md:p-6">
 			<Header title="Modifica partita" backLink={backLink} icon={<Pencil />} />
-			<Tabs defaultValue="scores" className="mt-4 w-full">
+
+			<Tabs defaultValue="scores" className="w-full min-w-0">
 				<TabsList>
 					<TabsTrigger value="scores">Risultato</TabsTrigger>
 					<TabsTrigger value="planner">Ripianifica</TabsTrigger>
 				</TabsList>
-				<TabsContent value="scores">
-					<h4 className="mt-4 flex justify-between text-xl">
-						<span className="flex w-1/3 justify-start">{match.team1.name}</span>
-						<span className="w-fit">vs</span>
-						<span className="flex w-1/3 justify-end">{match.team2.name}</span>
-					</h4>
 
-					<Form method="post" className="mt-4">
-						<div className="flex justify-between">
-							<label>
-								<input hidden name="team1Id" defaultValue={match.team1Id} />
-								<Input
-									type="number"
-									name="score1"
-									defaultValue={match.score1 ?? 0}
-									className="w-24 font-mono tabular-nums md:w-64"
-									inputMode="numeric"
-									required
-								/>
-							</label>
+				<TabsContent
+					value="scores"
+					className="mt-4 w-full min-w-0 space-y-5 focus-visible:outline-none"
+				>
+					<Form method="post" className="space-y-5">
+						<section className="section-blur space-y-6">
+							<div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-end gap-x-2 gap-y-3 sm:gap-x-4 sm:gap-y-2">
+								<div className="min-w-0 text-left">
+									<p className="text-[10px] font-medium tracking-wide text-slate-500 uppercase sm:text-xs">
+										Squadra 1
+									</p>
+									<p className="mt-0.5 line-clamp-2 text-sm leading-tight font-bold text-slate-900 sm:mt-1 sm:text-lg">
+										{match.team1.name}
+									</p>
+									<label className="mt-2 block sm:mt-3">
+										<input hidden name="team1Id" defaultValue={match.team1Id} />
+										<Input
+											type="number"
+											name="score1"
+											defaultValue={match.score1 ?? 0}
+											className={SCORE_INPUT_CLASS}
+											inputMode="numeric"
+											required
+										/>
+									</label>
+								</div>
 
-							<label>
-								<input hidden name="team2Id" defaultValue={match.team2Id} />
-								<Input
-									type="number"
-									name="score2"
-									defaultValue={match.score2 ?? 0}
-									className="w-24 font-mono tabular-nums md:w-64"
-									inputMode="numeric"
-									required
-								/>
-							</label>
-						</div>
+								<div className="flex shrink-0 flex-col justify-end pb-1 sm:pb-2">
+									<span className="rounded-full border border-slate-200/80 bg-slate-900/4 px-2.5 py-1.5 text-[10px] font-bold tracking-wide text-slate-600 sm:px-4 sm:py-2 sm:text-sm">
+										VS
+									</span>
+								</div>
 
-						<div className="mt-4 flex justify-between">
-							<div className="flex flex-col items-start">
-								<span className="text-sm font-semibold">Falli di squadra</span>
-								<div className="mt-2 flex items-center gap-x-1">
-									{renderFoulDots(match.team1Id)}
+								<div className="min-w-0 text-right">
+									<p className="text-[10px] font-medium tracking-wide text-slate-500 uppercase sm:text-xs">
+										Squadra 2
+									</p>
+									<p className="mt-0.5 line-clamp-2 text-sm leading-tight font-bold text-slate-900 sm:mt-1 sm:text-lg">
+										{match.team2.name}
+									</p>
+									<label className="mt-2 block sm:mt-3 sm:ml-auto sm:max-w-48">
+										<input hidden name="team2Id" defaultValue={match.team2Id} />
+										<Input
+											type="number"
+											name="score2"
+											defaultValue={match.score2 ?? 0}
+											className={SCORE_INPUT_CLASS}
+											inputMode="numeric"
+											required
+										/>
+									</label>
 								</div>
 							</div>
 
-							<div className="flex flex-col items-end">
-								<span className="text-sm font-semibold">Falli di squadra</span>
-								<div className="mt-2 flex items-center gap-x-1">
-									{renderFoulDots(match.team2Id)}
+							<div className="grid grid-cols-2 border-t border-slate-200/80 pt-4 sm:pt-6">
+								<div className="flex min-w-0 flex-col items-start">
+									<span className="text-[10px] font-semibold tracking-wide text-slate-600 uppercase sm:text-xs">
+										Falli squadra
+									</span>
+									<div className="mt-2 flex max-w-full flex-wrap gap-0.5">
+										{renderFoulDots(match.team1Id)}
+									</div>
+								</div>
+
+								<div className="flex min-w-0 flex-col items-end border-l border-slate-200/70">
+									<span className="text-[10px] font-semibold tracking-wide text-slate-600 uppercase sm:text-xs">
+										Falli squadra
+									</span>
+									<div className="mt-2 flex max-w-full flex-wrap justify-end gap-0.5">
+										{renderFoulDots(match.team2Id)}
+									</div>
 								</div>
 							</div>
-						</div>
+						</section>
 
-						<Separator className="mt-6 mb-4" />
-
-						<div className="mb-4 flex w-full justify-center">
-							<h4 className="text-xl font-bold">Punti giocatori</h4>
-						</div>
-
-						<div className="flex justify-between gap-x-4">
-							<div className="flex flex-1 flex-col space-y-4 md:max-w-[25%]">
+						<div className="grid grid-cols-2 md:gap-y-8">
+							<div className="min-w-0 space-y-4 border-r border-slate-200/80 pr-2 sm:pr-4">
 								{match.team1.players.map((player) => (
-									<div key={player.id}>
-										<label htmlFor={`player-${player.id}`}>
-											<div className="border-input flex items-center justify-between rounded-t-lg border-x border-t bg-white px-2 py-1 leading-5 text-shadow-2xs">
+									<div
+										key={player.id}
+										className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm ring-1 ring-slate-900/5"
+									>
+										<label
+											htmlFor={`player-${player.id}`}
+											className="block cursor-pointer"
+										>
+											<div className="flex items-center justify-between gap-1.5 border-b border-slate-200/80 bg-linear-to-r from-slate-50/90 to-white px-2 py-2 sm:gap-2 sm:px-3 sm:py-2.5">
 												<div className="flex flex-col">
-													<span className="text-xs">{player.name}</span>
-													<span className="font-semibold">
+													<span className="text-[11px] leading-tight text-slate-600 sm:text-xs">
+														{player.name}
+													</span>
+													<span className="text-sm leading-tight font-semibold text-slate-900 sm:text-base">
 														{player.surname}
 													</span>
 												</div>
@@ -449,19 +505,20 @@ export default function EditMatch() {
 												name={`team1Players[]`}
 												defaultValue={player.id}
 											/>
-											<div className="border-input bg-muted flex flex-col space-y-2 rounded-b-lg border p-2">
-												<span className="text-xs">
-													<i>
-														Alias:{' '}
-														{temporaryAliases[player.id] || 'non impostato'}
-													</i>
-												</span>
-												<div className="flex items-center justify-between gap-x-2">
+											<div className="flex flex-col gap-2 rounded-b-2xl border border-t-0 border-slate-200/80 bg-slate-50/60 p-2 sm:gap-3 sm:p-3">
+												<p className="text-xs leading-relaxed text-slate-600">
+													<span className="font-medium text-slate-700">
+														Alias:
+													</span>{' '}
+													{temporaryAliases[player.id] || 'non impostato'}
+												</p>
+												<div className="flex min-w-0 items-center gap-1 sm:gap-2">
 													<Button
 														variant="destructive"
 														type="button"
 														size="icon"
 														aria-label="Sottrai"
+														className={PLAYER_STEP_BTN_CLASS}
 														onClick={(e) => {
 															e.preventDefault()
 															const input = e.currentTarget
@@ -475,12 +532,12 @@ export default function EditMatch() {
 															}
 														}}
 													>
-														<Minus className="h-4 w-4" />
+														<Minus className={PLAYER_STEP_ICON_CLASS} />
 													</Button>
 													<Input
 														type="number"
 														name={`player-${player.id}`}
-														className="max-w-16 font-mono tabular-nums md:w-64"
+														className={PLAYER_POINTS_INPUT_CLASS}
 														inputMode="numeric"
 														min="0"
 														defaultValue={playerStatsMap.get(player.id) ?? 0}
@@ -490,6 +547,7 @@ export default function EditMatch() {
 														type="button"
 														size="icon"
 														aria-label="Aggiungi"
+														className={PLAYER_STEP_BTN_CLASS}
 														onClick={(e) => {
 															e.preventDefault()
 															const input = e.currentTarget
@@ -503,7 +561,7 @@ export default function EditMatch() {
 															}
 														}}
 													>
-														<Plus className="h-4 w-4" />
+														<Plus className={PLAYER_STEP_ICON_CLASS} />
 													</Button>
 												</div>
 												<DropdownMenu>
@@ -512,9 +570,10 @@ export default function EditMatch() {
 															variant="outline"
 															type="button"
 															aria-label="Opzioni"
+															className="w-full border-slate-200 bg-white/90 text-slate-700 shadow-sm"
 														>
-															<Settings className="h-4 w-4" />
-															Opzioni
+															<Settings className="h-4 w-4 shrink-0" />
+															<span className="ml-2">Opzioni</span>
 														</Button>
 													</DropdownMenuTrigger>
 													<DropdownMenuContent>
@@ -674,14 +733,22 @@ export default function EditMatch() {
 									<ErrorMessage message={actionData.errorTeam1} />
 								)}
 							</div>
-							<div className="flex flex-1 flex-col space-y-4 md:max-w-[25%]">
+							<div className="min-w-0 space-y-4 pl-2 sm:pl-4">
 								{match.team2.players.map((player) => (
-									<div key={player.id} className="">
-										<label htmlFor={`player-${player.id}`}>
-											<div className="border-input flex items-center justify-between rounded-t-lg border-x border-t bg-white px-2 py-1 leading-5 text-shadow-2xs">
+									<div
+										key={player.id}
+										className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm ring-1 ring-slate-900/5"
+									>
+										<label
+											htmlFor={`player-${player.id}`}
+											className="block cursor-pointer"
+										>
+											<div className="flex items-center justify-between gap-1.5 border-b border-slate-200/80 bg-linear-to-r from-slate-50/90 to-white px-2 py-2 sm:gap-2 sm:px-3 sm:py-2.5">
 												<div className="flex flex-col">
-													<span className="text-xs">{player.name}</span>
-													<span className="font-semibold">
+													<span className="text-[11px] leading-tight text-slate-600 sm:text-xs">
+														{player.name}
+													</span>
+													<span className="text-sm leading-tight font-semibold text-slate-900 sm:text-base">
 														{player.surname}
 													</span>
 												</div>
@@ -696,19 +763,20 @@ export default function EditMatch() {
 												name={`team2Players[]`}
 												defaultValue={player.id}
 											/>
-											<div className="border-input bg-muted flex flex-col space-y-2 rounded-b-lg border p-2">
-												<span className="text-xs">
-													<i>
-														Alias:{' '}
-														{temporaryAliases[player.id] || 'non impostato'}
-													</i>
-												</span>
-												<div className="flex items-center justify-between gap-x-2">
+											<div className="flex flex-col gap-2 rounded-b-2xl border border-t-0 border-slate-200/80 bg-slate-50/60 p-2 sm:gap-3 sm:p-3">
+												<p className="text-xs leading-relaxed text-slate-600">
+													<span className="font-medium text-slate-700">
+														Alias:
+													</span>{' '}
+													{temporaryAliases[player.id] || 'non impostato'}
+												</p>
+												<div className="flex min-w-0 items-center gap-1 sm:gap-2">
 													<Button
 														variant="destructive"
 														type="button"
 														size="icon"
 														aria-label="Sottrai"
+														className={PLAYER_STEP_BTN_CLASS}
 														onClick={(e) => {
 															e.preventDefault()
 															const input = e.currentTarget
@@ -722,12 +790,12 @@ export default function EditMatch() {
 															}
 														}}
 													>
-														<Minus className="h-4 w-4" />
+														<Minus className={PLAYER_STEP_ICON_CLASS} />
 													</Button>
 													<Input
 														type="number"
 														name={`player-${player.id}`}
-														className="max-w-16 font-mono tabular-nums md:w-64"
+														className={PLAYER_POINTS_INPUT_CLASS}
 														inputMode="numeric"
 														min="0"
 														defaultValue={playerStatsMap.get(player.id) ?? 0}
@@ -737,6 +805,7 @@ export default function EditMatch() {
 														type="button"
 														size="icon"
 														aria-label="Aggiungi"
+														className={PLAYER_STEP_BTN_CLASS}
 														onClick={(e) => {
 															e.preventDefault()
 															const input = e.currentTarget
@@ -750,7 +819,7 @@ export default function EditMatch() {
 															}
 														}}
 													>
-														<Plus className="h-4 w-4" />
+														<Plus className={PLAYER_STEP_ICON_CLASS} />
 													</Button>
 												</div>
 												<DropdownMenu>
@@ -759,9 +828,10 @@ export default function EditMatch() {
 															variant="outline"
 															type="button"
 															aria-label="Opzioni"
+															className="w-full border-slate-200 bg-white/90 text-slate-700 shadow-sm"
 														>
-															<Settings className="h-4 w-4" />
-															Opzioni
+															<Settings className="h-4 w-4 shrink-0" />
+															<span className="ml-2">Opzioni</span>
 														</Button>
 													</DropdownMenuTrigger>
 													<DropdownMenuContent>
@@ -925,48 +995,86 @@ export default function EditMatch() {
 
 						<input type="hidden" name="backLink" value={backLink} />
 
-						<Separator className="mt-6 mb-4" />
+						<section className="section-blur space-y-4">
+							<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+								<div className="flex items-start gap-3 rounded-xl border border-slate-200/80 bg-slate-50/60 p-3">
+									<Checkbox
+										id="isWalkover"
+										name="isWalkover"
+										className="mt-0.5"
+									/>
+									<label
+										htmlFor="isWalkover"
+										className="cursor-pointer text-sm leading-snug text-slate-800"
+									>
+										<span className="font-semibold">Vittoria a tavolino</span>
+										<span className="mt-1 block text-xs font-normal text-slate-600">
+											Consente di salvare senza controllo sui punti giocatori;
+											imposta di solito il risultato a 10-0.
+										</span>
+									</label>
+								</div>
 
-						<div className="mt-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-							<div className="flex items-center space-x-2">
-								<Checkbox id="isWalkover" name="isWalkover" />
-								<label
-									htmlFor="isWalkover"
-									className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+								<div className="flex items-start gap-1">
+									<CircleAlert className="h-4 w-4 shrink-0 text-red-500" />
+									<span className="block text-xs font-normal text-slate-600">
+										<strong>Prima di salvare:</strong> somma i punti giocatori,
+										inserisci il risultato e fai un check con il segnapunti.
+									</span>
+								</div>
+
+								<Button
+									type="submit"
+									name="intent"
+									value="score"
+									className="h-12 w-full shrink-0 text-base font-semibold shadow-md sm:h-11 sm:w-auto sm:min-w-40"
+									disabled={
+										(navigation.state === 'submitting' ||
+											navigation.state === 'loading') &&
+										navigation.formAction?.includes('edit')
+									}
 								>
-									Segna come vinta a tavolino <br />
-									<i className="leading-4 text-gray-500">
-										(impostare un risultato di 10-0)
-									</i>
-								</label>
-							</div>
-
-							<Button
-								type="submit"
-								name="intent"
-								value="score"
-								className="w-full md:w-32"
-								disabled={
-									(navigation.state === 'submitting' ||
+									{(navigation.state === 'submitting' ||
 										navigation.state === 'loading') &&
 									navigation.formAction?.includes('edit')
-								}
-							>
-								{(navigation.state === 'submitting' ||
-									navigation.state === 'loading') &&
-								navigation.formAction?.includes('edit')
-									? 'Salvataggio...'
-									: 'Salva'}
-							</Button>
-						</div>
+										? 'Salvataggio…'
+										: 'Salva risultato'}
+								</Button>
+							</div>
+						</section>
 					</Form>
 				</TabsContent>
-				<TabsContent value="planner">
-					<Form method="post" className="mt-4 space-y-4">
-						<div>
-							<label htmlFor="day">Giorno:</label>
+				<TabsContent
+					value="planner"
+					className="mt-4 w-full min-w-0 focus-visible:outline-none"
+				>
+					<section className="section-blur">
+						<h2 className="text-lg font-bold text-slate-900">
+							Ripianifica partita
+						</h2>
+						<p className="mt-2 text-sm leading-relaxed text-slate-700">
+							Sposta giorno, orario, campo o accoppiata squadre. Non è possibile
+							se è già stato inserito un risultato.
+						</p>
+					</section>
+
+					<Form
+						method="post"
+						className="mt-5 grid w-full grid-cols-1 gap-5 md:grid-cols-2 md:gap-x-6 md:gap-y-5"
+					>
+						<input type="hidden" name="backLink" value={backLink} />
+						<div className="rounded-2xl border border-slate-200/80 bg-white/60 p-4 shadow-inner ring-1 ring-slate-900/5 sm:p-5">
+							<label
+								htmlFor="day"
+								className="text-xs font-semibold tracking-wide text-slate-600 uppercase"
+							>
+								Giorno
+							</label>
 							<Select name="day" defaultValue={`${match.day}`}>
-								<SelectTrigger>
+								<SelectTrigger
+									id="day"
+									className={cn('mt-2', PLANNER_SELECT_CLASS)}
+								>
 									<SelectValue placeholder="Seleziona un giorno" />
 								</SelectTrigger>
 								<SelectContent>
@@ -982,10 +1090,18 @@ export default function EditMatch() {
 							</Select>
 						</div>
 
-						<div>
-							<label htmlFor="timeSlot">Orario:</label>
+						<div className="rounded-2xl border border-slate-200/80 bg-white/60 p-4 shadow-inner ring-1 ring-slate-900/5 sm:p-5">
+							<label
+								htmlFor="timeSlot"
+								className="text-xs font-semibold tracking-wide text-slate-600 uppercase"
+							>
+								Orario
+							</label>
 							<Select name="timeSlot" defaultValue={match.timeSlot}>
-								<SelectTrigger>
+								<SelectTrigger
+									id="timeSlot"
+									className={cn('mt-2', PLANNER_SELECT_CLASS)}
+								>
 									<SelectValue placeholder="Seleziona un orario" />
 								</SelectTrigger>
 								<SelectContent>
@@ -1001,10 +1117,18 @@ export default function EditMatch() {
 							</Select>
 						</div>
 
-						<div>
-							<label htmlFor="field">Campo:</label>
+						<div className="rounded-2xl border border-slate-200/80 bg-white/60 p-4 shadow-inner ring-1 ring-slate-900/5 sm:p-5">
+							<label
+								htmlFor="field"
+								className="text-xs font-semibold tracking-wide text-slate-600 uppercase"
+							>
+								Campo
+							</label>
 							<Select name="field" defaultValue={match.field}>
-								<SelectTrigger>
+								<SelectTrigger
+									id="field"
+									className={cn('mt-2', PLANNER_SELECT_CLASS)}
+								>
 									<SelectValue placeholder="Seleziona un campo" />
 								</SelectTrigger>
 								<SelectContent>
@@ -1020,10 +1144,18 @@ export default function EditMatch() {
 							</Select>
 						</div>
 
-						<div>
-							<label htmlFor="team1Id">Squadra 1:</label>
+						<div className="rounded-2xl border border-slate-200/80 bg-white/60 p-4 shadow-inner ring-1 ring-slate-900/5 sm:p-5">
+							<label
+								htmlFor="team1Id"
+								className="text-xs font-semibold tracking-wide text-slate-600 uppercase"
+							>
+								Squadra 1
+							</label>
 							<Select name="team1Id" defaultValue={match.team1Id}>
-								<SelectTrigger>
+								<SelectTrigger
+									id="team1Id"
+									className={cn('mt-2', PLANNER_SELECT_CLASS)}
+								>
 									<SelectValue placeholder="Seleziona una squadra" />
 								</SelectTrigger>
 								<SelectContent>
@@ -1041,10 +1173,18 @@ export default function EditMatch() {
 							</Select>
 						</div>
 
-						<div>
-							<label htmlFor="team2Id">Squadra 2:</label>
+						<div className="rounded-2xl border border-slate-200/80 bg-white/60 p-4 shadow-inner ring-1 ring-slate-900/5 sm:p-5">
+							<label
+								htmlFor="team2Id"
+								className="text-xs font-semibold tracking-wide text-slate-600 uppercase"
+							>
+								Squadra 2
+							</label>
 							<Select name="team2Id" defaultValue={match.team2Id}>
-								<SelectTrigger>
+								<SelectTrigger
+									id="team2Id"
+									className={cn('mt-2', PLANNER_SELECT_CLASS)}
+								>
 									<SelectValue placeholder="Seleziona una squadra avversaria" />
 								</SelectTrigger>
 								<SelectContent>
@@ -1066,16 +1206,18 @@ export default function EditMatch() {
 							type="submit"
 							name="intent"
 							value="replan"
-							className="w-full md:w-auto"
+							className="h-11 w-full font-semibold md:col-span-2 md:w-auto md:justify-self-start"
 							disabled={
 								navigation.state === 'submitting' ||
 								navigation.state === 'loading'
 							}
 						>
-							Ripianifica Partita
+							Ripianifica partita
 						</Button>
 						{actionData && 'error' in actionData && (
-							<p className="text-red-500">{actionData.error}</p>
+							<div className="md:col-span-2">
+								<ErrorMessage message={actionData.error} />
+							</div>
 						)}
 					</Form>
 				</TabsContent>
@@ -1089,7 +1231,8 @@ export default function EditMatch() {
 					<div className="flex flex-col gap-4">
 						<Input
 							type="text"
-							placeholder="Inserisci alias temporaneo"
+							placeholder="Alias temporaneo"
+							className="border-slate-200 bg-white/90 shadow-inner focus-visible:ring-orange-400/40"
 							value={
 								selectedPlayerId ? temporaryAliases[selectedPlayerId] || '' : ''
 							}
@@ -1098,7 +1241,9 @@ export default function EditMatch() {
 								handleAliasChange(selectedPlayerId, e.target.value)
 							}
 						/>
-						<Button onClick={() => setAliasDialogOpen(false)}>Chiudi</Button>
+						<Button type="button" onClick={() => setAliasDialogOpen(false)}>
+							Chiudi
+						</Button>
 					</div>
 				</DialogContent>
 			</Dialog>

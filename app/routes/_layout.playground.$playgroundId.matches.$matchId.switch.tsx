@@ -195,7 +195,7 @@ export default function SwitchMatch() {
 	const isSubmitting = navigation.state === 'submitting'
 
 	return (
-		<div className="mx-auto flex min-w-lg flex-col justify-center space-y-4 p-4">
+		<div className="flex flex-col justify-center space-y-4 md:mx-auto md:min-w-lg md:p-4">
 			<Header
 				title="Switch Partita"
 				backLink={backLink}

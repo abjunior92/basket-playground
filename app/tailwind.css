@@ -90,7 +90,10 @@
 }
 
 @layer utilities {
-	html,
+	html {
+		scrollbar-gutter: stable;
+		@apply bg-white;
+	}
 	body {
 		@apply bg-white;
 	}
