@@ -3,7 +3,7 @@ import { type LoaderFunctionArgs, type MetaFunction } from '@remix-run/node'
 import { Form, Link, useLoaderData } from '@remix-run/react'
 import { FacebookIcon } from 'icons/lucide-facebook'
 import { InstagramIcon } from 'icons/lucide-instagram'
-import { Award, Cog, LogOut, Trophy, UserCog } from 'lucide-react'
+import { Award, Binoculars, Cog, LogOut, Trophy, UserCog } from 'lucide-react'
 import { Button } from '~/components/ui/button'
 import { cn } from '~/lib/utils'
 import { checkUserIsLoggedIn } from '~/utils/helpers'
@@ -209,6 +209,6 @@ const resources = [
 	{
 		href: '/tournament',
 		text: 'Panoramica tornei',
-		icon: <Trophy />,
+		icon: <Binoculars />,
 	},
 ]
