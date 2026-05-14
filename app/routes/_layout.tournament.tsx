@@ -9,6 +9,7 @@ import {
 	Trophy,
 	Users,
 } from 'lucide-react'
+import { GlowCardLink } from '~/components/GlowCardLink'
 import Header from '~/components/Header'
 import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
@@ -182,78 +183,68 @@ export default function TournamentOverview() {
 															<ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
 																{group.teams.map((team) => (
 																	<li key={team.id}>
-																		<Link
+																		<GlowCardLink
 																			to={`/playgrounds/${playground.id}/teams/${team.id}`}
-																			className={cn(
-																				'group relative flex h-full min-h-32 flex-col overflow-hidden rounded-2xl border border-slate-200/90 bg-linear-to-br from-white/95 to-slate-50/90 p-4 shadow-sm',
-																				'transition-all duration-200 motion-safe:hover:-translate-y-0.5 motion-safe:hover:border-orange-200/80 motion-safe:hover:shadow-md',
-																				'focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2 focus-visible:outline-none',
-																			)}
+																			className="min-h-32"
 																		>
-																			<div
-																				aria-hidden="true"
-																				className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-orange-400/10 blur-2xl transition-opacity duration-300 group-hover:opacity-100 motion-safe:group-hover:scale-110"
-																			/>
-																			<div className="relative flex min-h-0 flex-1 flex-col gap-3">
-																				<div className="flex items-start justify-between gap-2">
-																					<div className="flex min-w-0 flex-1 items-start gap-2">
-																						<span
-																							className={cn(
-																								'mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-900/5 text-slate-800',
-																								'transition-colors duration-200 group-hover:bg-orange-500/15 group-hover:text-orange-900',
-																							)}
-																						>
-																							<Shield className="h-4 w-4" />
-																						</span>
-																						<div className="min-w-0">
-																							<p className="font-semibold leading-snug text-slate-900">
-																								{team.name}
-																							</p>
-																							<p className="mt-1 flex items-center gap-1.5 text-xs text-slate-600">
-																								<Users className="h-3.5 w-3.5 shrink-0 opacity-80" />
-																								<span>
-																									{team.players.length}{' '}
-																									{team.players.length === 1
-																										? 'giocatore'
-																										: 'giocatori'}
-																								</span>
-																							</p>
-																						</div>
+																			<div className="flex items-start justify-between gap-2">
+																				<div className="flex min-w-0 flex-1 items-start gap-2">
+																					<span
+																						className={cn(
+																							'mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-900/5 text-slate-800',
+																							'transition-colors duration-200 group-hover:bg-orange-500/15 group-hover:text-orange-900',
+																						)}
+																					>
+																						<Shield className="h-4 w-4" />
+																					</span>
+																					<div className="min-w-0">
+																						<p className="font-semibold leading-snug text-slate-900">
+																							{team.name}
+																						</p>
+																						<p className="mt-1 flex items-center gap-1.5 text-xs text-slate-600">
+																							<Users className="h-3.5 w-3.5 shrink-0 opacity-80" />
+																							<span>
+																								{team.players.length}{' '}
+																								{team.players.length === 1
+																									? 'giocatore'
+																									: 'giocatori'}
+																							</span>
+																						</p>
 																					</div>
-																					<ChevronRight className="h-5 w-5 shrink-0 text-slate-400 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-orange-600" />
 																				</div>
-																				{team.players.length === 0 ? (
-																					<p className="text-xs text-slate-500">
-																						Nessun giocatore in rosa.
-																					</p>
-																				) : (
-																					<div className="flex min-h-0 flex-1 flex-wrap content-start gap-1.5 border-t border-slate-200/80 pt-3">
-																						{team.players.map((player) => {
-																							const label = `${player.name} ${player.surname}`
-																							const inactive =
-																								player.retired ||
-																								player.isExpelled
-																							return (
-																								<span
-																									key={player.id}
-																									title={label}
-																									className={cn(
-																										'max-w-full truncate rounded-full border border-slate-200/80 bg-slate-900/4 px-2 py-0.5 text-xs text-slate-700',
-																										inactive &&
-																											'border-amber-200/80 bg-amber-50/90 text-slate-500 line-through decoration-slate-400',
-																									)}
-																								>
-																									{player.name}{' '}
-																									<span className="font-medium text-slate-800">
-																										{player.surname}
-																									</span>
-																								</span>
-																							)
-																						})}
-																					</div>
-																				)}
+																				<ChevronRight className="h-5 w-5 shrink-0 text-slate-400 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-orange-600" />
 																			</div>
-																		</Link>
+																			{team.players.length === 0 ? (
+																				<p className="text-xs text-slate-500">
+																					Nessun giocatore in rosa.
+																				</p>
+																			) : (
+																				<div className="flex min-h-0 flex-1 flex-wrap content-start gap-1.5 border-t border-slate-200/80 pt-3">
+																					{team.players.map((player) => {
+																						const label = `${player.name} ${player.surname}`
+																						const inactive =
+																							player.retired ||
+																							player.isExpelled
+																						return (
+																							<span
+																								key={player.id}
+																								title={label}
+																								className={cn(
+																									'max-w-full truncate rounded-full border border-slate-200/80 bg-slate-900/4 px-2 py-0.5 text-xs text-slate-700',
+																									inactive &&
+																										'border-amber-200/80 bg-amber-50/90 text-slate-500 line-through decoration-slate-400',
+																								)}
+																							>
+																								{player.name}{' '}
+																								<span className="font-medium text-slate-800">
+																									{player.surname}
+																								</span>
+																							</span>
+																						)
+																					})}
+																				</div>
+																			)}
+																		</GlowCardLink>
 																	</li>
 																))}
 															</ul>
