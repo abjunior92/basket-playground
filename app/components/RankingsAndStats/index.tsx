@@ -51,15 +51,15 @@ const getRankPillClasses = (position: number) => {
 
 const getScoreTextClasses = (position: number) => {
 	if (position === 1) {
-		return 'text-3xl sm:text-4xl bg-radial from-yellow-100 via-yellow-600 to-yellow-500 bg-clip-text text-transparent'
+		return 'text-3xl sm:text-4xl bg-radial from-yellow-600 via-yellow-400 to-yellow-600 bg-clip-text text-transparent'
 	}
 
 	if (position === 2) {
-		return 'text-2xl sm:text-3xl bg-radial from-slate-100 via-slate-600 to-slate-500 bg-clip-text text-transparent'
+		return 'text-2xl sm:text-3xl bg-radial from-slate-600 via-slate-400 to-slate-600 bg-clip-text text-transparent'
 	}
 
 	if (position === 3) {
-		return 'text-xl sm:text-2xl bg-radial from-amber-100 via-amber-600 to-amber-500 bg-clip-text text-transparent'
+		return 'text-xl sm:text-2xl bg-radial from-amber-600 via-amber-400 to-amber-600 bg-clip-text text-transparent'
 	}
 
 	return 'text-lg sm:text-xl'
@@ -160,7 +160,7 @@ const PlayerRankingList = <T extends RankedPlayer>({
 							<div className="shrink-0 text-right">
 								<div
 									className={cn(
-										'font-mono tabular-nums leading-none font-black text-slate-900 dark:text-slate-100',
+										'font-mono leading-none font-black text-slate-900 tabular-nums dark:text-slate-100',
 										getScoreTextClasses(position),
 									)}
 								>
