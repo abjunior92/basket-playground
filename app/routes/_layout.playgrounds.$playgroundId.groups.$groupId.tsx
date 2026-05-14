@@ -6,7 +6,13 @@ import {
 	redirect,
 	type LoaderFunctionArgs,
 } from '@remix-run/node'
-import { Form, Link, useActionData, useLoaderData } from '@remix-run/react'
+import {
+	Form,
+	Link,
+	useActionData,
+	useLoaderData,
+	useLocation,
+} from '@remix-run/react'
 import { LayoutGrid, Pencil, X } from 'lucide-react'
 import invariant from 'tiny-invariant'
 import DialogAlert from '~/components/DialogAlert'
@@ -110,16 +116,38 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 	)
 }
 
+function resolveGroupBackLink(
+	playgroundId: string,
+	state: unknown,
+): string {
+	const candidate = (state as { backLink?: unknown } | null)?.backLink
+	if (typeof candidate !== 'string' || !candidate.startsWith('/')) {
+		return `/playgrounds/${playgroundId}`
+	}
+	const ownPlaygrounds = `/playgrounds/${playgroundId}`
+	const ownPlayground = `/playground/${playgroundId}`
+	if (
+		candidate === ownPlaygrounds ||
+		candidate.startsWith(`${ownPlaygrounds}/`) ||
+		candidate.startsWith(`${ownPlayground}/`)
+	) {
+		return candidate
+	}
+	return ownPlaygrounds
+}
+
 export default function GroupDetails() {
 	const { group, groups } = useLoaderData<typeof loader>()
 	const actionData = useActionData<typeof action>()
+	const location = useLocation()
+	const backLink = resolveGroupBackLink(group.playgroundId, location.state)
 
 	return (
 		<div className="md:p-4">
 			<div className="flex items-center justify-between">
 				<Header
 					title={group.name}
-					backLink={`/playgrounds/${group.playgroundId}`}
+					backLink={backLink}
 					icon={<LayoutGrid />}
 					home
 				/>

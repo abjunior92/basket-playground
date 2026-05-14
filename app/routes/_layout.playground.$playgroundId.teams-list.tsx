@@ -197,7 +197,10 @@ export default function AdminTeamsIndex() {
 										index % 2 === 0 ? 'bg-white' : 'bg-slate-50/60',
 									)}
 								>
-									<TableCell className="align-middle font-mono text-xs text-slate-500">
+									<TableCell
+										align="center"
+										className="font-mono text-xs text-slate-500"
+									>
 										{index + 1}
 									</TableCell>
 									<TableCell className="align-middle font-medium text-slate-900">
@@ -252,6 +255,7 @@ export default function AdminTeamsIndex() {
 											>
 												<Link
 													to={`/playgrounds/${playgroundId}/groups/${team.groupId}`}
+													state={{ backLink }}
 													title="Apri girone"
 												>
 													<ExternalLink className="h-3.5 w-3.5" />
