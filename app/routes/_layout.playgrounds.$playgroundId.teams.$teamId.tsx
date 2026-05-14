@@ -195,8 +195,8 @@ export default function TeamDetails() {
 	}, [fetcher, revalidator, toast])
 
 	return (
-		<div className="md:p-4">
-			<div className="flex items-center justify-between">
+		<div className="mx-auto max-w-5xl space-y-6 p-4 pb-12 md:p-6">
+			<div className="flex items-center justify-between gap-3">
 				<Header
 					title={team.name}
 					backLink={
@@ -213,9 +213,9 @@ export default function TeamDetails() {
 				>
 					<DialogAlert
 						trigger={
-							<Button type="button" variant="destructive">
+							<Button type="button" variant="destructive" className="shrink-0">
 								<X className="h-5 w-5" />
-								<span className="hidden md:block">Cancella Squadra</span>
+								<span className="hidden md:inline">Cancella squadra</span>
 							</Button>
 						}
 						title="Elimina squadra"
@@ -225,94 +225,135 @@ export default function TeamDetails() {
 				</Form>
 			</div>
 
-			<h4 className="mt-4 text-xl">Nuovo Giocatore</h4>
-			<Form method="post" className="mt-2 space-y-4">
-				<Input
-					type="text"
-					name="name"
-					placeholder="Inserisci il nome del giocatore"
-					required
-				/>
-				<Input
-					type="text"
-					name="surname"
-					placeholder="Inserisci il cognome del giocatore"
-					required
-				/>
-				<Input
-					type="text"
-					name="birthYear"
-					placeholder="Inserisci l'anno di nascita del giocatore"
-					required
-				/>
-				<Select name="level" required>
-					<SelectTrigger>
-						<SelectValue placeholder="Seleziona un livello di esperienza" />
-					</SelectTrigger>
-					<SelectContent>
-						<SelectGroup>
-							<SelectLabel>Livello</SelectLabel>
-							{Array.from(playerLevelsMap.entries()).map(([key, value]) => (
-								<SelectItem key={key} value={key}>
-									{value}
-								</SelectItem>
-							))}
-						</SelectGroup>
-					</SelectContent>
-				</Select>
-				<div className="flex items-center space-x-2">
-					<Checkbox name="paid" />
-					<label
-						htmlFor="paid"
-						className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-					>
-						Iscrizione pagata
-					</label>
-				</div>
-				<div className="flex items-center space-x-4">
-					<Button
-						type="submit"
-						disabled={
-							isFull ||
-							((navigation.state === 'submitting' ||
+			<section className="section-blur">
+				<p className="text-xs font-medium tracking-wide text-slate-500 uppercase">
+					Crea
+				</p>
+				<h2 className="mt-1 text-lg font-bold text-slate-900">
+					Nuovo giocatore
+				</h2>
+				<p className="mt-2 text-sm leading-relaxed text-slate-700">
+					Al massimo cinque giocatori attivi per squadra. Campi obbligatori:
+					nome, cognome, anno di nascita e livello.
+				</p>
+			</section>
+
+			<section className="section-blur space-y-4">
+				<Form method="post" className="space-y-4">
+					<Input type="text" name="name" placeholder="Nome" required />
+					<Input type="text" name="surname" placeholder="Cognome" required />
+					<Input
+						type="text"
+						name="birthYear"
+						placeholder="Anno di nascita"
+						required
+					/>
+					<Select name="level" required>
+						<SelectTrigger>
+							<SelectValue placeholder="Livello di esperienza" />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectGroup>
+								<SelectLabel>Livello</SelectLabel>
+								{Array.from(playerLevelsMap.entries()).map(([key, value]) => (
+									<SelectItem key={key} value={key}>
+										{value}
+									</SelectItem>
+								))}
+							</SelectGroup>
+						</SelectContent>
+					</Select>
+					<div className="flex items-center gap-2 rounded-xl border border-slate-200/80 bg-slate-50/60 px-3 py-2">
+						<Checkbox name="paid" id="new-player-paid" />
+						<label
+							htmlFor="new-player-paid"
+							className="text-sm leading-snug text-slate-700"
+						>
+							Iscrizione pagata
+						</label>
+					</div>
+					<div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+						<Button
+							type="submit"
+							className="w-full sm:w-auto"
+							disabled={
+								isFull ||
+								((navigation.state === 'submitting' ||
+									navigation.state === 'loading') &&
+									navigation.formAction?.includes('playgrounds'))
+							}
+						>
+							{(navigation.state === 'submitting' ||
 								navigation.state === 'loading') &&
-								navigation.formAction?.includes('playgrounds'))
-						}
-					>
-						{(navigation.state === 'submitting' ||
-							navigation.state === 'loading') &&
-						navigation.formAction?.includes('playgrounds')
-							? 'Aggiungi Giocatore...'
-							: 'Aggiungi Giocatore'}
-					</Button>
-					{isFull && <ErrorMessage message="Squadra piena" />}
-					{actionData?.error && <ErrorMessage message={actionData.error} />}
-				</div>
-			</Form>
+							navigation.formAction?.includes('playgrounds')
+								? 'Aggiunta in corso…'
+								: 'Aggiungi giocatore'}
+						</Button>
+						{isFull && <ErrorMessage message="Squadra piena" />}
+						{actionData?.error && <ErrorMessage message={actionData.error} />}
+					</div>
+				</Form>
+			</section>
 
-			<h2 className="mt-12 text-xl">Lista Giocatori</h2>
+			<section className="section-blur">
+				<p className="text-xs font-medium tracking-wide text-slate-500 uppercase">
+					Elenco
+				</p>
+				<h2 className="mt-1 text-lg font-bold text-slate-900">Rosa</h2>
+				<p className="mt-2 text-sm leading-relaxed text-slate-700">
+					Modifica dati anagrafici, taglia e pagamento; dal menu azioni gestisci
+					ammonizioni, espulsioni e ritiri.
+				</p>
+			</section>
 
-			<div className="mt-4 overflow-hidden rounded-lg border border-gray-300">
-				<Table className="w-full border-collapse">
+			<div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white/50 shadow-inner ring-1 ring-slate-900/5">
+				<Table className="w-full min-w-[920px] border-collapse text-sm">
 					<TableHeader>
-						<TableRow className="bg-gray-100">
-							<TableHead>Nome</TableHead>
-							<TableHead>Cognome</TableHead>
-							<TableHead>Anno</TableHead>
-							<TableHead>Livello</TableHead>
-							<TableHead>Pagato</TableHead>
-							<TableHead>Taglia</TableHead>
-							<TableHead>Ammonizioni</TableHead>
-							<TableHead>Espulsione</TableHead>
-							<TableHead>Ritirato</TableHead>
-							<TableHead>Modifica</TableHead>
-							<TableHead>Elimina</TableHead>
-							<TableHead>Altre azioni</TableHead>
+						<TableRow className="border-b border-slate-200/80 bg-slate-50/90 hover:bg-slate-50/90">
+							<TableHead className="text-xs font-semibold tracking-wide whitespace-nowrap text-slate-600 uppercase">
+								Nome
+							</TableHead>
+							<TableHead className="text-xs font-semibold tracking-wide whitespace-nowrap text-slate-600 uppercase">
+								Cognome
+							</TableHead>
+							<TableHead className="text-xs font-semibold tracking-wide whitespace-nowrap text-slate-600 uppercase">
+								Anno
+							</TableHead>
+							<TableHead className="text-xs font-semibold tracking-wide whitespace-nowrap text-slate-600 uppercase">
+								Livello
+							</TableHead>
+							<TableHead className="text-xs font-semibold tracking-wide whitespace-nowrap text-slate-600 uppercase">
+								Pagato
+							</TableHead>
+							<TableHead className="text-xs font-semibold tracking-wide whitespace-nowrap text-slate-600 uppercase">
+								Taglia
+							</TableHead>
+							<TableHead className="text-xs font-semibold tracking-wide whitespace-nowrap text-slate-600 uppercase">
+								Amm.
+							</TableHead>
+							<TableHead className="text-xs font-semibold tracking-wide whitespace-nowrap text-slate-600 uppercase">
+								Esp.
+							</TableHead>
+							<TableHead className="text-xs font-semibold tracking-wide whitespace-nowrap text-slate-600 uppercase">
+								Rit.
+							</TableHead>
+							<TableHead className="text-xs font-semibold tracking-wide whitespace-nowrap text-slate-600 uppercase">
+								Modifica
+							</TableHead>
+							<TableHead className="text-xs font-semibold tracking-wide whitespace-nowrap text-slate-600 uppercase">
+								Elimina
+							</TableHead>
+							<TableHead className="text-xs font-semibold tracking-wide whitespace-nowrap text-slate-600 uppercase">
+								Altro
+							</TableHead>
 						</TableRow>
 					</TableHeader>
 					<TableBody>
 						{team.players.map((player) => (
-							<TableRow key={player.id} className="text-center">
+							<TableRow
+								key={player.id}
+								className="border-slate-200/80 bg-white/80 text-center hover:bg-slate-50/80"
+							>
 								<TableCell>{player.name}</TableCell>
 								<TableCell>{player.surname}</TableCell>
 								<TableCell>{player.birthYear}</TableCell>
@@ -340,9 +381,10 @@ export default function TeamDetails() {
 										<DialogTrigger asChild>
 											<Button
 												variant="outline"
-												size={'icon'}
+												size="icon"
 												type="button"
 												aria-label="Modifica giocatore"
+												className="border-slate-200 bg-white/80 shadow-sm"
 											>
 												<Pencil className="h-4 w-4" />
 											</Button>
@@ -360,7 +402,7 @@ export default function TeamDetails() {
 													form="editPlayerForm"
 													type="text"
 													name="name"
-													placeholder="Inserisci il nome del giocatore"
+													placeholder="Nome"
 													defaultValue={player.name}
 													required
 												/>
@@ -368,7 +410,7 @@ export default function TeamDetails() {
 													form="editPlayerForm"
 													type="text"
 													name="surname"
-													placeholder="Inserisci il cognome del giocatore"
+													placeholder="Cognome"
 													defaultValue={player.surname}
 													required
 												/>
@@ -376,7 +418,7 @@ export default function TeamDetails() {
 													form="editPlayerForm"
 													type="text"
 													name="birthYear"
-													placeholder="Inserisci l'anno di nascita del giocatore"
+													placeholder="Anno di nascita"
 													defaultValue={player.birthYear}
 													required
 												/>
@@ -387,7 +429,7 @@ export default function TeamDetails() {
 													required
 												>
 													<SelectTrigger>
-														<SelectValue placeholder="Seleziona un livello di esperienza" />
+														<SelectValue placeholder="Livello" />
 													</SelectTrigger>
 													<SelectContent>
 														<SelectGroup>
@@ -408,7 +450,7 @@ export default function TeamDetails() {
 													defaultValue={player.size ?? undefined}
 												>
 													<SelectTrigger>
-														<SelectValue placeholder="Seleziona la taglia assegnata" />
+														<SelectValue placeholder="Taglia" />
 													</SelectTrigger>
 													<SelectContent>
 														<SelectGroup>
@@ -426,15 +468,16 @@ export default function TeamDetails() {
 														</SelectGroup>
 													</SelectContent>
 												</Select>
-												<div className="flex items-center space-x-2">
+												<div className="flex items-center gap-2 rounded-xl border border-slate-200/80 bg-slate-50/60 px-3 py-2">
 													<Checkbox
 														form="editPlayerForm"
 														name="paid"
+														id={`edit-paid-${player.id}`}
 														defaultChecked={player.paid}
 													/>
 													<label
-														htmlFor="paid"
-														className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+														htmlFor={`edit-paid-${player.id}`}
+														className="text-sm leading-snug text-slate-700"
 													>
 														Iscrizione pagata
 													</label>
@@ -475,9 +518,10 @@ export default function TeamDetails() {
 											trigger={
 												<Button
 													variant="destructive"
-													size={'icon'}
+													size="icon"
 													type="button"
 													aria-label="Elimina giocatore"
+													className="shadow-sm"
 												>
 													<X className="h-4 w-4" />
 												</Button>
@@ -491,7 +535,12 @@ export default function TeamDetails() {
 								<TableCell>
 									<DropdownMenu>
 										<DropdownMenuTrigger asChild>
-											<Button variant="ghost" type="button" aria-label="Azioni">
+											<Button
+												variant="ghost"
+												type="button"
+												aria-label="Altre azioni"
+												className="text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+											>
 												<Ellipsis className="h-4 w-4" />
 											</Button>
 										</DropdownMenuTrigger>

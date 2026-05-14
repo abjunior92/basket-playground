@@ -13,7 +13,7 @@ import {
 	useLoaderData,
 	useLocation,
 } from '@remix-run/react'
-import { LayoutGrid, Pencil, X } from 'lucide-react'
+import { ChevronRight, LayoutGrid, Pencil, X } from 'lucide-react'
 import invariant from 'tiny-invariant'
 import DialogAlert from '~/components/DialogAlert'
 import ErrorMessage from '~/components/ErrorMessage'
@@ -46,6 +46,7 @@ import {
 	TableHeader,
 	TableRow,
 } from '~/components/ui/table'
+import { cn } from '~/lib/utils'
 
 const prisma = new PrismaClient()
 
@@ -60,8 +61,11 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 		where: { id: params.groupId },
 		include: {
 			teams: {
+				orderBy: { name: 'asc' },
 				include: {
-					players: true,
+					players: {
+						orderBy: [{ surname: 'asc' }, { name: 'asc' }],
+					},
 				},
 			},
 		},
@@ -71,6 +75,7 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 
 	const groups = await prisma.group.findMany({
 		where: { playgroundId: params.playgroundId },
+		orderBy: { name: 'asc' },
 	})
 
 	return json({ group, groups })
@@ -116,10 +121,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 	)
 }
 
-function resolveGroupBackLink(
-	playgroundId: string,
-	state: unknown,
-): string {
+function resolveGroupBackLink(playgroundId: string, state: unknown): string {
 	const candidate = (state as { backLink?: unknown } | null)?.backLink
 	if (typeof candidate !== 'string' || !candidate.startsWith('/')) {
 		return `/playgrounds/${playgroundId}`
@@ -143,8 +145,8 @@ export default function GroupDetails() {
 	const backLink = resolveGroupBackLink(group.playgroundId, location.state)
 
 	return (
-		<div className="md:p-4">
-			<div className="flex items-center justify-between">
+		<div className="mx-auto max-w-5xl space-y-6 p-4 pb-12 md:p-6">
+			<div className="flex items-center justify-between gap-3">
 				<Header
 					title={group.name}
 					backLink={backLink}
@@ -158,9 +160,9 @@ export default function GroupDetails() {
 				>
 					<DialogAlert
 						trigger={
-							<Button type="button" variant="destructive">
+							<Button type="button" variant="destructive" className="shrink-0">
 								<X className="h-5 w-5" />
-								<span className="hidden md:block">Cancella Girone</span>
+								<span className="hidden md:inline">Cancella girone</span>
 							</Button>
 						}
 						title="Elimina girone"
@@ -170,127 +172,181 @@ export default function GroupDetails() {
 				</Form>
 			</div>
 
-			<h4 className="mt-4 text-xl">Nuova Squadra</h4>
-			<Form method="post" className="mt-2 space-y-4">
-				<Input
-					type="text"
-					name="name"
-					placeholder="Inserisci il nome della squadra"
-					required
-				/>
-				<Input
-					type="tel"
-					name="refPhoneNumber"
-					placeholder="Inserisci il numero di telefono di riferimento della squadra"
-				/>
-				<div className="flex items-center gap-x-2">
-					<Button type="submit">Aggiungi Squadra</Button>
-					{actionData?.error && <ErrorMessage message={actionData.error} />}
-				</div>
-			</Form>
+			<section className="section-blur">
+				<p className="text-xs font-medium tracking-wide text-slate-500 uppercase">
+					Crea
+				</p>
+				<h2 className="mt-1 text-lg font-bold text-slate-900">Nuova squadra</h2>
+				<p className="mt-2 text-sm leading-relaxed text-slate-700">
+					Inserisci il nome e, se serve, un recapito telefonico per il referente
+					della squadra.
+				</p>
+			</section>
 
-			<h2 className="mt-12 text-xl">Lista Squadre</h2>
+			<section className="section-blur space-y-4">
+				<Form method="post" className="space-y-4">
+					<Input
+						type="text"
+						name="name"
+						placeholder="Nome della squadra"
+						required
+					/>
+					<Input
+						type="tel"
+						name="refPhoneNumber"
+						placeholder="Telefono di riferimento (opzionale)"
+					/>
+					<div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+						<Button type="submit" className="w-full sm:w-auto">
+							Aggiungi squadra
+						</Button>
+						{actionData?.error && <ErrorMessage message={actionData.error} />}
+					</div>
+				</Form>
+			</section>
 
-			<div className="mt-4 overflow-hidden rounded-lg border border-gray-300">
-				<Table className="w-full border-collapse">
-					<TableHeader>
-						<TableRow className="bg-gray-100">
-							<TableHead>Nome</TableHead>
-							<TableHead>Squadre</TableHead>
-							<TableHead>Telefono riferimento</TableHead>
-							<TableHead>Modifica</TableHead>
-						</TableRow>
-					</TableHeader>
-					<TableBody>
-						{group.teams.map((team) => (
-							<TableRow key={team.id}>
-								<TableCell className="text-center">
-									<Link
-										to={`/playgrounds/${group.playgroundId}/teams/${team.id}`}
-										className="text-blue-500 underline underline-offset-6"
-									>
-										{team.name}
-									</Link>
-								</TableCell>
-								<TableCell>
-									{team.players
-										.map((player) => `${player.name} ${player.surname}`)
-										.join(', ')}
-								</TableCell>
-								<TableCell className="text-center">
-									{team.refPhoneNumber}
-								</TableCell>
-								<TableCell className="text-center">
-									<Dialog>
-										<DialogTrigger asChild>
-											<Button
-												variant="outline"
-												type="button"
-												aria-label="Modifica giocatore"
-											>
-												<Pencil className="h-4 w-4" />
-											</Button>
-										</DialogTrigger>
-										<DialogContent>
-											<DialogHeader>
-												<DialogTitle>Modifica squadra</DialogTitle>
-											</DialogHeader>
-											<div className="grid gap-4 py-4">
-												<Input
-													form={`editTeamForm-${team.id}`}
-													type="text"
-													name="name"
-													placeholder="Inserisci il nome della squadra"
-													defaultValue={team.name}
-													required
-												/>
-												<Input
-													form={`editTeamForm-${team.id}`}
-													type="tel"
-													name="refPhoneNumber"
-													placeholder="Inserisci il numero di telefono di riferimento della squadra"
-													defaultValue={team.refPhoneNumber ?? ''}
-												/>
-												<Select
-													form={`editTeamForm-${team.id}`}
-													name="groupId"
-													defaultValue={team.groupId}
-													required
-												>
-													<SelectTrigger>
-														<SelectValue placeholder="Seleziona il girone" />
-													</SelectTrigger>
-													<SelectContent>
-														<SelectGroup>
-															<SelectLabel>Girone</SelectLabel>
-															{groups.map((g) => (
-																<SelectItem key={g.id} value={g.id}>
-																	{g.name}
-																</SelectItem>
-															))}
-														</SelectGroup>
-													</SelectContent>
-												</Select>
-											</div>
-											<DialogFooter>
-												<Form
-													id={`editTeamForm-${team.id}`}
-													method="post"
-													action={`/data/teams/${team.id}/${group.id}/${group.playgroundId}/edit`}
-												>
-													<DialogClose>
-														<Button type="submit">Salva</Button>
-													</DialogClose>
-												</Form>
-											</DialogFooter>
-										</DialogContent>
-									</Dialog>
-								</TableCell>
+			<section className="section-blur">
+				<p className="text-xs font-medium tracking-wide text-slate-500 uppercase">
+					Elenco
+				</p>
+				<h2 className="mt-1 text-lg font-bold text-slate-900">
+					Squadre del girone
+				</h2>
+				<p className="mt-2 text-sm leading-relaxed text-slate-700">
+					Apri una squadra per gestire giocatori, taglie e sanzioni. Puoi
+					spostare una squadra in un altro girone dalla finestra di modifica.
+				</p>
+			</section>
+
+			{group.teams.length === 0 ? (
+				<section className="section-blur">
+					<p className="text-sm text-slate-700">
+						Non risultano ancora squadre in questo girone.
+					</p>
+				</section>
+			) : (
+				<div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white/50 shadow-inner ring-1 ring-slate-900/5">
+					<Table className="w-full min-w-[640px] border-collapse text-sm">
+						<TableHeader>
+							<TableRow className="border-b border-slate-200/80 bg-slate-50/90 hover:bg-slate-50/90">
+								<TableHead className="text-left text-xs font-semibold tracking-wide text-slate-600 uppercase">
+									Squadra
+								</TableHead>
+								<TableHead className="text-left text-xs font-semibold tracking-wide text-slate-600 uppercase">
+									Giocatori
+								</TableHead>
+								<TableHead className="text-center text-xs font-semibold tracking-wide whitespace-nowrap text-slate-600 uppercase">
+									Telefono
+								</TableHead>
+								<TableHead className="w-[1%] text-center text-xs font-semibold tracking-wide whitespace-nowrap text-slate-600 uppercase">
+									Azioni
+								</TableHead>
 							</TableRow>
-						))}
-					</TableBody>
-				</Table>
-			</div>
+						</TableHeader>
+						<TableBody>
+							{group.teams.map((team) => (
+								<TableRow
+									key={team.id}
+									className="border-slate-200/80 bg-white/80 hover:bg-slate-50/80"
+								>
+									<TableCell className="align-middle">
+										<Link
+											to={`/playgrounds/${group.playgroundId}/teams/${team.id}`}
+											className={cn(
+												'group inline-flex max-w-full items-center gap-2 py-1 font-semibold text-slate-900 transition-colors hover:text-orange-900',
+												'focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2 focus-visible:outline-none',
+											)}
+										>
+											<ChevronRight className="h-4 w-4 shrink-0 text-slate-400 transition-transform group-hover:translate-x-0.5 group-hover:text-orange-600" />
+											<span className="truncate">{team.name}</span>
+										</Link>
+									</TableCell>
+									<TableCell className="max-w-md text-slate-700">
+										<span className="line-clamp-2">
+											{team.players.length === 0
+												? '—'
+												: team.players
+														.map((p) => `${p.name} ${p.surname}`)
+														.join(', ')}
+										</span>
+									</TableCell>
+									<TableCell className="text-center whitespace-nowrap text-slate-600">
+										{team.refPhoneNumber ?? '—'}
+									</TableCell>
+									<TableCell className="text-center">
+										<Dialog>
+											<DialogTrigger asChild>
+												<Button
+													variant="outline"
+													type="button"
+													size="sm"
+													aria-label="Modifica squadra"
+													className="border-slate-200 bg-white/80 shadow-sm"
+												>
+													<Pencil className="h-4 w-4" />
+												</Button>
+											</DialogTrigger>
+											<DialogContent>
+												<DialogHeader>
+													<DialogTitle>Modifica squadra</DialogTitle>
+												</DialogHeader>
+												<div className="grid gap-4 py-4">
+													<Input
+														form={`editTeamForm-${team.id}`}
+														type="text"
+														name="name"
+														placeholder="Nome della squadra"
+														defaultValue={team.name}
+														required
+													/>
+													<Input
+														form={`editTeamForm-${team.id}`}
+														type="tel"
+														name="refPhoneNumber"
+														placeholder="Telefono di riferimento"
+														defaultValue={team.refPhoneNumber ?? ''}
+													/>
+													<Select
+														form={`editTeamForm-${team.id}`}
+														name="groupId"
+														defaultValue={team.groupId}
+														required
+													>
+														<SelectTrigger className="border-slate-300 bg-white">
+															<SelectValue placeholder="Girone" />
+														</SelectTrigger>
+														<SelectContent>
+															<SelectGroup>
+																<SelectLabel>Girone</SelectLabel>
+																{groups.map((g) => (
+																	<SelectItem key={g.id} value={g.id}>
+																		{g.name}
+																	</SelectItem>
+																))}
+															</SelectGroup>
+														</SelectContent>
+													</Select>
+												</div>
+												<DialogFooter>
+													<Form
+														id={`editTeamForm-${team.id}`}
+														method="post"
+														action={`/data/teams/${team.id}/${group.id}/${group.playgroundId}/edit`}
+													>
+														<DialogClose>
+															<Button type="submit">Salva</Button>
+														</DialogClose>
+													</Form>
+												</DialogFooter>
+											</DialogContent>
+										</Dialog>
+									</TableCell>
+								</TableRow>
+							))}
+						</TableBody>
+					</Table>
+				</div>
+			)}
 		</div>
 	)
 }

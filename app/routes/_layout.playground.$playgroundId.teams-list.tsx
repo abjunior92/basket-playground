@@ -123,7 +123,7 @@ export default function AdminTeamsIndex() {
 							placeholder="Filtra per nome squadra, girone o telefono…"
 							value={search}
 							onChange={(e) => setSearch(e.target.value)}
-							className="border-slate-300 bg-white pl-9"
+							className="pl-9"
 							aria-label="Filtra squadre"
 						/>
 					</div>

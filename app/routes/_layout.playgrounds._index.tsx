@@ -11,6 +11,7 @@ import {
 	useActionData,
 	useLoaderData,
 } from '@remix-run/react'
+import { ChevronRight, Pencil } from 'lucide-react'
 import ErrorMessage from '~/components/ErrorMessage'
 import Header from '~/components/Header'
 import { Button } from '~/components/ui/button'
@@ -24,6 +25,7 @@ import {
 	DialogTrigger,
 } from '~/components/ui/dialog'
 import { Input } from '~/components/ui/input'
+import { cn } from '~/lib/utils'
 
 const prisma = new PrismaClient()
 
@@ -104,92 +106,163 @@ export default function Playgrounds() {
 	const actionData = useActionData<typeof action>()
 
 	return (
-		<div className="md:p-4">
+		<div className="mx-auto max-w-5xl space-y-6 p-4 pb-12 md:p-6">
 			<Header title="Tornei" backLink="/" />
 
-			<h4 className="mt-4 text-xl">Nuovo Torneo</h4>
-			<Form method="post" className="mt-2 space-y-4">
-				<input type="hidden" name="intent" value="create-playground" />
-				<Input
-					type="text"
-					name="name"
-					placeholder="Inserisci il nome del torneo"
-					required
-				/>
-				<Input
-					type="number"
-					name="year"
-					placeholder="Inserisci l'anno del torneo"
-					min={2000}
-					required
-				/>
-				<div className="flex items-center gap-x-2">
-					<Button type="submit">Aggiungi Torneo</Button>
-					{actionData?.error && <ErrorMessage message={actionData.error} />}
-				</div>
-			</Form>
+			<section className="section-blur">
+				<p className="text-xs font-medium tracking-wide text-slate-500 uppercase">
+					Crea
+				</p>
+				<h2 className="mt-1 text-lg font-bold text-slate-900">Nuovo torneo</h2>
+				<p className="mt-2 text-sm leading-relaxed text-slate-700">
+					Aggiungi un&apos;edizione del torneo con nome distintivo e anno di
+					riferimento.
+				</p>
+			</section>
 
-			<h4 className="mt-12 text-xl">Lista Tornei</h4>
-			<ul className="mt-4 space-y-2">
-				{playgrounds.map((playground) => (
-					<li key={playground.id} className="rounded-md border p-3">
-						<div className="flex items-center justify-between gap-2">
-							<Link
-								to={`/playgrounds/${playground.id}`}
-								className="text-blue-500 underline underline-offset-6"
+			<section className="section-blur space-y-4">
+				<Form method="post" className="grid gap-4 sm:grid-cols-2">
+					<input type="hidden" name="intent" value="create-playground" />
+					<div className="sm:col-span-1">
+						<label htmlFor="new-playground-name" className="sr-only">
+							Nome torneo
+						</label>
+						<Input
+							id="new-playground-name"
+							type="text"
+							name="name"
+							placeholder="Nome del torneo"
+							required
+						/>
+					</div>
+					<div className="sm:col-span-1">
+						<label htmlFor="new-playground-year" className="sr-only">
+							Anno
+						</label>
+						<Input
+							id="new-playground-year"
+							type="number"
+							name="year"
+							placeholder="Anno (es. 2026)"
+							min={2000}
+							required
+						/>
+					</div>
+					<div className="flex flex-col gap-3 sm:col-span-2 sm:flex-row sm:items-center">
+						<Button type="submit" className="w-full sm:w-auto">
+							Aggiungi torneo
+						</Button>
+						{actionData?.error && <ErrorMessage message={actionData.error} />}
+					</div>
+				</Form>
+			</section>
+
+			<section className="section-blur">
+				<p className="text-xs font-medium tracking-wide text-slate-500 uppercase">
+					Elenco
+				</p>
+				<h2 className="mt-1 text-lg font-bold text-slate-900">Tornei creati</h2>
+				<p className="mt-2 text-sm leading-relaxed text-slate-700">
+					Apri un torneo per gestire gironi e squadre, oppure modifica nome e
+					anno senza entrare nel dettaglio.
+				</p>
+			</section>
+
+			{playgrounds.length === 0 ? (
+				<section className="section-blur">
+					<p className="text-sm text-slate-700">
+						Non è ancora stato creato alcun torneo.
+					</p>
+				</section>
+			) : (
+				<ul className="space-y-3">
+					{playgrounds.map((playground) => (
+						<li key={playground.id}>
+							<div
+								className={cn(
+									'flex flex-col gap-3 rounded-2xl border border-slate-200/80 bg-linear-to-br from-white/95 to-slate-50/90 p-4 shadow-sm ring-1 ring-slate-900/5',
+									'sm:flex-row sm:items-center sm:justify-between sm:gap-4',
+								)}
 							>
-								{playground.name} ({playground.year})
-							</Link>
-							<Dialog>
-								<DialogTrigger asChild>
-									<Button type="button" variant="outline" size="sm">
-										Modifica
-									</Button>
-								</DialogTrigger>
-								<DialogContent>
-									<DialogHeader>
-										<DialogTitle>Modifica torneo</DialogTitle>
-									</DialogHeader>
-									<div className="grid gap-4 py-4">
-										<Input
-											form={`editPlaygroundForm-${playground.id}`}
-											type="text"
-											name="name"
-											defaultValue={playground.name}
-											required
-										/>
-										<Input
-											form={`editPlaygroundForm-${playground.id}`}
-											type="number"
-											name="year"
-											defaultValue={playground.year}
-											min={2000}
-											required
-										/>
-									</div>
-									<DialogFooter>
-										<Form id={`editPlaygroundForm-${playground.id}`} method="post">
-											<input
-												type="hidden"
-												name="intent"
-												value="update-playground"
+								<Link
+									to={`/playgrounds/${playground.id}`}
+									className={cn(
+										'group flex min-w-0 flex-1 items-center gap-3 rounded-xl py-1 transition-colors',
+										'focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2 focus-visible:outline-none',
+									)}
+								>
+									<span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-900/5 text-slate-700 transition-colors group-hover:bg-orange-500/15 group-hover:text-orange-900">
+										<ChevronRight className="h-5 w-5 transition-transform group-hover:translate-x-0.5" />
+									</span>
+									<span className="min-w-0">
+										<span className="block truncate font-semibold text-slate-900 group-hover:text-orange-900">
+											{playground.name}
+										</span>
+										<span className="mt-0.5 block text-sm text-slate-600">
+											Anno {playground.year}
+										</span>
+									</span>
+								</Link>
+								<Dialog>
+									<DialogTrigger asChild>
+										<Button
+											type="button"
+											variant="outline"
+											size="sm"
+											className="shrink-0 border-slate-200 bg-white/80 shadow-sm"
+										>
+											<Pencil className="h-4 w-4" />
+											<span className="ml-1.5">Modifica</span>
+										</Button>
+									</DialogTrigger>
+									<DialogContent>
+										<DialogHeader>
+											<DialogTitle>Modifica torneo</DialogTitle>
+										</DialogHeader>
+										<div className="grid gap-4 py-4">
+											<Input
+												form={`editPlaygroundForm-${playground.id}`}
+												type="text"
+												name="name"
+												defaultValue={playground.name}
+												required
 											/>
-											<input
-												type="hidden"
-												name="playgroundId"
-												value={playground.id}
+											<Input
+												form={`editPlaygroundForm-${playground.id}`}
+												type="number"
+												name="year"
+												defaultValue={playground.year}
+												min={2000}
+												required
 											/>
-											<DialogClose asChild>
-												<Button type="submit">Salva</Button>
-											</DialogClose>
-										</Form>
-									</DialogFooter>
-								</DialogContent>
-							</Dialog>
-						</div>
-					</li>
-				))}
-			</ul>
+										</div>
+										<DialogFooter>
+											<Form
+												id={`editPlaygroundForm-${playground.id}`}
+												method="post"
+											>
+												<input
+													type="hidden"
+													name="intent"
+													value="update-playground"
+												/>
+												<input
+													type="hidden"
+													name="playgroundId"
+													value={playground.id}
+												/>
+												<DialogClose asChild>
+													<Button type="submit">Salva</Button>
+												</DialogClose>
+											</Form>
+										</DialogFooter>
+									</DialogContent>
+								</Dialog>
+							</div>
+						</li>
+					))}
+				</ul>
+			)}
 		</div>
 	)
 }

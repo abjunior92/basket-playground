@@ -96,7 +96,7 @@ export default function GuestTeamsIndex() {
 						</label>
 						<div className="relative">
 							<Search
-								className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500"
+								className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-500"
 								aria-hidden
 							/>
 							<Input
@@ -106,7 +106,7 @@ export default function GuestTeamsIndex() {
 								placeholder="Cerca squadra per nome…"
 								value={search}
 								onChange={(e) => setSearch(e.target.value)}
-								className="border-slate-200 bg-white/90 pl-10 shadow-inner"
+								className="pl-10"
 							/>
 						</div>
 					</section>
@@ -114,8 +114,8 @@ export default function GuestTeamsIndex() {
 					{filteredTeams.length === 0 ? (
 						<section className="section-blur">
 							<p className="text-sm text-slate-700">
-								Nessuna squadra corrisponde a «{search.trim()}». Prova con un altro
-								nome.
+								Nessuna squadra corrisponde a «{search.trim()}». Prova con un
+								altro nome.
 							</p>
 						</section>
 					) : (
@@ -136,7 +136,7 @@ export default function GuestTeamsIndex() {
 													<Shield className="h-4 w-4" />
 												</span>
 												<div className="min-w-0">
-													<p className="font-semibold leading-snug text-slate-900">
+													<p className="leading-snug font-semibold text-slate-900">
 														{team.name}
 													</p>
 													<p className="mt-1 flex items-center gap-1.5 text-xs text-slate-600">
