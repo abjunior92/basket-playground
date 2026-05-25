@@ -5,8 +5,12 @@ import { FacebookIcon } from 'icons/lucide-facebook'
 import { InstagramIcon } from 'icons/lucide-instagram'
 import {
 	ArrowDown,
+	Bus,
 	CalendarClock,
+	Globe,
 	HandPlatter,
+	Heart,
+	HeartHandshake,
 	Info,
 	MapPin,
 	ShieldCheck,
@@ -250,6 +254,153 @@ export default function PlaygroundShowcasePage() {
 						</div>
 					</section>
 
+					<div className="relative space-y-4">
+						<div className="relative overflow-hidden rounded-2xl border border-orange-400/35 bg-linear-to-br from-[#0c1a33] via-[#122a4a] to-[#0a1428] text-white shadow-lg ring-1 shadow-slate-900/25 ring-white/10">
+							<h2 className="font-semiboldtext-white flex items-center gap-2 p-5 text-lg">
+								<HeartHandshake className="h-5 w-5 shrink-0" aria-hidden />
+								Baskin — West River Calderara ASD
+							</h2>
+							<div
+								aria-hidden="true"
+								className="pointer-events-none absolute -top-24 -right-16 h-64 w-64 rounded-full bg-orange-500/15 blur-3xl"
+							/>
+							<div
+								aria-hidden="true"
+								className="pointer-events-none absolute -bottom-8 -left-12 h-48 w-48 rounded-full bg-sky-400/10 blur-2xl"
+							/>
+							<svg
+								className="pointer-events-none absolute right-0 bottom-0 left-0 h-24 w-full text-orange-400/20"
+								viewBox="0 0 400 80"
+								preserveAspectRatio="none"
+								aria-hidden
+							>
+								<path
+									fill="none"
+									stroke="currentColor"
+									strokeWidth="3"
+									d="M-20 55 C 60 20, 120 75, 200 40 S 340 10, 420 50"
+								/>
+							</svg>
+
+							<div className="relative flex flex-col gap-5 p-5 sm:flex-row sm:items-start sm:gap-6 sm:p-6">
+								<div className="mx-auto shrink-0 sm:mx-0">
+									<div className="relative">
+										<div
+											aria-hidden="true"
+											className="absolute -inset-1 rounded-full bg-linear-to-br from-orange-400 to-orange-600 opacity-90 shadow-md shadow-orange-900/40"
+										/>
+										<img
+											src="/WR_LOGO_PNG.png"
+											alt="Logo West River Calderara ASD"
+											width={120}
+											height={120}
+											className="relative h-30 w-30 rounded-full border-4 border-[#0c1a33] bg-[#0c1a33] object-contain p-1.5"
+											loading="lazy"
+											decoding="async"
+										/>
+									</div>
+								</div>
+
+								<div className="min-w-0 flex-1 space-y-3">
+									<div className="flex flex-wrap items-center gap-2">
+										<span className="inline-flex items-center rounded-full border border-orange-400/50 bg-orange-500/20 px-2.5 py-0.5 text-[11px] font-bold tracking-[0.12em] text-orange-100 uppercase">
+											Basket inclusivo
+										</span>
+										<span className="inline-flex items-center gap-1 rounded-full border border-white/20 bg-white/10 px-2.5 py-0.5 text-[11px] font-semibold text-white/90">
+											<CalendarClock
+												className="h-3.5 w-3.5 text-orange-200"
+												aria-hidden
+											/>
+											Momento speciale il giovedì
+										</span>
+									</div>
+
+									<p className="text-base leading-snug font-bold tracking-tight text-white sm:text-lg">
+										Conosci West River: sport, squadra e tanto altro!
+									</p>
+									<p className="text-sm leading-relaxed text-slate-200/95">
+										Il <strong className="text-white">baskin</strong> è basket
+										accessibile a tutti: ritmo, gioco di squadra e tanto
+										entusiasmo. Al torneo dedichiamo un momento speciale
+										chiamato <strong className="text-white">Basket2All</strong>,
+										fermati e impara a conoscere questo sport.
+									</p>
+									<p className="flex gap-2 rounded-xl border border-white/15 bg-white/5 p-3 text-sm leading-relaxed text-slate-100/95">
+										<Bus
+											className="mt-0.5 h-5 w-5 shrink-0 text-orange-300"
+											aria-hidden
+										/>
+										<span>
+											<strong className="text-white">
+												Obiettivo: un pulmino per la società.
+											</strong>{' '}
+											Un mezzo per accompagnare giocatori, squadre e famiglie a
+											gare, eventi ed allenamenti: se puoi, sostieni la raccolta
+											con una donazione.
+										</span>
+									</p>
+								</div>
+							</div>
+
+							<div className="relative border-t border-white/10 bg-black/20 px-5 py-4 sm:px-6">
+								<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+									<p className="text-xs leading-relaxed text-slate-300/95 sm:max-w-[55%]">
+										Ogni contributo, anche piccolo, si somma: grazie per
+										aiutarci a portare avanti questa realtà.
+									</p>
+									<div className="flex w-full flex-col items-stretch gap-2 sm:ml-auto sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
+										{westRiverShowcaseLinks.donationUrl ? (
+											<a
+												href={westRiverShowcaseLinks.donationUrl}
+												target="_blank"
+												rel="noreferrer"
+												className="group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-xl border border-orange-500 bg-orange-500 px-5 py-2.5 text-sm font-semibold text-slate-950 shadow-md shadow-orange-950/30 transition duration-200 ease-out hover:border-orange-400 hover:bg-orange-400 hover:shadow-lg hover:shadow-orange-950/35 focus-visible:ring-2 focus-visible:ring-orange-300 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0c1a33] focus-visible:outline motion-safe:hover:-translate-y-0.5"
+											>
+												<span
+													aria-hidden="true"
+													className="pointer-events-none absolute inset-y-0 -left-1/3 block w-1/3 bg-linear-to-r from-transparent via-white/45 to-transparent transition-transform duration-500 group-hover:translate-x-[220%]"
+												/>
+												<Heart
+													className="relative h-4 w-4 shrink-0"
+													aria-hidden
+												/>
+												<span className="relative">Dona per il pulmino</span>
+											</a>
+										) : (
+											<p className="rounded-lg border border-orange-400/25 bg-orange-500/10 px-3 py-2 text-center text-xs font-medium text-orange-100/95 sm:text-left">
+												Il link per la donazione sarà pubblicato qui a breve.
+											</p>
+										)}
+										<div className="flex flex-col gap-2 sm:flex-row sm:gap-2">
+											<a
+												href={westRiverShowcaseLinks.websiteUrl}
+												target="_blank"
+												rel="noreferrer"
+												className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/25 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-white/15 focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0c1a33] focus-visible:outline"
+											>
+												<Globe className="h-4 w-4 shrink-0" aria-hidden />
+												Sito ufficiale
+											</a>
+											<a
+												href={westRiverShowcaseLinks.instagramUrl}
+												target="_blank"
+												rel="noreferrer"
+												className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/25 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-white/15 focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0c1a33] focus-visible:outline"
+											>
+												<InstagramIcon
+													size={16}
+													className="shrink-0"
+													aria-hidden
+												/>
+												Instagram
+											</a>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
 					<section className={cn('section-blur', 'highlights-card-v1')}>
 						<div
 							aria-hidden="true"
@@ -375,6 +526,13 @@ export default function PlaygroundShowcasePage() {
 			</main>
 		</>
 	)
+}
+
+/** Link West River nella card showcase */
+const westRiverShowcaseLinks = {
+	donationUrl: 'https://ideaginger.it/sostieni-3737.html',
+	websiteUrl: 'https://westriver.altervista.org/',
+	instagramUrl: 'https://www.instagram.com/westriver_asd/',
 }
 
 const newsItems = [
