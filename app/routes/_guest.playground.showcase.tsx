@@ -19,6 +19,7 @@ import {
 	Trophy,
 	Wallet,
 } from 'lucide-react'
+import { EventVenueMap } from '~/components/EventVenueMap'
 import { cn } from '~/lib/utils'
 
 const prisma = new PrismaClient()
@@ -469,19 +470,31 @@ export default function PlaygroundShowcasePage() {
 						</div>
 					</section>
 
+					<section className={cn('section-blur', 'highlights-card-v1')}>
+						<div
+							aria-hidden="true"
+							className="menu-hero-overlay-v1 pointer-events-none absolute inset-0"
+						/>
+						<div
+							aria-hidden="true"
+							className="menu-hero-grain pointer-events-none absolute inset-0 opacity-20 mix-blend-soft-light"
+						/>
+						<div className="relative space-y-4">
+							<div>
+								<h2 className="flex items-center gap-2 text-lg font-semibold text-slate-900">
+									<MapPin className="h-5 w-5" aria-hidden />
+									Mappa del torneo
+								</h2>
+								<p className="mt-1 text-sm text-slate-800">
+									Noi siamo qui! Apri Google Maps per le indicazioni stradali.
+								</p>
+							</div>
+							<EventVenueMap />
+						</div>
+					</section>
+
 					<section className="section-blur">
 						<div className="space-y-3 text-sm text-slate-900">
-							<p className="flex items-center gap-2 font-semibold">
-								<MapPin className="h-4 w-4" />
-								<a
-									href="https://maps.app.goo.gl/M4Ux1PdG3bkxzcY27"
-									target="_blank"
-									rel="noreferrer"
-									className="underline"
-								>
-									Oratorio Il Tralcio, Longara
-								</a>
-							</p>
 							<p className="flex items-center gap-2">
 								<CalendarClock className="h-4 w-4" />
 								Aggiornamenti e programma pubblicati ogni giorno.
