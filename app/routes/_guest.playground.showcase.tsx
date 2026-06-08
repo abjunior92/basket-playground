@@ -75,7 +75,22 @@ export default function PlaygroundShowcasePage() {
 							aria-hidden="true"
 							className="menu-hero-grain pointer-events-none absolute inset-0 opacity-20 mix-blend-soft-light"
 						/>
-						<div className="relative">
+						<div
+							className="pointer-events-none absolute top-3 right-3 z-10 sm:top-4 sm:right-4"
+							aria-hidden="true"
+						>
+							<div className="rounded-full bg-white/80 p-0.5 shadow-lg ring-2 shadow-slate-900/15 ring-white/90 ring-offset-1 ring-offset-white/50 motion-safe:rotate-6">
+								<img
+									src="/logo_longara.JPG"
+									alt=""
+									className="h-10 w-10 rounded-full object-cover sm:h-14 sm:w-14"
+									width={56}
+									height={56}
+									loading="eager"
+								/>
+							</div>
+						</div>
+						<div className="relative sm:pr-16">
 							<p className="text-sm font-medium tracking-wide text-slate-700/95">
 								Pagina ufficiale
 							</p>
