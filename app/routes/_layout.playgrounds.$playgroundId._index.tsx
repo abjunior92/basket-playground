@@ -89,6 +89,13 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 	const name = formData.get('name') as string
 	const color = formData.get('color') as ColorGroup
 
+	if (!name || !color) {
+		return json(
+			{ error: 'Il nome e il colore del girone sono obbligatori' },
+			{ status: 400 },
+		)
+	}
+
 	const existingGroup = await prisma.group.findFirst({
 		where: {
 			playgroundId: params.playgroundId,
@@ -100,9 +107,16 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 		return json({ error: 'Girone già esistente!' }, { status: 400 })
 	}
 
-	if (!name || !color) {
+	const existingGroupWithColor = await prisma.group.findFirst({
+		where: {
+			playgroundId: params.playgroundId,
+			color,
+		},
+	})
+
+	if (existingGroupWithColor) {
 		return json(
-			{ error: 'Il nome e il colore del girone sono obbligatori' },
+			{ error: 'Esiste già un girone con questo colore in questo torneo!' },
 			{ status: 400 },
 		)
 	}
@@ -121,6 +135,10 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 export default function PlaygroundDetails() {
 	const { playground } = useLoaderData<typeof loader>()
 	const actionData = useActionData<typeof action>()
+	const usedColors = new Set(playground.groups.map((group) => group.color))
+	const availableColors = Array.from(colorGroupMap.entries()).filter(
+		([key]) => !usedColors.has(key),
+	)
 
 	return (
 		<div className="mx-auto max-w-5xl space-y-6 p-4 pb-12 md:p-6">
@@ -169,14 +187,20 @@ export default function PlaygroundDetails() {
 						placeholder="Nome del girone"
 						required
 					/>
-					<Select name="color" required>
+					<Select name="color" required disabled={availableColors.length === 0}>
 						<SelectTrigger>
-							<SelectValue placeholder="Colore del girone" />
+							<SelectValue
+								placeholder={
+									availableColors.length === 0
+										? 'Nessun colore disponibile'
+										: 'Colore del girone'
+								}
+							/>
 						</SelectTrigger>
 						<SelectContent>
 							<SelectGroup>
 								<SelectLabel>Colore gruppo</SelectLabel>
-								{Array.from(colorGroupMap.entries()).map(([key]) => (
+								{availableColors.map(([key]) => (
 									<SelectItem key={key} value={key}>
 										<div className="flex items-center space-x-2">
 											<div
@@ -193,7 +217,11 @@ export default function PlaygroundDetails() {
 						</SelectContent>
 					</Select>
 					<div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-						<Button type="submit" className="w-full sm:w-auto">
+						<Button
+							type="submit"
+							className="w-full sm:w-auto"
+							disabled={availableColors.length === 0}
+						>
 							Aggiungi girone
 						</Button>
 						{actionData?.error && <ErrorMessage message={actionData.error} />}

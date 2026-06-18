@@ -25,10 +25,12 @@ model Playground {
 model Group {
   id       String   @id @default(uuid())
   name     String
-  color    ColorGroup   @unique
+  color    ColorGroup
   playground   Playground   @relation(fields: [playgroundId], references: [id], onDelete: Cascade)
   playgroundId String
   teams  Team[]
+
+  @@unique([playgroundId, color])
 }
 
 enum ColorGroup {
