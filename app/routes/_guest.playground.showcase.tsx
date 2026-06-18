@@ -5,6 +5,7 @@ import { FacebookIcon } from 'icons/lucide-facebook'
 import { InstagramIcon } from 'icons/lucide-instagram'
 import {
 	ArrowDown,
+	Award,
 	Bus,
 	CalendarClock,
 	Globe,
@@ -18,8 +19,16 @@ import {
 	Star,
 	Trophy,
 	Wallet,
+	type LucideIcon,
 } from 'lucide-react'
+import { type ReactNode } from 'react'
 import { EventVenueMap } from '~/components/EventVenueMap'
+import {
+	Accordion,
+	AccordionContent,
+	AccordionItem,
+	AccordionTrigger,
+} from '~/components/ui/accordion'
 import { cn } from '~/lib/utils'
 
 const prisma = new PrismaClient()
@@ -46,6 +55,58 @@ export const loader = async () => {
 		process.env.PUBLIC_SATISPAY_PAYMENT_URL?.trim() || null
 
 	return { playground, satispayPaymentUrl }
+}
+
+const showcaseAccordionSections = ['organization', 'prizes', 'food'] as const
+
+type ShowcaseAccordionSectionProps = {
+	value: string
+	icon: LucideIcon
+	title: string
+	description?: string
+	children: ReactNode
+}
+
+function ShowcaseAccordionSection({
+	value,
+	icon: Icon,
+	title,
+	description,
+	children,
+}: ShowcaseAccordionSectionProps) {
+	return (
+		<AccordionItem
+			value={value}
+			className={cn(
+				'section-blur',
+				'highlights-card-v1',
+				'relative border-none',
+			)}
+		>
+			<div
+				aria-hidden="true"
+				className="menu-hero-overlay-v1 pointer-events-none absolute inset-0"
+			/>
+			<div
+				aria-hidden="true"
+				className="menu-hero-grain pointer-events-none absolute inset-0 opacity-20 mix-blend-soft-light"
+			/>
+			<div className="relative">
+				<AccordionTrigger className="cursor-pointer gap-2 py-0 text-lg font-semibold text-slate-900 hover:no-underline [&>svg]:text-slate-600">
+					<span className="flex items-center gap-2">
+						<Icon className="h-5 w-5 shrink-0" aria-hidden />
+						{title}
+					</span>
+				</AccordionTrigger>
+				<AccordionContent className="pt-4">
+					{description ? (
+						<p className="mb-3 text-sm text-slate-800">{description}</p>
+					) : null}
+					{children}
+				</AccordionContent>
+			</div>
+		</AccordionItem>
+	)
 }
 
 export default function PlaygroundShowcasePage() {
@@ -144,17 +205,11 @@ export default function PlaygroundShowcasePage() {
 								</h3>
 								<p className="mt-2 text-sm leading-relaxed text-emerald-950/95">
 									Da quest'anno è possibile saldare l&apos;iscrizione tramite
-									Satispay. Chi paga entro fine maggio 2026 e iscrive almeno tre
-									giocatori per squadra ha uno sconto di 5&nbsp;€: quota{' '}
-									<span className="font-semibold">10&nbsp;€</span> a testa
-									invece di{' '}
-									<span className="line-through opacity-80">15&nbsp;€</span>.
+									Satispay.
 									<br />
 									<br />
-									<span className="font-semibold">
-										⭐️ Iscriversi subito conviene:
-									</span>{' '}
-									ti garantiremo la scelta della taglia della divisa!
+									Il costo è di <strong>15&nbsp;€</strong> per persona (minimo 3
+									giocatori per squadra).
 									<br />
 									<br />
 									<span className="font-semibold">
@@ -195,7 +250,7 @@ export default function PlaygroundShowcasePage() {
 								)}
 							</div>
 
-							<ul className="space-y-2">
+							{/* <ul className="space-y-2">
 								{newsItems.map((item) => (
 									<li
 										key={item.title}
@@ -214,24 +269,20 @@ export default function PlaygroundShowcasePage() {
 										) : null}
 									</li>
 								))}
-							</ul>
+							</ul> */}
 						</div>
 					</section>
 
-					<section className={cn('section-blur', 'highlights-card-v1')}>
-						<div
-							aria-hidden="true"
-							className="menu-hero-overlay-v1 pointer-events-none absolute inset-0"
-						/>
-						<div
-							aria-hidden="true"
-							className="menu-hero-grain pointer-events-none absolute inset-0 opacity-20 mix-blend-soft-light"
-						/>
-						<div className="relative space-y-4">
-							<h2 className="flex items-center gap-2 text-lg font-semibold text-slate-900">
-								<ShieldCheck className="h-5 w-5" />
-								Organizzazione torneo
-							</h2>
+					<Accordion
+						type="multiple"
+						defaultValue={[...showcaseAccordionSections]}
+						className="flex flex-col gap-4 md:gap-8"
+					>
+						<ShowcaseAccordionSection
+							value="organization"
+							icon={ShieldCheck}
+							title="Organizzazione torneo"
+						>
 							<ul className="space-y-2">
 								{organizationInfo.map((item) => (
 									<li
@@ -241,34 +292,50 @@ export default function PlaygroundShowcasePage() {
 										<p className="text-sm font-semibold text-slate-900">
 											{item.label}
 										</p>
-										<p className="mt-1 text-sm text-slate-800">{item.value}</p>
+										<p
+											className="mt-1 text-sm text-slate-800"
+											dangerouslySetInnerHTML={{ __html: item.value as string }}
+										/>
 									</li>
 								))}
 							</ul>
-						</div>
-					</section>
+						</ShowcaseAccordionSection>
 
-					<section className={cn('section-blur', 'highlights-card-v1')}>
-						<div
-							aria-hidden="true"
-							className="menu-hero-overlay-v1 pointer-events-none absolute inset-0"
-						/>
-						<div
-							aria-hidden="true"
-							className="menu-hero-grain pointer-events-none absolute inset-0 opacity-20 mix-blend-soft-light"
-						/>
-						<div className="relative space-y-4">
-							<h2 className="flex items-center gap-2 text-lg font-semibold text-slate-900">
-								<HandPlatter className="h-5 w-5" />
-								Cibo e bevande
-							</h2>
-							<p className="mt-1 rounded-lg border border-slate-300/70 bg-white/75 p-3 text-sm text-slate-800">
+						<ShowcaseAccordionSection
+							value="prizes"
+							icon={Award}
+							title="Premi"
+							description="Record e obiettivi premiati durante il torneo."
+						>
+							<ul className="space-y-2">
+								{prizes.map((prize) => (
+									<li
+										key={prize.title}
+										className="rounded-lg border border-slate-300/70 bg-white/75 p-3"
+									>
+										<p className="text-sm font-semibold text-slate-900">
+											{prize.title}
+										</p>
+										<p className="mt-1 text-sm text-slate-800">
+											{prize.description}
+										</p>
+									</li>
+								))}
+							</ul>
+						</ShowcaseAccordionSection>
+
+						<ShowcaseAccordionSection
+							value="food"
+							icon={HandPlatter}
+							title="Cibo e bevande"
+						>
+							<p className="rounded-lg border border-slate-300/70 bg-white/75 p-3 text-sm text-slate-800">
 								A ridosso del torneo, verrà inserito il menu giornaliero e i
 								relativi prezzi. Ogni giorno la cucina sarà aperta dalle 18:00
 								alle 22:00.
 							</p>
-						</div>
-					</section>
+						</ShowcaseAccordionSection>
+					</Accordion>
 
 					<div className="relative space-y-4">
 						<div className="relative overflow-hidden rounded-2xl border border-orange-400/35 bg-linear-to-br from-[#0c1a33] via-[#122a4a] to-[#0a1428] text-white shadow-lg ring-1 shadow-slate-900/25 ring-white/10">
@@ -327,7 +394,7 @@ export default function PlaygroundShowcasePage() {
 												className="h-3.5 w-3.5 text-orange-200"
 												aria-hidden
 											/>
-											Momento speciale il giovedì
+											Venerdì 3 luglio 2026 dalle 19
 										</span>
 									</div>
 
@@ -417,56 +484,38 @@ export default function PlaygroundShowcasePage() {
 						</div>
 					</div>
 
-					<section className={cn('section-blur', 'highlights-card-v1')}>
-						<div
-							aria-hidden="true"
-							className="menu-hero-overlay-v1 pointer-events-none absolute inset-0"
-						/>
-						<div
-							aria-hidden="true"
-							className="menu-hero-grain pointer-events-none absolute inset-0 opacity-20 mix-blend-soft-light"
-						/>
-						<div className="relative grid gap-4">
-							<div>
-								<h2 className="flex items-center gap-2 text-lg font-semibold text-slate-900">
-									<Star className="h-5 w-5" />
-									Sponsor
-								</h2>
-								<p className="mt-1 text-sm text-slate-800">
-									Un grazie speciale ai partner che supportano il torneo.
-								</p>
-								<ul className="mt-2 grid gap-2 sm:grid-cols-2">
-									{sponsors.map((sponsor) => (
-										<li
-											key={sponsor.name}
-											className="flex items-center gap-2 rounded-lg border border-slate-300/70 bg-white/75 px-3 py-2 text-sm font-medium text-slate-900"
-										>
-											<img
-												src={`/${sponsor.logo}`}
-												alt={sponsor.name}
-												className="object-contain"
-											/>
-										</li>
-									))}
-								</ul>
-							</div>
-						</div>
-					</section>
+					<Accordion
+						type="multiple"
+						defaultValue={['sponsors', 'info', 'map']}
+						className="flex flex-col gap-4 md:gap-8"
+					>
+						<ShowcaseAccordionSection
+							value="sponsors"
+							icon={Star}
+							title="Sponsor"
+							description="Un grazie speciale ai partner che supportano il torneo."
+						>
+							<ul className="grid gap-2 sm:grid-cols-2">
+								{sponsors.map((sponsor) => (
+									<li
+										key={sponsor.name}
+										className="flex items-center gap-2 rounded-lg border border-slate-300/70 bg-white/75 px-3 py-2 text-sm font-medium text-slate-900"
+									>
+										<img
+											src={`/${sponsor.logo}`}
+											alt={sponsor.name}
+											className="object-contain"
+										/>
+									</li>
+								))}
+							</ul>
+						</ShowcaseAccordionSection>
 
-					<section className={cn('section-blur', 'highlights-card-v1')}>
-						<div
-							aria-hidden="true"
-							className="menu-hero-overlay-v1 pointer-events-none absolute inset-0"
-						/>
-						<div
-							aria-hidden="true"
-							className="menu-hero-grain pointer-events-none absolute inset-0 opacity-20 mix-blend-soft-light"
-						/>
-						<div className="relative space-y-3">
-							<h2 className="flex items-center gap-2 text-lg font-semibold text-slate-900">
-								<Info className="h-5 w-5" />
-								Info utili
-							</h2>
+						<ShowcaseAccordionSection
+							value="info"
+							icon={Info}
+							title="Info utili"
+						>
 							<ul className="space-y-2">
 								{latestInfo.map((info) => (
 									<li
@@ -482,31 +531,17 @@ export default function PlaygroundShowcasePage() {
 									</li>
 								))}
 							</ul>
-						</div>
-					</section>
+						</ShowcaseAccordionSection>
 
-					<section className={cn('section-blur', 'highlights-card-v1')}>
-						<div
-							aria-hidden="true"
-							className="menu-hero-overlay-v1 pointer-events-none absolute inset-0"
-						/>
-						<div
-							aria-hidden="true"
-							className="menu-hero-grain pointer-events-none absolute inset-0 opacity-20 mix-blend-soft-light"
-						/>
-						<div className="relative space-y-4">
-							<div>
-								<h2 className="flex items-center gap-2 text-lg font-semibold text-slate-900">
-									<MapPin className="h-5 w-5" aria-hidden />
-									Mappa del torneo
-								</h2>
-								<p className="mt-1 text-sm text-slate-800">
-									Noi siamo qui! Apri Google Maps per le indicazioni stradali.
-								</p>
-							</div>
+						<ShowcaseAccordionSection
+							value="map"
+							icon={MapPin}
+							title="Mappa del torneo"
+							description="Noi siamo qui! Apri Google Maps per le indicazioni stradali."
+						>
 							<EventVenueMap />
-						</div>
-					</section>
+						</ShowcaseAccordionSection>
+					</Accordion>
 
 					<section className="section-blur">
 						<div className="space-y-3 text-sm text-slate-900">
@@ -563,29 +598,62 @@ const westRiverShowcaseLinks = {
 	instagramUrl: 'https://www.instagram.com/westriver_asd/',
 }
 
-const newsItems = [
-	{
-		title: 'Regole speciali in arrivo',
-		description:
-			'Quest’anno introdurremo regole speciali per rendere le partite ancora più avvincenti ed emozionanti. I dettagli verranno comunicati passo passo.',
-		badge: 'Seguiranno aggiornamenti',
-	},
-] as const
+// const newsItems = [
+// 	{
+// 		title: 'Regole speciali in arrivo',
+// 		description:
+// 			'Quest’anno introdurremo regole speciali per rendere le partite ancora più avvincenti ed emozionanti. I dettagli verranno comunicati passo passo.',
+// 		badge: 'Seguiranno aggiornamenti',
+// 	},
+// ] as const
 
 const organizationInfo = [
 	{
 		label: 'Formato evento',
-		value: 'Torneo 3vs3 con fase a gironi, play-in, playoff e finali serali.',
+		value:
+			'Torneo 3vs3: si vince ai 31 punti o chi fa più punti entro 15 minuti',
 	},
 	{
-		label: 'Fase a gironi e finali',
+		label: 'Calendario giornaliero',
 		value:
-			'Dalla prima domenica fino al giovedì: gironi + play-in, domenica play-off e finali',
+			'1ª domenica -> mercoledì: <strong>gironi</strong> <br /> giovedì solo <strong>play-in</strong> <br /> 2ª domenica <strong>play-off</strong> e <strong>finali</strong>',
+	},
+]
+
+const prizes = [
+	{
+		title: 'Damuuuv — miglior giocata',
+		description: 'Premiata ogni sera, offerta da Bardamù',
+	},
+	{
+		title: 'Squadra 1ª classificata',
+		description: 'Cena di squadra da Trattoria da Gianna',
+	},
+	{
+		title: 'Squadre 2° e 3° classificate',
+		description: 'Ricche ceste',
+	},
+	{
+		title: 'Miglior marcatore gironi',
+		description: 'Pallone da basket',
+	},
+	{
+		title: 'MVP playoff + finali',
+		description: 'Aperitivo completo per 2 persone offerto da Bardamù',
+	},
+	{
+		title: 'Vincitore 3PT Challenge',
+		description: 'Zainetto',
+	},
+	{
+		title: 'Squadre 1° classificate di ogni girone',
+		description: 'Cena offerta allo stand del torneo',
 	},
 ]
 
 const sponsors = [
 	{ name: 'Punto3', logo: 'logo_punto3.png' },
+	{ name: 'Trattoria da Gianna', logo: 'logo_gianna.png' },
 	{ name: 'Ristorante Laghetto Longara', logo: 'logo_laghetto.jpg' },
 ]
 
