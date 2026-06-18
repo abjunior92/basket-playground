@@ -46,6 +46,12 @@ import {
 	TableHeader,
 	TableRow,
 } from '~/components/ui/table'
+import {
+	canAddTeamToGroup,
+	getTeamsPerGroupLimit,
+	resolveTournamentFormat,
+	TOURNAMENT_FORMAT_LABELS,
+} from '~/lib/tournament-format'
 import { cn } from '~/lib/utils'
 
 const prisma = new PrismaClient()
@@ -68,6 +74,9 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 					},
 				},
 			},
+			playground: {
+				select: { format: true },
+			},
 		},
 	})
 
@@ -78,7 +87,16 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 		orderBy: { name: 'asc' },
 	})
 
-	return json({ group, groups })
+	return json({
+		group: {
+			...group,
+			playground: {
+				...group.playground,
+				format: resolveTournamentFormat(group.playground.format),
+			},
+		},
+		groups,
+	})
 }
 
 export const action = async ({ request, params }: ActionFunctionArgs) => {
@@ -103,6 +121,28 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 	if (!name) {
 		return json(
 			{ error: 'Il nome della squadra è obbligatorio' },
+			{ status: 400 },
+		)
+	}
+
+	const group = await prisma.group.findUnique({
+		where: { id: params.groupId },
+		include: {
+			teams: true,
+			playground: { select: { format: true } },
+		},
+	})
+
+	if (!group) {
+		return json({ error: 'Girone non trovato' }, { status: 404 })
+	}
+
+	if (!canAddTeamToGroup(group.playground.format, group.teams.length)) {
+		const limit = getTeamsPerGroupLimit(group.playground.format)
+		return json(
+			{
+				error: `Ogni girone può avere al massimo ${limit} squadre (${TOURNAMENT_FORMAT_LABELS[group.playground.format]}).`,
+			},
 			{ status: 400 },
 		)
 	}
@@ -143,6 +183,8 @@ export default function GroupDetails() {
 	const actionData = useActionData<typeof action>()
 	const location = useLocation()
 	const backLink = resolveGroupBackLink(group.playgroundId, location.state)
+	const teamLimit = getTeamsPerGroupLimit(group.playground.format)
+	const canAddTeam = canAddTeamToGroup(group.playground.format, group.teams.length)
 
 	return (
 		<div className="mx-auto max-w-5xl space-y-6 p-4 pb-12 md:p-6">
@@ -179,7 +221,8 @@ export default function GroupDetails() {
 				<h2 className="mt-1 text-lg font-bold text-slate-900">Nuova squadra</h2>
 				<p className="mt-2 text-sm leading-relaxed text-slate-700">
 					Inserisci il nome e, se serve, un recapito telefonico per il referente
-					della squadra.
+					della squadra. Squadre nel girone: {group.teams.length}
+					{teamLimit !== null ? `/${teamLimit}` : ''}.
 				</p>
 			</section>
 
@@ -190,14 +233,16 @@ export default function GroupDetails() {
 						name="name"
 						placeholder="Nome della squadra"
 						required
+						disabled={!canAddTeam}
 					/>
 					<Input
 						type="tel"
 						name="refPhoneNumber"
 						placeholder="Telefono di riferimento (opzionale)"
+						disabled={!canAddTeam}
 					/>
 					<div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-						<Button type="submit" className="w-full sm:w-auto">
+						<Button type="submit" className="w-full sm:w-auto" disabled={!canAddTeam}>
 							Aggiungi squadra
 						</Button>
 						{actionData?.error && <ErrorMessage message={actionData.error} />}

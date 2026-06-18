@@ -2,6 +2,11 @@ import { PrismaClient } from '@prisma/client'
 import { type ActionFunctionArgs } from '@remix-run/node'
 import { redirect } from '@remix-run/react'
 import invariant from 'tiny-invariant'
+import {
+	canAddTeamToGroup,
+	getTeamsPerGroupLimit,
+	TOURNAMENT_FORMAT_LABELS,
+} from '~/lib/tournament-format'
 
 const prisma = new PrismaClient()
 
@@ -33,6 +38,31 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 				{
 					status: 400,
 				},
+			)
+		}
+
+		const targetGroup = await prisma.group.findUnique({
+			where: { id: newGroupId },
+			include: {
+				teams: true,
+				playground: { select: { format: true } },
+			},
+		})
+
+		if (!targetGroup) {
+			throw new Response('Girone di destinazione non trovato', { status: 404 })
+		}
+
+		if (
+			!canAddTeamToGroup(
+				targetGroup.playground.format,
+				targetGroup.teams.length,
+			)
+		) {
+			const limit = getTeamsPerGroupLimit(targetGroup.playground.format)
+			throw new Response(
+				`Il girone di destinazione ha già raggiunto il limite di ${limit} squadre (${TOURNAMENT_FORMAT_LABELS[targetGroup.playground.format]}).`,
+				{ status: 400 },
 			)
 		}
 	}

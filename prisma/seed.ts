@@ -535,6 +535,7 @@ async function main() {
 		data: {
 			name: 'Longara 3vs3 2025',
 			year: 2025,
+			format: 'five_groups',
 		},
 	})
 

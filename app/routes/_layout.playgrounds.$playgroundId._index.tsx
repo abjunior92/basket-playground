@@ -51,6 +51,12 @@ import {
 	colorGroupMap,
 	colorGroupTransform,
 } from '~/lib/types'
+import {
+	canAddGroupToPlayground,
+	resolveTournamentFormat,
+	TOURNAMENT_FORMAT_LABELS,
+	TOURNAMENT_FORMAT_LIMITS,
+} from '~/lib/tournament-format'
 import { cn } from '~/lib/utils'
 
 const prisma = new PrismaClient()
@@ -80,7 +86,12 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 
 	if (!playground) throw new Response('Not Found', { status: 404 })
 
-	return json({ playground })
+	return json({
+		playground: {
+			...playground,
+			format: resolveTournamentFormat(playground.format),
+		},
+	})
 }
 
 export const action = async ({ request, params }: ActionFunctionArgs) => {
@@ -121,6 +132,26 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 		)
 	}
 
+	const playground = await prisma.playground.findUnique({
+		where: { id: params.playgroundId },
+		include: { groups: true },
+	})
+
+	if (!playground) {
+		return json({ error: 'Torneo non trovato' }, { status: 404 })
+	}
+
+	if (!canAddGroupToPlayground(playground.format, playground.groups.length)) {
+		const resolvedFormat = resolveTournamentFormat(playground.format)
+		const maxGroups = TOURNAMENT_FORMAT_LIMITS[resolvedFormat].maxGroups
+		return json(
+			{
+				error: `Questo torneo consente al massimo ${maxGroups} gironi (${TOURNAMENT_FORMAT_LABELS[resolvedFormat]}).`,
+			},
+			{ status: 400 },
+		)
+	}
+
 	await prisma.group.create({
 		data: {
 			name,
@@ -139,6 +170,11 @@ export default function PlaygroundDetails() {
 	const availableColors = Array.from(colorGroupMap.entries()).filter(
 		([key]) => !usedColors.has(key),
 	)
+	const canAddGroup = canAddGroupToPlayground(
+		playground.format,
+		playground.groups.length,
+	)
+	const formatLimits = TOURNAMENT_FORMAT_LIMITS[playground.format]
 
 	return (
 		<div className="mx-auto max-w-5xl space-y-6 p-4 pb-12 md:p-6">
@@ -170,6 +206,21 @@ export default function PlaygroundDetails() {
 
 			<section className="section-blur">
 				<p className="text-xs font-medium tracking-wide text-slate-500 uppercase">
+					Formato
+				</p>
+				<h2 className="mt-1 text-lg font-bold text-slate-900">
+					{TOURNAMENT_FORMAT_LABELS[playground.format]}
+				</h2>
+				<p className="mt-2 text-sm leading-relaxed text-slate-700">
+					Gironi creati: {playground.groups.length}/{formatLimits.maxGroups}.
+					{playground.format === 'four_groups'
+						? ' Ogni girone deve avere esattamente 7 squadre.'
+						: ' Ogni girone può avere 6 o 7 squadre.'}
+				</p>
+			</section>
+
+			<section className="section-blur">
+				<p className="text-xs font-medium tracking-wide text-slate-500 uppercase">
 					Crea
 				</p>
 				<h2 className="mt-1 text-lg font-bold text-slate-900">Nuovo girone</h2>
@@ -187,13 +238,19 @@ export default function PlaygroundDetails() {
 						placeholder="Nome del girone"
 						required
 					/>
-					<Select name="color" required disabled={availableColors.length === 0}>
+					<Select
+						name="color"
+						required
+						disabled={!canAddGroup || availableColors.length === 0}
+					>
 						<SelectTrigger>
 							<SelectValue
 								placeholder={
-									availableColors.length === 0
-										? 'Nessun colore disponibile'
-										: 'Colore del girone'
+									!canAddGroup
+										? 'Limite gironi raggiunto'
+										: availableColors.length === 0
+											? 'Nessun colore disponibile'
+											: 'Colore del girone'
 								}
 							/>
 						</SelectTrigger>
@@ -220,7 +277,7 @@ export default function PlaygroundDetails() {
 						<Button
 							type="submit"
 							className="w-full sm:w-auto"
-							disabled={availableColors.length === 0}
+							disabled={!canAddGroup || availableColors.length === 0}
 						>
 							Aggiungi girone
 						</Button>
