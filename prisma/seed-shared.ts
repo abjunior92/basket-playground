@@ -1,5 +1,5 @@
 import {
-	PrismaClient,
+	type PrismaClient,
 	type ColorGroup,
 	type Level,
 	type TournamentFormat,
@@ -202,7 +202,10 @@ function generateTimeSlots() {
 	return timeSlots
 }
 
-function calcolaSlotDisponibili(allTimeSlots: string[], giorno: number): number {
+function calcolaSlotDisponibili(
+	allTimeSlots: string[],
+	giorno: number,
+): number {
 	const slots = allTimeSlots.filter((slot) => {
 		const [startTime] = slot.split(' > ')
 		if (!startTime) return false
@@ -504,9 +507,14 @@ async function simulatePlayinAndPlayoffs(
 		playinWinners.push(result.winnerId)
 	}
 
-	const seededTeams = [...directPlayoffTeams.map((team) => team.id), ...playinWinners]
+	const seededTeams = [
+		...directPlayoffTeams.map((team) => team.id),
+		...playinWinners,
+	]
 	if (seededTeams.length !== 16) {
-		throw new Error(`Tabellone playoff incompleto: ${seededTeams.length} squadre`)
+		throw new Error(
+			`Tabellone playoff incompleto: ${seededTeams.length} squadre`,
+		)
 	}
 
 	const finalEightSlots = [
