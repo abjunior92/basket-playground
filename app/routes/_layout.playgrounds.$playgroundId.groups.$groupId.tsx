@@ -226,7 +226,7 @@ export default function GroupDetails() {
 				</section>
 			) : (
 				<div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white/50 shadow-inner ring-1 ring-slate-900/5">
-					<Table className="w-full min-w-[640px] border-collapse text-sm">
+					<Table className="w-full border-collapse text-sm sm:min-w-[640px]">
 						<TableHeader>
 							<TableRow className="border-b border-slate-200/80 bg-slate-50/90 hover:bg-slate-50/90">
 								<TableHead className="text-left text-xs font-semibold tracking-wide text-slate-600 uppercase">
