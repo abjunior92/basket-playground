@@ -10,10 +10,16 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum TournamentFormat {
+  four_groups
+  five_groups
+}
+
 model Playground {
   id      String   @id @default(uuid())
   name    String
   year    Int
+  format  TournamentFormat @default(five_groups)
   groups  Group[]
   matches Match[]
   jerseys JerseyStock[]

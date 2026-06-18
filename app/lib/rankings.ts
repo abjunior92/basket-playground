@@ -1,4 +1,6 @@
 import { type ColorGroup, type PrismaClient } from '@prisma/client'
+import { computePlayoffQualification } from '~/lib/tournament-format'
+import { resolveTournamentFormat } from '~/lib/tournament-format'
 import { type TeamWithPlayoffStats, type TeamWithStatsType } from '~/lib/types'
 import { calculateTiebreaker, sortTeamsWithTiebreaker } from '~/lib/utils'
 
@@ -38,6 +40,17 @@ export const getRankingsData = async (
 	prisma: PrismaClient,
 	playgroundId: string,
 ) => {
+	const playground = await prisma.playground.findUnique({
+		where: { id: playgroundId },
+		select: { format: true },
+	})
+
+	if (!playground) {
+		throw new Response('Not Found', { status: 404 })
+	}
+
+	const format = resolveTournamentFormat(playground.format)
+
 	const teams = await prisma.team.findMany({
 		where: { group: { playgroundId } },
 		include: {
@@ -242,18 +255,22 @@ export const getRankingsData = async (
 		teams,
 	)
 	const sortedFifthPlacedTeams = sortTeamsWithTiebreaker(buildPlacedTeams(4), teams)
+	const sortedSixthPlacedTeams = sortTeamsWithTiebreaker(buildPlacedTeams(5), teams)
 
-	const directPlayoffTeamIds = [
-		...sortedFirstPlacedTeams,
-		...sortedSecondPlacedTeams.slice(0, 3),
-	].map((team) => team.id)
+	const { directPlayoffTeams, playinTeams } = computePlayoffQualification(
+		format,
+		{
+			first: sortedFirstPlacedTeams,
+			second: sortedSecondPlacedTeams,
+			third: sortedThirdPlacedTeams,
+			fourth: sortedFourthPlacedTeams,
+			fifth: sortedFifthPlacedTeams,
+			sixth: sortedSixthPlacedTeams,
+		},
+	)
 
-	const playinTeamIds = [
-		...sortedSecondPlacedTeams.slice(3),
-		...sortedThirdPlacedTeams,
-		...sortedFourthPlacedTeams,
-		...sortedFifthPlacedTeams.slice(0, 4),
-	].map((team) => team.id)
+	const directPlayoffTeamIds = directPlayoffTeams.map((team) => team.id)
+	const playinTeamIds = playinTeams.map((team) => team.id)
 
 	return {
 		groups,
@@ -261,6 +278,7 @@ export const getRankingsData = async (
 		topPlayersFinals,
 		directPlayoffTeamIds,
 		playinTeamIds,
+		format,
 	}
 }
 

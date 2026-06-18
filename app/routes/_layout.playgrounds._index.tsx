@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import { type TournamentFormat, PrismaClient } from '@prisma/client'
 import {
 	type MetaFunction,
 	type ActionFunctionArgs,
@@ -12,6 +12,7 @@ import {
 	useLoaderData,
 } from '@remix-run/react'
 import { ChevronRight, Pencil } from 'lucide-react'
+import { useState } from 'react'
 import ErrorMessage from '~/components/ErrorMessage'
 import Header from '~/components/Header'
 import { Button } from '~/components/ui/button'
@@ -25,6 +26,18 @@ import {
 	DialogTrigger,
 } from '~/components/ui/dialog'
 import { Input } from '~/components/ui/input'
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '~/components/ui/select'
+import {
+	TOURNAMENT_FORMAT_DESCRIPTIONS,
+	TOURNAMENT_FORMAT_LABELS,
+	resolveTournamentFormat,
+} from '~/lib/tournament-format'
 import { cn } from '~/lib/utils'
 
 const prisma = new PrismaClient()
@@ -37,7 +50,13 @@ export const loader = async () => {
 	const playgrounds = await prisma.playground.findMany({
 		orderBy: [{ year: 'desc' }, { name: 'asc' }],
 	})
-	return json({ playgrounds })
+
+	return json({
+		playgrounds: playgrounds.map((playground) => ({
+			...playground,
+			format: resolveTournamentFormat(playground.format),
+		})),
+	})
 }
 
 export const action = async ({ request }: ActionFunctionArgs) => {
@@ -45,6 +64,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 	const intent = formData.get('intent') as string
 	const name = formData.get('name') as string
 	const year = Number(formData.get('year'))
+	const format = formData.get('format') as TournamentFormat
 
 	if (!name) {
 		return json({ error: 'Il nome del torneo è obbligatorio' }, { status: 400 })
@@ -52,6 +72,13 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
 	if (!Number.isInteger(year) || year < 2000) {
 		return json({ error: "L'anno del torneo non è valido" }, { status: 400 })
+	}
+
+	if (format !== 'four_groups' && format !== 'five_groups') {
+		return json(
+			{ error: 'Seleziona un formato torneo valido' },
+			{ status: 400 },
+		)
 	}
 
 	if (intent === 'update-playground') {
@@ -95,7 +122,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 	}
 
 	await prisma.playground.create({
-		data: { name, year },
+		data: { name, year, format },
 	})
 
 	return redirect('/playgrounds')
@@ -104,6 +131,9 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 export default function Playgrounds() {
 	const { playgrounds } = useLoaderData<typeof loader>()
 	const actionData = useActionData<typeof action>()
+
+	const [selectedFormat, setSelectedFormat] =
+		useState<TournamentFormat>('five_groups')
 
 	return (
 		<div className="mx-auto max-w-5xl space-y-6 p-4 pb-12 md:p-6">
@@ -147,6 +177,39 @@ export default function Playgrounds() {
 							min={2000}
 							required
 						/>
+					</div>
+					<div className="sm:col-span-2">
+						<label htmlFor="new-playground-format" className="sr-only">
+							Formato torneo
+						</label>
+						<Select
+							name="format"
+							value={selectedFormat}
+							onValueChange={(value) =>
+								setSelectedFormat(value as TournamentFormat)
+							}
+							required
+						>
+							<SelectTrigger id="new-playground-format">
+								<SelectValue placeholder="Formato torneo">
+									{TOURNAMENT_FORMAT_LABELS[selectedFormat]}
+								</SelectValue>
+							</SelectTrigger>
+							<SelectContent>
+								{(
+									Object.keys(TOURNAMENT_FORMAT_LABELS) as TournamentFormat[]
+								).map((value) => (
+									<SelectItem key={value} value={value}>
+										<div className="py-0.5 font-medium">
+											{TOURNAMENT_FORMAT_LABELS[value]}
+										</div>
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
+						<div className="text-muted-foreground mt-1 text-xs">
+							{TOURNAMENT_FORMAT_DESCRIPTIONS[selectedFormat]}
+						</div>
 					</div>
 					<div className="flex flex-col gap-3 sm:col-span-2 sm:flex-row sm:items-center">
 						<Button type="submit" className="w-full sm:w-auto">
@@ -199,7 +262,8 @@ export default function Playgrounds() {
 											{playground.name}
 										</span>
 										<span className="mt-0.5 block text-sm text-slate-600">
-											Anno {playground.year}
+											Anno {playground.year} ·{' '}
+											{TOURNAMENT_FORMAT_LABELS[playground.format]}
 										</span>
 									</span>
 								</Link>

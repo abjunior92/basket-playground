@@ -22,15 +22,9 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '~/components/ui/select'
-import { colorGroupClasses, type TeamWithPlayoffStats } from '~/lib/types'
-import {
-	calculateTiebreaker,
-	cn,
-	getDayLabel,
-	getFinalTimeSlots,
-	getMatchLabel,
-	sortTeamsWithTiebreaker,
-} from '~/lib/utils'
+import { loadPlayoffQualificationContext } from '~/lib/playoff-qualification.server'
+import { colorGroupClasses } from '~/lib/types'
+import { cn, getDayLabel, getFinalTimeSlots, getMatchLabel } from '~/lib/utils'
 
 const prisma = new PrismaClient()
 
@@ -44,210 +38,22 @@ export const meta: MetaFunction = () => {
 export const loader = async ({ params }: LoaderFunctionArgs) => {
 	invariant(params.playgroundId, 'playgroundId is required')
 
-	// Recupera tutte le squadre del playground
-	const teams = await prisma.team.findMany({
-		where: { group: { playgroundId: params.playgroundId } },
-		include: {
-			group: true,
-			matchesAsTeam1: {
-				where: { day: { in: [1, 2, 3, 4, 6] } },
-				select: { id: true, winner: true, score1: true, score2: true },
-			},
-			matchesAsTeam2: {
-				where: { day: { in: [1, 2, 3, 4, 6] } },
-				select: { id: true, winner: true, score1: true, score2: true },
-			},
-		},
-	})
+	const { directPlayoffTeams, playinTeams } =
+		await loadPlayoffQualificationContext(prisma, params.playgroundId)
 
-	// Calcola le statistiche per ogni squadra
-	const teamsWithStats = teams.map((team) => {
-		const matches = [...team.matchesAsTeam1, ...team.matchesAsTeam2]
-		const matchesPlayed = matches.filter(
-			(match) => match.winner !== null,
-		).length
-		const matchesWon = matches.filter(
-			(match) => match.winner === team.id,
-		).length
-
-		let pointsScored = 0
-		let pointsConceded = 0
-
-		matches.forEach((match) => {
-			if (match.winner !== null) {
-				if (team.matchesAsTeam1.some((m) => m.id === match.id)) {
-					pointsScored += match.score1 || 0
-					pointsConceded += match.score2 || 0
-				} else {
-					pointsScored += match.score2 || 0
-					pointsConceded += match.score1 || 0
-				}
-			}
-		})
-
-		const pointsDifference = pointsScored - pointsConceded
-		const winPercentage = matchesPlayed > 0 ? matchesWon / matchesPlayed : 0
-
-		return {
-			id: team.id,
-			name: team.name,
-			group: team.group,
-			matchesPlayed,
-			matchesWon,
-			pointsScored,
-			pointsConceded,
-			winPercentage,
-			pointsDifference,
-			pointsGroup: matchesWon * 2,
-			groupPosition: 0, // Sarà aggiornato dopo l'ordinamento
-		} as TeamWithPlayoffStats
-	})
-
-	// Raggruppa le squadre per girone
-	const groups = teamsWithStats.reduce(
-		(acc, team) => {
-			const groupKey = `${team.group.name}_${team.group.color}`
-			if (!acc[groupKey]) {
-				acc[groupKey] = []
-			}
-			acc[groupKey].push(team)
-			return acc
-		},
-		{} as Record<string, TeamWithPlayoffStats[]>,
-	)
-
-	// Ordina le squadre di ogni girone con la nuova logica:
-	// 1. Ordina per percentuale vittorie
-	// 2. Se ci sono squadre con la stessa percentuale vittorie, applica la classifica avulsa
-	Object.keys(groups).forEach((groupName) => {
-		const group = groups[groupName]
-		if (group) {
-			// Prima ordina per percentuale vittorie
-			group.sort((a, b) => {
-				if (!a || !b) return 0
-				return b.winPercentage - a.winPercentage
-			})
-
-			// Poi applica la classifica avulsa per squadre con stessa percentuale
-			let currentIndex = 0
-			while (currentIndex < group.length) {
-				const currentTeam = group[currentIndex]
-				if (!currentTeam) {
-					currentIndex++
-					continue
-				}
-
-				const currentWinPercentage = currentTeam.winPercentage
-				let endIndex = currentIndex + 1
-
-				// Trova tutte le squadre con la stessa percentuale vittorie
-				while (
-					endIndex < group.length &&
-					group[endIndex]?.winPercentage === currentWinPercentage
-				) {
-					endIndex++
-				}
-
-				// Se ci sono più squadre con la stessa percentuale, applica la classifica avulsa
-				if (endIndex - currentIndex > 1) {
-					const tiedTeams = group.slice(currentIndex, endIndex).filter(Boolean)
-					const sortedTiedTeams = calculateTiebreaker(tiedTeams, teams)
-
-					// Sostituisci le squadre ordinate
-					for (let i = 0; i < sortedTiedTeams.length; i++) {
-						if (group[currentIndex + i] && sortedTiedTeams[i]) {
-							group[currentIndex + i] = sortedTiedTeams[
-								i
-							]! as TeamWithPlayoffStats
-						}
-					}
-				}
-
-				currentIndex = endIndex
-			}
-
-			// Aggiungi la posizione in classifica per ogni squadra
-			group.forEach((team, index) => {
-				if (team) {
-					team.groupPosition = index + 1
-				}
-			})
-		}
-	})
-
-	// Determina le squadre qualificate per i playoff
-	const firstPlacedTeams = Object.values(groups)
-		.map((group) => group?.[0])
-		.filter(Boolean)
-	const secondPlacedTeams = Object.values(groups)
-		.map((group) => group?.[1])
-		.filter(Boolean)
-	const thirdPlacedTeams = Object.values(groups)
-		.map((group) => group?.[2])
-		.filter(Boolean)
-	const fourthPlacedTeams = Object.values(groups)
-		.map((group) => group?.[3])
-		.filter(Boolean)
-	const fifthPlacedTeams = Object.values(groups)
-		.map((group) => group?.[4])
-		.filter(Boolean)
-
-	// Ordina tutte le classifiche con la nuova logica
-	const sortedFirstPlacedTeams = sortTeamsWithTiebreaker(
-		firstPlacedTeams,
-		teams,
-	)
-	const sortedSecondPlacedTeams = sortTeamsWithTiebreaker(
-		secondPlacedTeams,
-		teams,
-	)
-	const sortedThirdPlacedTeams = sortTeamsWithTiebreaker(
-		thirdPlacedTeams,
-		teams,
-	)
-	const sortedFourthPlacedTeams = sortTeamsWithTiebreaker(
-		fourthPlacedTeams,
-		teams,
-	)
-	const sortedFifthPlacedTeams = sortTeamsWithTiebreaker(
-		fifthPlacedTeams,
-		teams,
-	)
-
-	// Squadre che vanno direttamente ai playoff (finali di domenica)
-	const directPlayoffTeams = [
-		...sortedFirstPlacedTeams,
-		...sortedSecondPlacedTeams.slice(0, 3), // Le 3 migliori seconde
-	].filter(
-		(team): team is NonNullable<typeof team> =>
-			team !== null && team !== undefined,
-	)
-
-	// Squadre che giocano i playin (giovedì)
-	const playinTeams = [
-		...sortedSecondPlacedTeams.slice(3), // Le 2 peggiori seconde
-		...sortedThirdPlacedTeams,
-		...sortedFourthPlacedTeams,
-		...sortedFifthPlacedTeams.slice(0, 4), // Le 4 migliori quinte
-	].filter(
-		(team): team is NonNullable<typeof team> =>
-			team !== null && team !== undefined,
-	)
-
-	// Recupera le partite play-in esistenti
 	const playinMatches = await prisma.match.findMany({
 		where: {
 			playgroundId: params.playgroundId,
-			day: 5, // Giovedì
+			day: 5,
 			OR: [
 				{
 					team1: {
-						id: { in: playinTeams.filter((t) => t?.id).map((t) => t!.id) },
+						id: { in: playinTeams.map((team) => team.id) },
 					},
 				},
 				{
 					team2: {
-						id: { in: playinTeams.filter((t) => t?.id).map((t) => t!.id) },
+						id: { in: playinTeams.map((team) => team.id) },
 					},
 				},
 			],
@@ -259,7 +65,6 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 		orderBy: [{ timeSlot: 'asc' }, { field: 'asc' }],
 	})
 
-	// Recupera le squadre vincitrici dei play-in
 	const playinWinners = playinMatches
 		.filter((match) => match.winner !== null)
 		.map((match) => {
@@ -269,7 +74,6 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 				id: winningTeam.id,
 				name: winningTeam.name,
 				group: winningTeam.group,
-				// Aggiungi statistiche base per compatibilità
 				matchesPlayed: 0,
 				matchesWon: 0,
 				pointsScored: 0,
@@ -280,11 +84,10 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 			}
 		})
 
-	// Recupera le partite playoff esistenti per controllare gli slot occupati
 	const existingPlayoffMatches = await prisma.match.findMany({
 		where: {
 			playgroundId: params.playgroundId,
-			day: 7, // Domenica
+			day: 7,
 		},
 		include: {
 			team1: { include: { group: true } },
@@ -293,7 +96,6 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 		orderBy: [{ timeSlot: 'asc' }, { field: 'asc' }],
 	})
 
-	// Combina le squadre qualificate direttamente con le vincitrici dei play-in
 	const allPlayoffTeams = [...directPlayoffTeams, ...playinWinners]
 
 	return {
@@ -552,7 +354,7 @@ export default function NewPlayoffMatch() {
 											</div>
 											<div className="flex items-center gap-2">
 												{match.score1 !== null && match.score2 !== null ? (
-													<div className="text-lg font-mono tabular-nums">
+													<div className="font-mono text-lg tabular-nums">
 														<span
 															className={cn(
 																isTeam1Winner && 'font-bold text-green-600',
@@ -597,7 +399,7 @@ export default function NewPlayoffMatch() {
 												{match.score1 !== null && (
 													<span
 														className={cn(
-															'text-lg font-bold font-mono tabular-nums',
+															'font-mono text-lg font-bold tabular-nums',
 															isTeam1Winner && 'text-green-600',
 														)}
 													>
@@ -629,7 +431,7 @@ export default function NewPlayoffMatch() {
 												{match.score2 !== null && (
 													<span
 														className={cn(
-															'text-lg font-bold font-mono tabular-nums',
+															'font-mono text-lg font-bold tabular-nums',
 															isTeam2Winner && 'text-green-600',
 														)}
 													>

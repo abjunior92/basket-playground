@@ -8,6 +8,8 @@
     "dev": "DATABASE_URL=postgresql://postgres:password@localhost:5432/postgres remix vite:dev",
     "lint": "eslint --ignore-pattern .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
     "prisma:seed": "npx tsx prisma/seed.ts",
+    "prisma:seed:four-groups": "SEED_FORMAT=four_groups npx tsx prisma/seed.ts",
+    "prisma:seed:five-groups": "SEED_FORMAT=five_groups npx tsx prisma/seed.ts",
     "start": "remix-serve ./build/server/index.js",
     "typecheck": "tsc"
   },
