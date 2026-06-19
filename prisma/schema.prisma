@@ -162,11 +162,11 @@ model JerseyStock {
   id        String  @id @default(uuid())
   playground  Playground @relation(fields: [playgroundId], references: [id], onDelete: Cascade)
   playgroundId String
-  size      Sizes   @unique
+  size      Sizes
   available Int     @default(0)
   distributed Int   @default(0)
 
-  @@unique([playgroundId, size]) // Evita doppioni per lo stesso playground
+  @@unique([playgroundId, size])
 }
 
 model ThreePointChallengeParticipant {
