@@ -32,6 +32,10 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 export default function Index() {
 	const { playgrounds, palmaresList } = useLoaderData<typeof loader>()
 
+	const currentYearPlayground = playgrounds.find(
+		(playground) => playground.year === new Date().getFullYear(),
+	)
+
 	return (
 		<main className="flex bg-white/20 text-slate-800 md:min-h-screen md:items-center md:justify-center md:px-8 md:py-12">
 			<div className="mx-auto flex w-full max-w-lg flex-col gap-4 md:gap-8">
@@ -70,10 +74,10 @@ export default function Index() {
 							>
 								<span className="nav-button-animate-text">Bacheca torneo</span>
 							</Link>
-							{playgrounds.length > 0 && playgrounds[0] && (
+							{currentYearPlayground && playgrounds[0] && (
 								<Link
 									className="nav-button group justify-center"
-									to={`/playground/${playgrounds[0].id}/menu`}
+									to={`/playground/${currentYearPlayground.id ?? playgrounds[0].id}/menu`}
 								>
 									<span className="nav-button-animate-text">Menu Ospiti</span>
 								</Link>
