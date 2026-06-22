@@ -16,10 +16,18 @@ export type SeedTournamentConfig = {
 
 export const FOUR_GROUPS_SEED_CONFIG: SeedTournamentConfig = {
 	format: 'four_groups',
-	name: 'Longara 3vs3 2026 (4 gironi)',
+	name: 'Longara 3vs3 2026 (4 gironi · 28)',
 	year: 2026,
 	groupColors: ['red', 'blue', 'green', 'yellow'],
 	getTeamsPerGroup: () => 7,
+}
+
+export const FOUR_GROUPS_SIX_SEED_CONFIG: SeedTournamentConfig = {
+	format: 'four_groups_six',
+	name: 'Longara 3vs3 2026 (4 gironi · 24)',
+	year: 2026,
+	groupColors: ['red', 'blue', 'green', 'yellow'],
+	getTeamsPerGroup: () => 6,
 }
 
 export const FIVE_GROUPS_SEED_CONFIG: SeedTournamentConfig = {

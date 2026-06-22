@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 import {
 	FOUR_GROUPS_SEED_CONFIG,
+	FOUR_GROUPS_SIX_SEED_CONFIG,
 	FIVE_GROUPS_SEED_CONFIG,
 	seedTournament,
 	type SeedTournamentConfig,
@@ -10,6 +11,7 @@ const prisma = new PrismaClient()
 
 const SEED_CONFIGS: Record<string, SeedTournamentConfig> = {
 	four_groups: FOUR_GROUPS_SEED_CONFIG,
+	four_groups_six: FOUR_GROUPS_SIX_SEED_CONFIG,
 	five_groups: FIVE_GROUPS_SEED_CONFIG,
 }
 
@@ -19,7 +21,7 @@ function resolveSeedConfig(): SeedTournamentConfig {
 
 	if (!config) {
 		throw new Error(
-			`SEED_FORMAT non valido: "${format}". Usa "four_groups" o "five_groups".`,
+			`SEED_FORMAT non valido: "${format}". Usa "four_groups", "four_groups_six" o "five_groups".`,
 		)
 	}
 

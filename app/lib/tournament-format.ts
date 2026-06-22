@@ -6,10 +6,28 @@ export const PLAYOFF_FINALISTS_COUNT = 16
 
 export const DEFAULT_TOURNAMENT_FORMAT: TournamentFormat = 'five_groups'
 
+const TOURNAMENT_FORMATS = [
+	'four_groups',
+	'four_groups_six',
+	'five_groups',
+] as const satisfies readonly TournamentFormat[]
+
+export const isTournamentFormat = (
+	value: string,
+): value is TournamentFormat => {
+	return (TOURNAMENT_FORMATS as readonly string[]).includes(value)
+}
+
+export const usesFourGroupQualification = (
+	format: TournamentFormat,
+): boolean => {
+	return format === 'four_groups' || format === 'four_groups_six'
+}
+
 export const resolveTournamentFormat = (
 	format: TournamentFormat | null | undefined,
 ): TournamentFormat => {
-	if (format === 'four_groups' || format === 'five_groups') {
+	if (format && isTournamentFormat(format)) {
 		return format
 	}
 	return DEFAULT_TOURNAMENT_FORMAT
@@ -17,6 +35,7 @@ export const resolveTournamentFormat = (
 
 export const TOURNAMENT_FORMAT_LABELS: Record<TournamentFormat, string> = {
 	four_groups: '4 gironi · 28 squadre',
+	four_groups_six: '4 gironi · 24 squadre',
 	five_groups: '5 gironi · 32 squadre',
 }
 
@@ -24,6 +43,8 @@ export const TOURNAMENT_FORMAT_DESCRIPTIONS: Record<TournamentFormat, string> =
 	{
 		four_groups:
 			'4 gironi da 7 squadre. Playoff diretti: 1ª e 2ª di ogni girone. Play-in: 3ª, 4ª, 5ª e 6ª.',
+		four_groups_six:
+			'4 gironi da 6 squadre. Playoff diretti: 1ª e 2ª di ogni girone. Play-in: 3ª, 4ª, 5ª e 6ª.',
 		five_groups:
 			'5 gironi da 6–7 squadre. Playoff diretti: tutte le 1ª e le 3 migliori 2ª. Play-in: le 2 peggiori 2ª, tutte le 3ª e 4ª e le 4 migliori 5ª.',
 	}
@@ -33,7 +54,20 @@ export const TOURNAMENT_FORMAT_LIMITS: Record<
 	{ maxGroups: number; teamsPerGroup: number | { max: number } }
 > = {
 	four_groups: { maxGroups: 4, teamsPerGroup: 7 },
+	four_groups_six: { maxGroups: 4, teamsPerGroup: 6 },
 	five_groups: { maxGroups: 5, teamsPerGroup: { max: 7 } },
+}
+
+export const getFormatTeamsPerGroupHint = (
+	format: TournamentFormat,
+): string => {
+	if (format === 'four_groups') {
+		return 'Ogni girone deve avere esattamente 7 squadre.'
+	}
+	if (format === 'four_groups_six') {
+		return 'Ogni girone deve avere esattamente 6 squadre.'
+	}
+	return 'Ogni girone può avere 6 o 7 squadre.'
 }
 
 export type PlacedTeams = {
@@ -59,7 +93,7 @@ export const computePlayoffQualification = (
 } => {
 	const resolvedFormat = resolveTournamentFormat(format)
 
-	if (resolvedFormat === 'four_groups') {
+	if (usesFourGroupQualification(resolvedFormat)) {
 		return {
 			directPlayoffTeams: [...placed.first, ...placed.second],
 			playinTeams: [
@@ -88,7 +122,7 @@ export const getDirectPlayoffDistributionSummary = (
 ): QualificationSummaryItem[] => {
 	const resolvedFormat = resolveTournamentFormat(format)
 
-	if (resolvedFormat === 'four_groups') {
+	if (usesFourGroupQualification(resolvedFormat)) {
 		return [
 			{ label: '1ª classificate', count: placed.first.length },
 			{ label: '2ª classificate', count: placed.second.length },
@@ -110,7 +144,7 @@ export const getPlayinDistributionSummary = (
 ): QualificationSummaryItem[] => {
 	const resolvedFormat = resolveTournamentFormat(format)
 
-	if (resolvedFormat === 'four_groups') {
+	if (usesFourGroupQualification(resolvedFormat)) {
 		return [
 			{ label: '3ª classificate', count: placed.third.length },
 			{ label: '4ª classificate', count: placed.fourth.length },
@@ -142,6 +176,17 @@ export const getFormatRulesSections = (
 		return {
 			groups:
 				'Il torneo prevede 4 gironi da 7 squadre ciascuno (28 squadre totali).',
+			directPlayoff:
+				'Accedono direttamente ai playoff: tutte le prime e tutte le seconde classificate di ogni girone.',
+			playin:
+				'Ai playin accedono: tutte le terze, quarte, quinte e seste classificate di ogni girone. Le settimes sono eliminate.',
+		}
+	}
+
+	if (resolvedFormat === 'four_groups_six') {
+		return {
+			groups:
+				'Il torneo prevede 4 gironi da 6 squadre ciascuno (24 squadre totali).',
 			directPlayoff:
 				'Accedono direttamente ai playoff: tutte le prime e tutte le seconde classificate di ogni girone.',
 			playin:

@@ -47,16 +47,17 @@ import {
 	TableRow,
 } from '~/components/ui/table'
 import {
-	colorGroupClasses,
-	colorGroupMap,
-	colorGroupTransform,
-} from '~/lib/types'
-import {
 	canAddGroupToPlayground,
+	getFormatTeamsPerGroupHint,
 	resolveTournamentFormat,
 	TOURNAMENT_FORMAT_LABELS,
 	TOURNAMENT_FORMAT_LIMITS,
 } from '~/lib/tournament-format'
+import {
+	colorGroupClasses,
+	colorGroupMap,
+	colorGroupTransform,
+} from '~/lib/types'
 import { cn } from '~/lib/utils'
 
 const prisma = new PrismaClient()
@@ -212,10 +213,8 @@ export default function PlaygroundDetails() {
 					{TOURNAMENT_FORMAT_LABELS[playground.format]}
 				</h2>
 				<p className="mt-2 text-sm leading-relaxed text-slate-700">
-					Gironi creati: {playground.groups.length}/{formatLimits.maxGroups}.
-					{playground.format === 'four_groups'
-						? ' Ogni girone deve avere esattamente 7 squadre.'
-						: ' Ogni girone può avere 6 o 7 squadre.'}
+					Gironi creati: {playground.groups.length}/{formatLimits.maxGroups}.{' '}
+					{getFormatTeamsPerGroupHint(playground.format)}
 				</p>
 			</section>
 

@@ -34,6 +34,7 @@ import {
 	SelectValue,
 } from '~/components/ui/select'
 import {
+	isTournamentFormat,
 	TOURNAMENT_FORMAT_DESCRIPTIONS,
 	TOURNAMENT_FORMAT_LABELS,
 	resolveTournamentFormat,
@@ -74,7 +75,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 		return json({ error: "L'anno del torneo non è valido" }, { status: 400 })
 	}
 
-	if (format !== 'four_groups' && format !== 'five_groups') {
+	if (!isTournamentFormat(format)) {
 		return json(
 			{ error: 'Seleziona un formato torneo valido' },
 			{ status: 400 },

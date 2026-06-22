@@ -12,6 +12,7 @@ datasource db {
 
 enum TournamentFormat {
   four_groups
+  four_groups_six
   five_groups
 }
 
