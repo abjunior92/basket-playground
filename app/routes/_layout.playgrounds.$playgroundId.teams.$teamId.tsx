@@ -96,7 +96,7 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 	return json({ team })
 }
 
-const MAX_PLAYERS_PER_TEAM = 5
+const MAX_PLAYERS_PER_TEAM = 6
 
 export const action = async ({ request, params }: ActionFunctionArgs) => {
 	invariant(params.playgroundId, 'playgroundId is required')
@@ -120,7 +120,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 		return json(
 			{
 				error:
-					'Questa squadra ha già raggiunto il limite massimo di 5 giocatori.',
+					`Questa squadra ha già raggiunto il limite massimo di ${MAX_PLAYERS_PER_TEAM} giocatori.`,
 			},
 			{ status: 400 },
 		)

@@ -1,11 +1,18 @@
 import { PrismaClient } from '@prisma/client'
-import { type LoaderFunctionArgs, type MetaFunction, json } from '@remix-run/node'
+import {
+	type LoaderFunctionArgs,
+	type MetaFunction,
+	json,
+} from '@remix-run/node'
 import { Link, useLoaderData, useParams } from '@remix-run/react'
 import { BookOpenText } from 'lucide-react'
 import invariant from 'tiny-invariant'
 import Header from '~/components/Header'
 import { Button } from '~/components/ui/button'
-import { getFormatRulesSections, resolveTournamentFormat } from '~/lib/tournament-format'
+import {
+	getFormatRulesSections,
+	resolveTournamentFormat,
+} from '~/lib/tournament-format'
 
 const prisma = new PrismaClient()
 
@@ -86,8 +93,8 @@ export default function Rules() {
 				formatRules.directPlayoff,
 				formatRules.playin,
 				'I playin sono partite secche "dentro o fuori" per definire le ultime 8 qualificate ai playoff.',
-				'Ogni squadra deve avere da 3 a 5 giocatori.',
-				'Durante il torneo è ammesso un 6° giocatore solo come sostituzione definitiva di uno dei 5 iscritti.',
+				'Ogni squadra deve avere da 3 a 6 giocatori.',
+				'Un giocatore segnato come ritirato non conta nel limite di rosa e può essere sostituito.',
 				'Anche in caso di espulsioni la squadra può continuare il torneo se presenti almeno 2 giocatori.',
 				'Playin e playoff possono essere disputati solo da giocatori che hanno giocato almeno una partita dei gironi.',
 				'Le sostituzioni in partita sono libere ma solo a gioco fermo, avvisando arbitro o segnapunti.',

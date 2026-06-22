@@ -631,7 +631,7 @@ const prizes = [
 	},
 	{
 		title: 'Squadre 2° e 3° classificate',
-		description: 'Ricche ceste',
+		description: 'Ricche ceste di prodotti alimentari',
 	},
 	{
 		title: 'Miglior marcatore gironi',
