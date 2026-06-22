@@ -654,6 +654,7 @@ const prizes = [
 const sponsors = [
 	{ name: 'Punto3', logo: 'logo_punto3.png' },
 	{ name: 'Trattoria da Gianna', logo: 'logo_gianna.png' },
+	{ name: 'Bardamù', logo: 'logo_bardamu.png' },
 	{ name: 'Ristorante Laghetto Longara', logo: 'logo_laghetto.jpg' },
 ]
 
