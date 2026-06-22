@@ -147,13 +147,18 @@ const livelli: Level[] = [
 	'prima_divisione',
 	'promozione',
 	'u15',
+	'u16',
 	'u17',
 	'u19',
+	'u19_gold',
+	'u19_eccellenza',
 	'u20',
 	'over',
 	'mai_giocato',
 	'free_agent',
 	'csi',
+	'csi_elite',
+	'uisp',
 	'campetto',
 ]
 
