@@ -339,13 +339,24 @@
 		animation-duration: 1.6s;
 	}
 
+	.prize-trophy .prize-trophy-shine {
+		animation: cta-shine 4.5s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+		animation-delay: 1.2s;
+	}
+
+	.group:hover .prize-trophy .prize-trophy-shine {
+		animation-duration: 1.8s;
+	}
+
 	@media (prefers-reduced-motion: reduce) {
 		.cta-arrow,
-		.cta-satispay .cta-shine {
+		.cta-satispay .cta-shine,
+		.prize-trophy .prize-trophy-shine {
 			animation: none !important;
 		}
 
-		.cta-satispay .cta-shine {
+		.cta-satispay .cta-shine,
+		.prize-trophy .prize-trophy-shine {
 			display: none;
 		}
 	}
