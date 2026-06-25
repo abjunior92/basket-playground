@@ -192,23 +192,25 @@ export default function PlaygroundShowcasePage() {
 							</p>
 
 							{playground ? (
-								<div className="mt-4 space-y-2">
-									<Link
-										className="nav-button group justify-center"
-										to={`/playground/${playground.id}/menu`}
-									>
-										<Trophy className="h-4.5 w-4.5 shrink-0" aria-hidden />
-										<span className="nav-button-animate-text">
-											Apri il torneo
-										</span>
-										<ArrowRight
-											className="h-4 w-4 shrink-0 transition-transform duration-200 ease-out motion-safe:group-hover:translate-x-0.5"
-											aria-hidden
-										/>
-									</Link>
-									<p className="text-center text-xs font-medium text-slate-600">
-										Calendario, partite, punteggi e classifiche
-									</p>
+								<div className="mt-4 flex flex-col gap-2 sm:flex-row">
+									<div className="space-y-2">
+										<Link
+											className="nav-button group justify-center"
+											to={`/playground/${playground.id}/menu`}
+										>
+											<Trophy className="h-4.5 w-4.5 shrink-0" aria-hidden />
+											<span className="nav-button-animate-text">
+												Apri il torneo
+											</span>
+											<ArrowRight
+												className="h-4 w-4 shrink-0 transition-transform duration-200 ease-out motion-safe:group-hover:translate-x-0.5"
+												aria-hidden
+											/>
+										</Link>
+										<p className="text-center text-xs font-medium text-slate-600">
+											Calendario, partite, punteggi e classifiche
+										</p>
+									</div>
 								</div>
 							) : (
 								<p className="mt-4 rounded-xl border border-amber-300 bg-amber-100/90 px-4 py-3 text-sm text-amber-950">
