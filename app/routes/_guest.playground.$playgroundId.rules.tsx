@@ -119,7 +119,11 @@ export default function Rules() {
 					Per ogni dettaglio ufficiale fa sempre fede il documento completo.
 				</p>
 				<div className="mt-4">
-					<Link to="/regolamento.docx" target="_blank" rel="noreferrer">
+					<Link
+						to="/regolamento_24_squadre_4_gironi.docx"
+						target="_blank"
+						rel="noreferrer"
+					>
 						<Button>
 							<BookOpenText />
 							Scarica/Apri regolamento ufficiale
