@@ -28,7 +28,9 @@ export const meta: MetaFunction = () => {
 export const loader = async ({ request }: LoaderFunctionArgs) => {
 	await checkUserIsLoggedIn(request)
 
-	const playgrounds = await prisma.playground.findMany()
+	const playgrounds = await prisma.playground.findMany({
+		orderBy: { year: 'desc' },
+	})
 	const palmaresList = await prisma.tournamentPalmares.findMany({
 		select: { year: true },
 		orderBy: { year: 'desc' },

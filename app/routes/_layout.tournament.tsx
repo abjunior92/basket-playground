@@ -27,7 +27,7 @@ export const meta: MetaFunction = () => {
 
 export const loader = async () => {
 	const playgrounds = await prisma.playground.findMany({
-		orderBy: { name: 'asc' },
+		orderBy: { year: 'desc' },
 		include: {
 			groups: {
 				orderBy: { name: 'asc' },
