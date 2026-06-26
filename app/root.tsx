@@ -5,10 +5,23 @@ import {
 	Outlet,
 	Scripts,
 	ScrollRestoration,
+	useLoaderData,
 } from '@remix-run/react'
 
 import './tailwind.css'
+import { GoatCounter } from '~/components/goat-counter'
 import { Toaster } from '~/components/ui/toaster'
+
+export const loader = async () => {
+	const siteCode = process.env.GOATCOUNTER_SITE_CODE?.trim()
+
+	return {
+		goatCounterEndpoint: siteCode
+			? `https://${siteCode}.goatcounter.com/count`
+			: null,
+		goatCounterAllowLocal: process.env.NODE_ENV !== 'production',
+	}
+}
 
 export const links: LinksFunction = () => [
 	{ rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -24,6 +37,9 @@ export const links: LinksFunction = () => [
 ]
 
 const App = () => {
+	const { goatCounterEndpoint, goatCounterAllowLocal } =
+		useLoaderData<typeof loader>()
+
 	return (
 		<html lang="en">
 			<head>
@@ -35,6 +51,12 @@ const App = () => {
 			<body>
 				<Outlet />
 				<Toaster />
+				{goatCounterEndpoint ? (
+					<GoatCounter
+						endpoint={goatCounterEndpoint}
+						allowLocal={goatCounterAllowLocal}
+					/>
+				) : null}
 				<ScrollRestoration />
 				<Scripts />
 			</body>
