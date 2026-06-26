@@ -3,7 +3,15 @@ import { type LoaderFunctionArgs, type MetaFunction } from '@remix-run/node'
 import { Form, Link, useLoaderData } from '@remix-run/react'
 import { FacebookIcon } from 'icons/lucide-facebook'
 import { InstagramIcon } from 'icons/lucide-instagram'
-import { Award, Binoculars, Cog, LogOut, Trophy, UserCog } from 'lucide-react'
+import {
+	Award,
+	BarChart3,
+	Binoculars,
+	Cog,
+	LogOut,
+	Trophy,
+	UserCog,
+} from 'lucide-react'
 import { Button } from '~/components/ui/button'
 import { cn } from '~/lib/utils'
 import { checkUserIsLoggedIn } from '~/utils/helpers'
@@ -26,11 +34,17 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 		orderBy: { year: 'desc' },
 	})
 
-	return { playgrounds, palmaresList }
+	const goatCounterSiteCode = process.env.GOATCOUNTER_SITE_CODE?.trim()
+	const analyticsUrl = goatCounterSiteCode
+		? `https://${goatCounterSiteCode}.goatcounter.com`
+		: null
+
+	return { playgrounds, palmaresList, analyticsUrl }
 }
 
 export default function Index() {
-	const { playgrounds, palmaresList } = useLoaderData<typeof loader>()
+	const { playgrounds, palmaresList, analyticsUrl } =
+		useLoaderData<typeof loader>()
 
 	const currentYearPlayground = playgrounds.find(
 		(playground) => playground.year === new Date().getFullYear(),
@@ -101,6 +115,21 @@ export default function Index() {
 									</Link>
 								</li>
 							))}
+							{analyticsUrl && (
+								<li>
+									<a
+										href={analyticsUrl}
+										target="_blank"
+										rel="noreferrer"
+										className="nav-button group"
+									>
+										<span className="nav-button-animate-icon">
+											<BarChart3 />
+										</span>
+										<span>Statistiche utilizzo</span>
+									</a>
+								</li>
+							)}
 						</ul>
 					</nav>
 				</section>
