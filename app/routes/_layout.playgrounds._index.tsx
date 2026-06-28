@@ -1,4 +1,4 @@
-import { type TournamentFormat, PrismaClient } from '@prisma/client'
+import { type TournamentFormat } from '@prisma/client'
 import {
 	type MetaFunction,
 	type ActionFunctionArgs,
@@ -33,6 +33,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '~/components/ui/select'
+import { prisma } from '~/db.server'
 import {
 	isTournamentFormat,
 	TOURNAMENT_FORMAT_DESCRIPTIONS,
@@ -41,7 +42,6 @@ import {
 } from '~/lib/tournament-format'
 import { cn } from '~/lib/utils'
 
-const prisma = new PrismaClient()
 
 export const meta: MetaFunction = () => {
 	return [{ title: 'Tornei' }, { name: 'description', content: 'Tornei' }]

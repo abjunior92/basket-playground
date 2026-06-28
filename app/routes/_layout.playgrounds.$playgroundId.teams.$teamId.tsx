@@ -1,4 +1,4 @@
-import { type Level, PrismaClient } from '@prisma/client'
+import { type Level } from '@prisma/client'
 import {
 	type MetaFunction,
 	type ActionFunctionArgs,
@@ -65,6 +65,7 @@ import {
 	TableHeader,
 	TableRow,
 } from '~/components/ui/table'
+import { prisma } from '~/db.server'
 import { useToast } from '~/hooks/use-toast'
 import {
 	playerLevelsMap,
@@ -73,7 +74,6 @@ import {
 	playerSizesTransform,
 } from '~/lib/types'
 
-const prisma = new PrismaClient()
 
 export const meta: MetaFunction = () => {
 	return [{ title: 'Squadra' }, { name: 'description', content: 'Squadra' }]

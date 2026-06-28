@@ -1,4 +1,3 @@
-import { PrismaClient } from '@prisma/client'
 import {
 	type ActionFunctionArgs,
 	json,
@@ -16,10 +15,10 @@ import { Award, Save } from 'lucide-react'
 import invariant from 'tiny-invariant'
 import Header from '~/components/Header'
 import { Button } from '~/components/ui/button'
+import { prisma } from '~/db.server'
 import { isMatchFinal, isMatchThirdPlace } from '~/lib/utils'
 import { checkUserIsLoggedIn } from '~/utils/helpers'
 
-const prisma = new PrismaClient()
 
 export const meta: MetaFunction = () => {
 	return [

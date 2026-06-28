@@ -1,4 +1,3 @@
-import { PrismaClient } from '@prisma/client'
 import { type LoaderFunctionArgs, type MetaFunction } from '@remix-run/node'
 import { Link, useLoaderData, useParams } from '@remix-run/react'
 import { Trophy, Users, Calendar, Pencil, Plus } from 'lucide-react'
@@ -8,6 +7,7 @@ import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
+import { prisma } from '~/db.server'
 import { loadPlayoffQualificationContext } from '~/lib/playoff-qualification.server'
 import { PLAYIN_WINNERS_COUNT } from '~/lib/tournament-format'
 import { colorGroupClasses } from '~/lib/types'
@@ -21,7 +21,6 @@ import {
 	isMatchThirdPlace,
 } from '~/lib/utils'
 
-const prisma = new PrismaClient()
 
 export const meta: MetaFunction = () => {
 	return [

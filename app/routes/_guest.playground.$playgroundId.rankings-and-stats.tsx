@@ -1,11 +1,10 @@
-import { PrismaClient } from '@prisma/client'
 import { type LoaderFunctionArgs, type MetaFunction } from '@remix-run/node'
 import { useLoaderData, useLocation, useParams } from '@remix-run/react'
 import invariant from 'tiny-invariant'
 import RankingsAndStats from '~/components/RankingsAndStats'
+import { prisma } from '~/db.server'
 import { getRankingsData } from '~/lib/rankings'
 
-const prisma = new PrismaClient()
 
 export const meta: MetaFunction = () => {
 	return [

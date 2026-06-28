@@ -1,4 +1,3 @@
-import { PrismaClient } from '@prisma/client'
 import {
 	type LoaderFunctionArgs,
 	type ActionFunctionArgs,
@@ -21,8 +20,8 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '~/components/ui/select'
+import { prisma } from '~/db.server'
 
-const prisma = new PrismaClient()
 
 export const meta: MetaFunction = () => {
 	return [

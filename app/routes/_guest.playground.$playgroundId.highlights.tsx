@@ -1,4 +1,3 @@
-import { PrismaClient } from '@prisma/client'
 import { type LoaderFunctionArgs, type MetaFunction } from '@remix-run/node'
 import { Form, useLoaderData, useParams, useSubmit } from '@remix-run/react'
 import { Download, Flame, Loader2, Scale, Star, Target } from 'lucide-react'
@@ -13,6 +12,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '~/components/ui/select'
+import { prisma } from '~/db.server'
 import {
 	createHighlightsImageDataUrl,
 	downloadDataUrl,
@@ -23,7 +23,6 @@ import { getTournamentHighlightsByDay } from '~/lib/highlights'
 import { getDayLabel } from '~/lib/utils'
 import { authSessionStorage } from '~/session.server'
 
-const prisma = new PrismaClient()
 
 export const meta: MetaFunction = () => {
 	return [{ title: 'Highlights Torneo' }]

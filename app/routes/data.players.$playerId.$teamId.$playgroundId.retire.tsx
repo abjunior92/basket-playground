@@ -1,8 +1,7 @@
-import { PrismaClient } from '@prisma/client'
 import { redirect, type ActionFunctionArgs } from '@remix-run/node'
 import invariant from 'tiny-invariant'
+import { prisma } from '~/db.server'
 
-const prisma = new PrismaClient()
 
 export const action = async ({ params, request }: ActionFunctionArgs) => {
 	invariant(params.playerId, 'playerId is required')

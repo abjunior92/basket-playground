@@ -1,4 +1,3 @@
-import { PrismaClient } from '@prisma/client'
 import {
 	type LoaderFunctionArgs,
 	json,
@@ -9,9 +8,9 @@ import { Award } from 'lucide-react'
 import invariant from 'tiny-invariant'
 import Header from '~/components/Header'
 import Palmares from '~/components/Palmares'
+import { prisma } from '~/db.server'
 import { checkUserIsLoggedIn } from '~/utils/helpers'
 
-const prisma = new PrismaClient()
 
 export const meta: MetaFunction = () => {
 	return [{ title: 'Palmares' }]

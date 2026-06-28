@@ -1,6 +1,5 @@
 import { type ColorGroup, type PrismaClient } from '@prisma/client'
-import { computePlayoffQualification } from '~/lib/tournament-format'
-import { resolveTournamentFormat } from '~/lib/tournament-format'
+import { computePlayoffQualification, resolveTournamentFormat  } from '~/lib/tournament-format'
 import { type TeamWithPlayoffStats, type TeamWithStatsType } from '~/lib/types'
 import { calculateTiebreaker, sortTeamsWithTiebreaker } from '~/lib/utils'
 

@@ -1,4 +1,3 @@
-import { PrismaClient } from '@prisma/client'
 import { type LoaderFunctionArgs, type MetaFunction } from '@remix-run/node'
 import { Link, useLoaderData } from '@remix-run/react'
 import { FacebookIcon } from 'icons/lucide-facebook'
@@ -15,6 +14,7 @@ import {
 	Users,
 } from 'lucide-react'
 import invariant from 'tiny-invariant'
+import { prisma } from '~/db.server'
 import {
 	cn,
 	getDayLabel,
@@ -22,7 +22,6 @@ import {
 	getTournamentDayCandidates,
 } from '~/lib/utils'
 
-const prisma = new PrismaClient()
 
 export const meta: MetaFunction = () => {
 	return [

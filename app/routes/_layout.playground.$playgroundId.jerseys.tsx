@@ -1,4 +1,4 @@
-import { PrismaClient, type Sizes } from '@prisma/client'
+import { type Sizes } from '@prisma/client'
 import {
 	type ActionFunctionArgs,
 	json,
@@ -50,10 +50,10 @@ import {
 	TableHeader,
 	TableRow,
 } from '~/components/ui/table'
+import { prisma } from '~/db.server'
 import { useToast } from '~/hooks/use-toast'
 import { playerSizesMap } from '~/lib/types'
 
-const prisma = new PrismaClient()
 
 export const meta: MetaFunction = () => {
 	return [

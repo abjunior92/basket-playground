@@ -1,4 +1,4 @@
-import { type ColorGroup, PrismaClient } from '@prisma/client'
+import { type ColorGroup } from '@prisma/client'
 import {
 	type MetaFunction,
 	type ActionFunctionArgs,
@@ -46,6 +46,7 @@ import {
 	TableHeader,
 	TableRow,
 } from '~/components/ui/table'
+import { prisma } from '~/db.server'
 import {
 	canAddGroupToPlayground,
 	getFormatTeamsPerGroupHint,
@@ -60,7 +61,6 @@ import {
 } from '~/lib/types'
 import { cn } from '~/lib/utils'
 
-const prisma = new PrismaClient()
 
 export const meta: MetaFunction = () => {
 	return [{ title: 'Torneo' }, { name: 'description', content: 'Torneo' }]

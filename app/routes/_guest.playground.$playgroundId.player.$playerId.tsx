@@ -1,4 +1,3 @@
-import { PrismaClient } from '@prisma/client'
 import { type LoaderFunctionArgs, type MetaFunction } from '@remix-run/node'
 import {
 	Link,
@@ -11,10 +10,10 @@ import { BarChart3, ChevronRight, Shield, UserRound } from 'lucide-react'
 import invariant from 'tiny-invariant'
 import Header from '~/components/Header'
 import { Badge } from '~/components/ui/badge'
+import { prisma } from '~/db.server'
 import { colorGroupClasses, playerLevelsTransform } from '~/lib/types'
 import { cn, getDayLabel } from '~/lib/utils'
 
-const prisma = new PrismaClient()
 
 export const meta: MetaFunction = () => {
 	return [

@@ -1,4 +1,3 @@
-import { PrismaClient } from '@prisma/client'
 import { type LoaderFunctionArgs, type MetaFunction } from '@remix-run/node'
 import { Form, Link, useLoaderData } from '@remix-run/react'
 import { FacebookIcon } from 'icons/lucide-facebook'
@@ -13,10 +12,10 @@ import {
 	UserCog,
 } from 'lucide-react'
 import { Button } from '~/components/ui/button'
+import { prisma } from '~/db.server'
 import { cn } from '~/lib/utils'
 import { checkUserIsLoggedIn } from '~/utils/helpers'
 
-const prisma = new PrismaClient()
 
 export const meta: MetaFunction = () => {
 	return [

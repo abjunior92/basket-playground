@@ -1,4 +1,3 @@
-import { PrismaClient } from '@prisma/client'
 import { type LoaderFunctionArgs, type MetaFunction } from '@remix-run/node'
 import { Link, useLoaderData } from '@remix-run/react'
 import {
@@ -17,10 +16,10 @@ import {
 import invariant from 'tiny-invariant'
 import { GlowCardLink } from '~/components/GlowCardLink'
 import { Button } from '~/components/ui/button'
+import { prisma } from '~/db.server'
 import { cn } from '~/lib/utils'
 import { checkUserIsLoggedIn } from '~/utils/helpers'
 
-const prisma = new PrismaClient()
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
 	const name = data?.playground?.name

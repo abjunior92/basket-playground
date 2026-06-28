@@ -1,4 +1,3 @@
-import { PrismaClient } from '@prisma/client'
 import { type MetaFunction } from '@remix-run/node'
 import { Link, useLoaderData } from '@remix-run/react'
 import { FacebookIcon } from 'icons/lucide-facebook'
@@ -49,9 +48,9 @@ import {
 	AccordionItem,
 	AccordionTrigger,
 } from '~/components/ui/accordion'
+import { prisma } from '~/db.server'
 import { cn } from '~/lib/utils'
 
-const prisma = new PrismaClient()
 
 export const meta: MetaFunction = () => {
 	return [

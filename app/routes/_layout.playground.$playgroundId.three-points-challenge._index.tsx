@@ -1,4 +1,3 @@
-import { PrismaClient } from '@prisma/client'
 import {
 	type ActionFunctionArgs,
 	type LoaderFunctionArgs,
@@ -37,9 +36,9 @@ import {
 	TableHeader,
 	TableRow,
 } from '~/components/ui/table'
+import { prisma } from '~/db.server'
 import { useToast } from '~/hooks/use-toast'
 
-const prisma = new PrismaClient()
 
 export const meta: MetaFunction = () => {
 	return [

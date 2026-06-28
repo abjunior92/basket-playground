@@ -1,14 +1,13 @@
-import { PrismaClient } from '@prisma/client'
 import { type ActionFunctionArgs } from '@remix-run/node'
 import { redirect } from '@remix-run/react'
 import invariant from 'tiny-invariant'
+import { prisma } from '~/db.server'
 import {
 	canAddTeamToGroup,
 	getTeamsPerGroupLimit,
 	TOURNAMENT_FORMAT_LABELS,
 } from '~/lib/tournament-format'
 
-const prisma = new PrismaClient()
 
 export const action = async ({ request, params }: ActionFunctionArgs) => {
 	invariant(params.teamId, 'teamId is required')

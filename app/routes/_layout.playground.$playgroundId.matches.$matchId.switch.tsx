@@ -1,4 +1,3 @@
-import { PrismaClient } from '@prisma/client'
 import {
 	type ActionFunctionArgs,
 	json,
@@ -26,9 +25,9 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '~/components/ui/select'
+import { prisma } from '~/db.server'
 import { getDayLabel, getTimeSlots } from '~/lib/utils'
 
-const prisma = new PrismaClient()
 
 export const meta: MetaFunction = () => {
 	return [

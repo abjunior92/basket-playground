@@ -1,4 +1,3 @@
-import { PrismaClient } from '@prisma/client'
 import {
 	type ActionFunctionArgs,
 	json,
@@ -20,9 +19,9 @@ import { ReplanMatchForm } from '~/components/EditMatch/ReplanMatchForm'
 import { TemporaryAliasDialog } from '~/components/EditMatch/TemporaryAliasDialog'
 import Header from '~/components/Header'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
+import { prisma } from '~/db.server'
 import { getTimeSlots } from '~/lib/utils'
 
-const prisma = new PrismaClient()
 
 export const meta: MetaFunction = () => {
 	return [

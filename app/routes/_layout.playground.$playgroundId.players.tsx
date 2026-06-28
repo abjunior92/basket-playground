@@ -1,4 +1,3 @@
-import { PrismaClient } from '@prisma/client'
 import { type LoaderFunctionArgs, type MetaFunction } from '@remix-run/node'
 import { Link, useLoaderData, useParams } from '@remix-run/react'
 import { ArrowUp, ChevronDown, Pencil, Users2 } from 'lucide-react'
@@ -21,10 +20,10 @@ import {
 	TableHeader,
 	TableRow,
 } from '~/components/ui/table'
+import { prisma } from '~/db.server'
 import { playerSizesTransform, type PlayerStatsType } from '~/lib/types'
 import { cn } from '~/lib/utils'
 
-const prisma = new PrismaClient()
 
 export const meta: MetaFunction = () => {
 	return [

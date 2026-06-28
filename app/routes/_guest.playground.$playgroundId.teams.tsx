@@ -1,4 +1,3 @@
-import { PrismaClient } from '@prisma/client'
 import { type LoaderFunctionArgs, type MetaFunction } from '@remix-run/node'
 import { useLoaderData, useParams } from '@remix-run/react'
 import { ChevronRight, Search, Shield, Users } from 'lucide-react'
@@ -8,10 +7,10 @@ import { GlowCardLink } from '~/components/GlowCardLink'
 import Header from '~/components/Header'
 import { Badge } from '~/components/ui/badge'
 import { Input } from '~/components/ui/input'
+import { prisma } from '~/db.server'
 import { colorGroupClasses } from '~/lib/types'
 import { cn } from '~/lib/utils'
 
-const prisma = new PrismaClient()
 
 export const meta: MetaFunction = () => {
 	return [

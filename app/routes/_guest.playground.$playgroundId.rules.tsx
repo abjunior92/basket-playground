@@ -1,4 +1,3 @@
-import { PrismaClient } from '@prisma/client'
 import {
 	type LoaderFunctionArgs,
 	type MetaFunction,
@@ -9,12 +8,12 @@ import { BookOpenText } from 'lucide-react'
 import invariant from 'tiny-invariant'
 import Header from '~/components/Header'
 import { Button } from '~/components/ui/button'
+import { prisma } from '~/db.server'
 import {
 	getFormatRulesSections,
 	resolveTournamentFormat,
 } from '~/lib/tournament-format'
 
-const prisma = new PrismaClient()
 
 export const meta: MetaFunction = () => {
 	return [

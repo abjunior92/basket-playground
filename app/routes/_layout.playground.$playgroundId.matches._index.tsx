@@ -1,4 +1,3 @@
-import { PrismaClient } from '@prisma/client'
 import {
 	json,
 	type LoaderFunctionArgs,
@@ -47,10 +46,10 @@ import {
 	TableHeader,
 	TableRow,
 } from '~/components/ui/table'
+import { prisma } from '~/db.server'
 import { colorGroupClasses } from '~/lib/types'
 import { cn, getDayLabel } from '~/lib/utils'
 
-const prisma = new PrismaClient()
 
 export const meta: MetaFunction = () => {
 	return [

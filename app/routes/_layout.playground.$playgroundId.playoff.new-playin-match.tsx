@@ -1,4 +1,3 @@
-import { PrismaClient } from '@prisma/client'
 import {
 	type ActionFunctionArgs,
 	json,
@@ -22,11 +21,11 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '~/components/ui/select'
+import { prisma } from '~/db.server'
 import { loadPlayoffQualificationContext } from '~/lib/playoff-qualification.server'
 import { colorGroupClasses } from '~/lib/types'
 import { cn, getDayLabel, getTimeSlots } from '~/lib/utils'
 
-const prisma = new PrismaClient()
 
 export const meta: MetaFunction = () => {
 	return [

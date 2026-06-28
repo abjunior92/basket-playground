@@ -1,8 +1,8 @@
-import { type Level, PrismaClient, type Sizes } from '@prisma/client'
+import { type Level, type Sizes } from '@prisma/client'
 import { json, type ActionFunctionArgs } from '@remix-run/node'
 import invariant from 'tiny-invariant'
+import { prisma } from '~/db.server'
 
-const prisma = new PrismaClient()
 
 export const action = async ({ request, params }: ActionFunctionArgs) => {
 	invariant(params.playgroundId, 'playgroundId is required')
