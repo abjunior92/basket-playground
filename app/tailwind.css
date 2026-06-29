@@ -87,6 +87,12 @@
 	::file-selector-button {
 		border-color: var(--color-gray-200, currentcolor);
 	}
+
+	@media (prefers-reduced-motion: no-preference) {
+		html {
+			scroll-behavior: smooth;
+		}
+	}
 }
 
 @layer utilities {

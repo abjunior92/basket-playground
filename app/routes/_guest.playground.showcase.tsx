@@ -10,6 +10,8 @@ import {
 	Bus,
 	CalendarClock,
 	CalendarDays,
+	ChevronLeft,
+	ChevronRight,
 	ClipboardCheck,
 	Clock,
 	Crosshair,
@@ -19,9 +21,12 @@ import {
 	Flame,
 	GlassWater,
 	Globe,
+	Camera,
 	HandPlatter,
 	Heart,
 	HeartHandshake,
+	ImageDown,
+	Images,
 	Info,
 	MapPin,
 	Medal,
@@ -40,7 +45,14 @@ import {
 	Zap,
 	type LucideIcon,
 } from 'lucide-react'
-import { type ReactNode } from 'react'
+import {
+	useCallback,
+	useEffect,
+	useRef,
+	useState,
+	type MouseEvent as ReactMouseEvent,
+	type ReactNode,
+} from 'react'
 import { EventVenueMap } from '~/components/EventVenueMap'
 import {
 	Accordion,
@@ -50,7 +62,6 @@ import {
 } from '~/components/ui/accordion'
 import { prisma } from '~/db.server'
 import { cn } from '~/lib/utils'
-
 
 export const meta: MetaFunction = () => {
 	return [
@@ -83,7 +94,12 @@ export const loader = async () => {
 	return { playground, satispayPaymentUrl, showNews }
 }
 
-const showcaseAccordionSections = ['organization', 'prizes', 'food'] as const
+const showcaseAccordionSections = [
+	'organization',
+	'prizes',
+	'food',
+	'photos',
+] as const
 
 type ShowcaseAccordionSectionProps = {
 	value: string
@@ -91,6 +107,8 @@ type ShowcaseAccordionSectionProps = {
 	title: string
 	description?: string
 	children: ReactNode
+	/** Ancora per il table of contents (scroll dall'header). */
+	id?: string
 }
 
 function ShowcaseAccordionSection({
@@ -99,14 +117,16 @@ function ShowcaseAccordionSection({
 	title,
 	description,
 	children,
+	id,
 }: ShowcaseAccordionSectionProps) {
 	return (
 		<AccordionItem
 			value={value}
+			id={id}
 			className={cn(
 				'section-blur',
 				'highlights-card-v1',
-				'relative border-none',
+				'relative scroll-mt-4 border-none',
 			)}
 		>
 			<div
@@ -135,10 +155,135 @@ function ShowcaseAccordionSection({
 	)
 }
 
+type TocItem = {
+	id: string
+	label: string
+	icon: LucideIcon
+}
+
+const prefersReducedMotion = () =>
+	typeof window !== 'undefined' &&
+	window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+function ShowcaseTableOfContents({ items }: { items: TocItem[] }) {
+	const scrollerRef = useRef<HTMLUListElement>(null)
+	const [canScrollLeft, setCanScrollLeft] = useState(false)
+	const [canScrollRight, setCanScrollRight] = useState(false)
+
+	const updateArrows = useCallback(() => {
+		const el = scrollerRef.current
+		if (!el) return
+		const { scrollLeft, scrollWidth, clientWidth } = el
+		setCanScrollLeft(scrollLeft > 1)
+		setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 1)
+	}, [])
+
+	useEffect(() => {
+		updateArrows()
+		window.addEventListener('resize', updateArrows)
+		return () => window.removeEventListener('resize', updateArrows)
+	}, [updateArrows])
+
+	const scrollByDirection = (direction: 1 | -1) => {
+		const el = scrollerRef.current
+		if (!el) return
+		el.scrollBy({
+			left: direction * Math.max(180, el.clientWidth * 0.7),
+			behavior: prefersReducedMotion() ? 'auto' : 'smooth',
+		})
+	}
+
+	const handleJump = (
+		event: ReactMouseEvent<HTMLAnchorElement>,
+		id: string,
+	) => {
+		event.preventDefault()
+		const target = document.getElementById(id)
+		if (!target) return
+		target.scrollIntoView({
+			behavior: prefersReducedMotion() ? 'auto' : 'smooth',
+			block: 'start',
+		})
+		if (typeof history !== 'undefined' && history.replaceState) {
+			history.replaceState(null, '', `#${id}`)
+		}
+	}
+
+	const arrowClass =
+		'grid h-7 w-7 shrink-0 place-items-center rounded-full border border-slate-300/70 bg-white/80 text-slate-600 shadow-sm transition duration-200 ease-out hover:bg-white hover:text-slate-900 focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-1 focus-visible:outline disabled:pointer-events-none disabled:opacity-50 motion-safe:hover:-translate-y-0.5'
+
+	return (
+		<nav
+			aria-label="Indice delle sezioni"
+			className="relative mt-5 border-t border-slate-900/10 pt-4"
+		>
+			<div className="flex items-center gap-1.5">
+				<button
+					type="button"
+					onClick={() => scrollByDirection(-1)}
+					disabled={!canScrollLeft}
+					aria-label="Scorri le sezioni indietro"
+					className={arrowClass}
+				>
+					<ChevronLeft className="h-4 w-4" aria-hidden />
+				</button>
+
+				<ul
+					ref={scrollerRef}
+					onScroll={updateArrows}
+					className="flex flex-1 snap-x gap-1.5 overflow-x-auto pt-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+				>
+					{items.map((item) => {
+						const Icon = item.icon
+						return (
+							<li key={item.id} className="snap-start">
+								<a
+									href={`#${item.id}`}
+									onClick={(event) => handleJump(event, item.id)}
+									className="group inline-flex items-center gap-1.5 rounded-full border border-slate-300/70 bg-white/70 px-2.5 py-1 text-xs font-semibold whitespace-nowrap text-slate-700 shadow-sm transition duration-200 ease-out hover:border-slate-400 hover:bg-white hover:text-slate-900 focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-1 focus-visible:outline motion-safe:hover:-translate-y-0.5"
+								>
+									<Icon
+										className="h-3.5 w-3.5 shrink-0 text-slate-500 transition-colors duration-200 group-hover:text-slate-700"
+										aria-hidden
+									/>
+									{item.label}
+								</a>
+							</li>
+						)
+					})}
+				</ul>
+
+				<button
+					type="button"
+					onClick={() => scrollByDirection(1)}
+					disabled={!canScrollRight}
+					aria-label="Scorri le sezioni avanti"
+					className={arrowClass}
+				>
+					<ChevronRight className="h-4 w-4" aria-hidden />
+				</button>
+			</div>
+		</nav>
+	)
+}
+
 export default function PlaygroundShowcasePage() {
 	const { playground, satispayPaymentUrl, showNews } =
 		useLoaderData<typeof loader>()
 	const newsYear = playground?.year ?? new Date().getFullYear()
+
+	/** Voci del table of contents: "Novità" appare solo finché è visibile. */
+	const tocItems: TocItem[] = [
+		...(showNews ? [{ id: 'novita', label: 'Novità', icon: Sparkles }] : []),
+		{ id: 'organizzazione', label: 'Organizzazione', icon: ShieldCheck },
+		{ id: 'premi', label: 'Premi', icon: Award },
+		{ id: 'foto', label: 'Foto', icon: Images },
+		{ id: 'cibo', label: 'Cibo', icon: HandPlatter },
+		{ id: 'baskin', label: 'Baskin', icon: HeartHandshake },
+		{ id: 'sponsor', label: 'Sponsor', icon: Star },
+		{ id: 'info', label: 'Info utili', icon: Info },
+		{ id: 'mappa', label: 'Mappa', icon: MapPin },
+	]
 
 	return (
 		<>
@@ -218,10 +363,21 @@ export default function PlaygroundShowcasePage() {
 								</p>
 							)}
 						</div>
+
+						{tocItems.length > 1 ? (
+							<ShowcaseTableOfContents items={tocItems} />
+						) : null}
 					</header>
 
 					{showNews ? (
-						<section className={cn('section-blur', 'highlights-card-v1')}>
+						<section
+							id="novita"
+							className={cn(
+								'section-blur',
+								'highlights-card-v1',
+								'scroll-mt-4',
+							)}
+						>
 							<div
 								aria-hidden="true"
 								className="menu-hero-overlay-v1 pointer-events-none absolute inset-0"
@@ -319,6 +475,7 @@ export default function PlaygroundShowcasePage() {
 					>
 						<ShowcaseAccordionSection
 							value="organization"
+							id="organizzazione"
 							icon={ShieldCheck}
 							title="Organizzazione torneo"
 						>
@@ -412,6 +569,7 @@ export default function PlaygroundShowcasePage() {
 
 						<ShowcaseAccordionSection
 							value="prizes"
+							id="premi"
 							icon={Award}
 							title="Premi"
 							description="Record e obiettivi premiati durante il torneo."
@@ -487,7 +645,55 @@ export default function PlaygroundShowcasePage() {
 						</ShowcaseAccordionSection>
 
 						<ShowcaseAccordionSection
+							value="photos"
+							id="foto"
+							icon={Images}
+							title="Foto del torneo"
+							description="Rivivi i momenti migliori: l'album condiviso del torneo."
+						>
+							<a
+								href={tournamentPhotosUrl}
+								target="_blank"
+								rel="noreferrer"
+								className="group relative block overflow-hidden rounded-2xl border border-fuchsia-300/70 bg-linear-to-br from-fuchsia-50 via-rose-50 to-violet-100/80 p-4 shadow-md ring-1 shadow-fuchsia-900/10 ring-fuchsia-200/60 transition duration-200 ease-out hover:shadow-lg hover:shadow-fuchsia-900/15 focus-visible:ring-2 focus-visible:ring-fuchsia-500 focus-visible:ring-offset-2 focus-visible:outline motion-safe:hover:-translate-y-0.5"
+							>
+								<div
+									aria-hidden="true"
+									className="pointer-events-none absolute -top-10 -right-8 h-32 w-32 rounded-full bg-fuchsia-300/30 blur-2xl"
+								/>
+								<div className="relative flex items-center gap-3.5">
+									<div className="relative shrink-0">
+										{/* Stack di "polaroid" per richiamare l'idea di un album */}
+										<div
+											aria-hidden="true"
+											className="absolute -top-1.5 -left-1.5 h-12 w-12 rounded-xl bg-white/80 shadow-sm ring-1 ring-fuchsia-200/70 transition-transform duration-200 motion-safe:group-hover:-rotate-6"
+										/>
+										<div
+											aria-hidden="true"
+											className="absolute -top-0.5 left-1 h-12 w-12 rounded-xl bg-white/90 shadow-sm ring-1 ring-rose-200/70 transition-transform duration-200 motion-safe:group-hover:rotate-3"
+										/>
+										<div className="relative grid h-13 w-13 place-items-center rounded-2xl bg-linear-to-br from-fuchsia-500 to-violet-600 text-white shadow-lg ring-2 shadow-fuchsia-900/25 ring-white/70 transition-transform duration-200 motion-safe:group-hover:scale-105">
+											<Camera className="h-6.5 w-6.5" aria-hidden />
+										</div>
+									</div>
+									<div className="min-w-0 flex-1">
+										<p className="text-base leading-tight font-extrabold tracking-tight text-fuchsia-950">
+											Apri l&apos;album del torneo
+										</p>
+										<p className="mt-0.5 text-sm font-medium text-fuchsia-900/90">
+											Tutte le foto raccolte su Google Drive.
+										</p>
+									</div>
+									<span className="relative grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white/80 text-fuchsia-700 shadow-sm ring-1 ring-fuchsia-300/70 transition-transform duration-200 motion-safe:group-hover:translate-x-0.5 motion-safe:group-hover:-translate-y-0.5">
+										<ImageDown className="h-4.5 w-4.5" aria-hidden />
+									</span>
+								</div>
+							</a>
+						</ShowcaseAccordionSection>
+
+						<ShowcaseAccordionSection
 							value="food"
+							id="cibo"
 							icon={HandPlatter}
 							title="Cibo e bevande"
 						>
@@ -620,7 +826,7 @@ export default function PlaygroundShowcasePage() {
 						</ShowcaseAccordionSection>
 					</Accordion>
 
-					<div className="relative space-y-4">
+					<div id="baskin" className="relative scroll-mt-4 space-y-4">
 						<div className="relative overflow-hidden rounded-2xl border border-orange-400/35 bg-linear-to-br from-[#0c1a33] via-[#122a4a] to-[#0a1428] text-white shadow-lg ring-1 shadow-slate-900/25 ring-white/10">
 							<h2 className="font-semiboldtext-white flex items-center gap-2 p-5 text-lg">
 								<HeartHandshake className="h-5 w-5 shrink-0" aria-hidden />
@@ -774,6 +980,7 @@ export default function PlaygroundShowcasePage() {
 					>
 						<ShowcaseAccordionSection
 							value="sponsors"
+							id="sponsor"
 							icon={Star}
 							title="Sponsor"
 							description="Un grazie speciale ai partner che supportano il torneo."
@@ -802,6 +1009,7 @@ export default function PlaygroundShowcasePage() {
 
 						<ShowcaseAccordionSection
 							value="info"
+							id="info"
 							icon={Info}
 							title="Info utili"
 						>
@@ -837,6 +1045,7 @@ export default function PlaygroundShowcasePage() {
 
 						<ShowcaseAccordionSection
 							value="map"
+							id="mappa"
 							icon={MapPin}
 							title="Mappa del torneo"
 							description="Noi siamo qui! Apri Google Maps per le indicazioni stradali."
@@ -892,6 +1101,10 @@ export default function PlaygroundShowcasePage() {
 		</>
 	)
 }
+
+/** Album foto del torneo su Google Drive (solo reindirizzamento esterno). */
+const tournamentPhotosUrl =
+	'https://drive.google.com/drive/folders/1x3dOm0464uCPrEsF0UR4LS5JZl1jJQca'
 
 /** Link West River nella card showcase */
 const westRiverShowcaseLinks = {
@@ -1036,7 +1249,12 @@ const foodSchedule: FoodDay[] = [
 		items: ['Patatine', 'Piadine', 'Crescentine'],
 		opening: true,
 	},
-	{ weekday: 'Lunedì', day: '29', month: 'GIU' },
+	{
+		weekday: 'Lunedì',
+		day: '29',
+		month: 'GIU',
+		items: ['Patatine', 'Piadine', 'Pizze'],
+	},
 	{ weekday: 'Martedì', day: '30', month: 'GIU' },
 	{ weekday: 'Mercoledì', day: '1', month: 'LUG' },
 	{ weekday: 'Giovedì', day: '2', month: 'LUG' },
