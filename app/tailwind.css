@@ -333,6 +333,17 @@
 		@apply inline-flex items-center gap-1 rounded-lg border border-blue-200 bg-blue-50/90 px-2 py-1 text-blue-900 underline-offset-2 transition-colors duration-200 hover:bg-blue-100 hover:underline focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:outline-none;
 	}
 
+	/* Ingresso scaglionato delle sezioni nel dettaglio partita. */
+	.match-reveal {
+		opacity: 0;
+		animation: match-reveal-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+	}
+
+	/* Pulsazione discreta per evidenziare l'MVP del match. */
+	.match-mvp-pulse {
+		animation: match-mvp-pulse 2.4s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+	}
+
 	.cta-arrow {
 		animation: cta-arrow-bounce 1.2s cubic-bezier(0.25, 1, 0.5, 1) infinite;
 	}
@@ -357,8 +368,14 @@
 	@media (prefers-reduced-motion: reduce) {
 		.cta-arrow,
 		.cta-satispay .cta-shine,
-		.prize-trophy .prize-trophy-shine {
+		.prize-trophy .prize-trophy-shine,
+		.match-reveal,
+		.match-mvp-pulse {
 			animation: none !important;
+		}
+
+		.match-reveal {
+			opacity: 1;
 		}
 
 		.cta-satispay .cta-shine,
@@ -385,6 +402,27 @@
 	55%,
 	100% {
 		transform: translateX(360%) skewX(-12deg);
+	}
+}
+
+@keyframes match-reveal-in {
+	from {
+		opacity: 0;
+		transform: translateY(12px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes match-mvp-pulse {
+	0%,
+	100% {
+		transform: scale(1);
+	}
+	50% {
+		transform: scale(1.12) rotate(-6deg);
 	}
 }
 

@@ -7,6 +7,7 @@ import {
 	Award,
 	BookOpenText,
 	CalendarDays,
+	ChevronRight,
 	Flame,
 	Medal,
 	Swords,
@@ -235,25 +236,31 @@ export default function Index() {
 									</p>
 									<ul className="space-y-2">
 										{latestResults.map((match) => (
-											<li
-												key={match.id}
-												className="rounded-lg border border-slate-200 bg-white/80 p-3"
-											>
-												<div className="mb-1 text-xs font-semibold tracking-wide text-slate-700">
-													{getDayLabel(match.day.toString())} · {match.timeSlot}{' '}
-													· Campo {match.field}
-												</div>
-												<p className="text-sm text-slate-900">
-													{match.team1.name}{' '}
-													<span className="font-mono font-semibold tabular-nums">
-														{match.score1 ?? '-'}
-													</span>{' '}
-													-{' '}
-													<span className="font-mono font-semibold tabular-nums">
-														{match.score2 ?? '-'}
-													</span>{' '}
-													{match.team2.name}
-												</p>
+											<li key={match.id}>
+												<Link
+													to={`/playground/${playground.id}/match/${match.id}?returnTo=${encodeURIComponent(`/playground/${playground.id}/menu`)}`}
+													aria-label={`Vedi dettaglio della partita tra ${match.team1.name} e ${match.team2.name}`}
+													className="group block rounded-lg border border-slate-200 bg-white/80 p-3 transition-transform duration-200 ease-out hover:bg-white motion-safe:hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:outline-none"
+												>
+													<div className="mb-1 flex items-center justify-between gap-2">
+														<span className="text-xs font-semibold tracking-wide text-slate-700">
+															{getDayLabel(match.day.toString())} ·{' '}
+															{match.timeSlot} · Campo {match.field}
+														</span>
+														<ChevronRight className="h-4 w-4 shrink-0 text-slate-400 transition-transform duration-200 ease-out motion-safe:group-hover:translate-x-0.5" />
+													</div>
+													<p className="text-sm text-slate-900">
+														{match.team1.name}{' '}
+														<span className="font-mono font-semibold tabular-nums">
+															{match.score1 ?? '-'}
+														</span>{' '}
+														-{' '}
+														<span className="font-mono font-semibold tabular-nums">
+															{match.score2 ?? '-'}
+														</span>{' '}
+														{match.team2.name}
+													</p>
+												</Link>
 											</li>
 										))}
 									</ul>

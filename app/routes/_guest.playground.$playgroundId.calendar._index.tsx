@@ -46,7 +46,6 @@ import { prisma } from '~/db.server'
 import { colorGroupClasses } from '~/lib/types'
 import { cn, getDayLabel } from '~/lib/utils'
 
-
 export const meta: MetaFunction = () => {
 	return [
 		{ title: 'Calendario Partite' },
@@ -395,7 +394,7 @@ export default function Matches() {
 																					className={cn(
 																						isTeam1Winner &&
 																							'font-bold text-green-600',
-																						'text-2xl font-mono tabular-nums',
+																						'font-mono text-2xl tabular-nums',
 																					)}
 																				>
 																					{match.score1}
@@ -430,7 +429,7 @@ export default function Matches() {
 																					className={cn(
 																						isTeam2Winner &&
 																							'font-bold text-green-600',
-																						'text-2xl font-mono tabular-nums',
+																						'font-mono text-2xl tabular-nums',
 																					)}
 																				>
 																					{match.score2}
@@ -438,6 +437,14 @@ export default function Matches() {
 																			</div>
 																		</div>
 																	</div>
+																	<Link
+																		to={`/playground/${params.playgroundId}/match/${match.id}?returnTo=${encodeURIComponent(currentPath)}`}
+																		className="guest-link-pill-bordered w-full justify-center text-xs"
+																		aria-label={`Vedi dettaglio della partita tra ${match.team1.name} e ${match.team2.name}`}
+																	>
+																		<span>Vedi dettaglio</span>
+																		<ChevronRight className="h-3.5 w-3.5 opacity-80" />
+																	</Link>
 																</div>
 															)
 														})}
@@ -479,6 +486,12 @@ export default function Matches() {
 												<div className="flex items-center justify-center gap-1">
 													<Pencil className="h-3 w-3 shrink-0 text-red-500" />
 													<span className="hidden md:inline">Risultato</span>
+												</div>
+											</TableHead>
+											<TableHead className="w-auto">
+												<div className="flex items-center justify-center gap-1">
+													<Eye className="h-3 w-3 shrink-0 text-red-500" />
+													<span className="hidden md:inline">Dettaglio</span>
 												</div>
 											</TableHead>
 										</TableRow>
@@ -555,6 +568,16 @@ export default function Matches() {
 														>
 															{match.score2}
 														</span>
+													</TableCell>
+													<TableCell>
+														<Link
+															to={`/playground/${params.playgroundId}/match/${match.id}?returnTo=${encodeURIComponent(currentPath)}`}
+															className="guest-link-pill-bordered justify-center"
+															aria-label={`Vedi dettaglio della partita tra ${match.team1.name} e ${match.team2.name}`}
+														>
+															<span>Vedi dettaglio</span>
+															<ChevronRight className="h-3.5 w-3.5 opacity-80" />
+														</Link>
 													</TableCell>
 												</TableRow>
 											)
