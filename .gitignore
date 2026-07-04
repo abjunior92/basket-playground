@@ -7,3 +7,7 @@ node_modules
 .prisma/
 /backups/*
 dev.db
+
+# Prisma migration SQL (override global ~/.gitignore_global *.sql)
+!prisma/migrations/
+!prisma/migrations/**/*.sql
