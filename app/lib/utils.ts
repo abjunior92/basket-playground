@@ -72,86 +72,116 @@ export const getDayLabel = (day: string) => {
 	return label
 }
 
-export const getFinalTimeSlots = () => {
-	return getTimeSlots().filter(
-		(slot) =>
-			isMatchFinalEight(slot) ||
-			isMatchFinalFour(slot) ||
-			isMatchSemifinal(slot) ||
-			isMatchThirdPlace(slot) ||
-			isMatchFinal(slot),
-	)
+export type PlayoffMatchPhase =
+	| 'final_eight'
+	| 'final_four'
+	| 'semifinal'
+	| 'third_place'
+	| 'final'
+	| 'third_fourth_final'
+	| 'extra'
+
+export const PLAYOFF_MATCH_PHASE_OPTIONS: {
+	value: PlayoffMatchPhase
+	label: string
+}[] = [
+	{ value: 'final_eight', label: 'Ottavo di finale' },
+	{ value: 'final_four', label: 'Quarto di finale' },
+	{ value: 'semifinal', label: 'Semifinale' },
+	{ value: 'third_place', label: 'Terzo posto' },
+	{ value: 'final', label: 'Finale' },
+	{ value: 'third_fourth_final', label: 'Finale 3/4 posto' },
+	{ value: 'extra', label: 'Partita extra' },
+]
+
+const PLAYOFF_MATCH_PHASE_LABELS: Record<PlayoffMatchPhase, string> = {
+	final_eight: 'Ottavo di finale',
+	final_four: 'Quarto di finale',
+	semifinal: 'Semifinale',
+	third_place: 'Terzo posto',
+	final: 'Finale',
+	third_fourth_final: 'Finale 3/4 posto',
+	extra: 'Partita extra',
 }
 
-export const getMatchLabel = (timeSlot: string) => {
-	let label
+type MatchWithOptionalPhase = Pick<Match, 'timeSlot'> & {
+	matchPhase?: PlayoffMatchPhase | null
+}
 
+const getPlayoffPhaseFromTimeSlot = (
+	timeSlot: string,
+): PlayoffMatchPhase | null => {
 	switch (timeSlot) {
 		case '19:20 > 19:35':
 		case '19:40 > 19:55':
 		case '20:00 > 20:15':
 		case '20:20 > 20:35':
-			label = 'Ottavi di Finale'
-			break
+			return 'final_eight'
 		case '20:40 > 20:55':
 		case '21:00 > 21:15':
-			label = 'Quarti di Finale'
-			break
+			return 'final_four'
 		case '21:20 > 21:35':
-			label = 'Semifinali'
-			break
+			return 'semifinal'
 		case '21:40 > 21:55':
-			label = 'Terzo posto'
-			break
+			return 'third_place'
 		case '22:00 > 22:15':
-			label = 'Finale'
-			break
+			return 'final'
 		default:
-			label = 'Extra Partita'
-			break
+			return null
 	}
-	return label
 }
 
-export const isMatchFinalEight = (match: Match | string) => {
+const resolvePlayoffPhase = (
+	match: MatchWithOptionalPhase | string,
+): PlayoffMatchPhase | null => {
 	if (typeof match === 'string') {
-		match = { timeSlot: match } as Match
+		return getPlayoffPhaseFromTimeSlot(match)
 	}
-	return (
-		match.timeSlot === '19:20 > 19:35' ||
-		match.timeSlot === '19:40 > 19:55' ||
-		match.timeSlot === '20:00 > 20:15' ||
-		match.timeSlot === '20:20 > 20:35'
+
+	if (match.matchPhase) {
+		return match.matchPhase
+	}
+
+	return getPlayoffPhaseFromTimeSlot(match.timeSlot)
+}
+
+export const getFinalTimeSlots = () => {
+	return getTimeSlots().filter(
+		(slot) => getPlayoffPhaseFromTimeSlot(slot) !== null,
 	)
 }
-export const isMatchFinalFour = (match: Match | string) => {
-	if (typeof match === 'string') {
-		match = { timeSlot: match } as Match
+
+export const getMatchLabel = (match: MatchWithOptionalPhase | string) => {
+	const phase = resolvePlayoffPhase(match)
+	if (phase) {
+		return PLAYOFF_MATCH_PHASE_LABELS[phase]
 	}
-	return (
-		match.timeSlot === '20:40 > 20:55' || match.timeSlot === '21:00 > 21:15'
-	)
+
+	return 'Partita extra'
 }
 
-export const isMatchSemifinal = (match: Match | string) => {
-	if (typeof match === 'string') {
-		match = { timeSlot: match } as Match
-	}
-	return match.timeSlot === '21:20 > 21:35'
+export const isMatchFinalEight = (match: MatchWithOptionalPhase | string) => {
+	return resolvePlayoffPhase(match) === 'final_eight'
+}
+export const isMatchFinalFour = (match: MatchWithOptionalPhase | string) => {
+	return resolvePlayoffPhase(match) === 'final_four'
 }
 
-export const isMatchThirdPlace = (match: Match | string) => {
-	if (typeof match === 'string') {
-		match = { timeSlot: match } as Match
-	}
-	return match.timeSlot === '21:40 > 21:55'
+export const isMatchSemifinal = (match: MatchWithOptionalPhase | string) => {
+	return resolvePlayoffPhase(match) === 'semifinal'
 }
 
-export const isMatchFinal = (match: Match | string) => {
-	if (typeof match === 'string') {
-		match = { timeSlot: match } as Match
-	}
-	return match.timeSlot === '22:00 > 22:15'
+export const isMatchThirdPlace = (match: MatchWithOptionalPhase | string) => {
+	const phase = resolvePlayoffPhase(match)
+	return phase === 'third_place' || phase === 'third_fourth_final'
+}
+
+export const isMatchFinal = (match: MatchWithOptionalPhase | string) => {
+	return resolvePlayoffPhase(match) === 'final'
+}
+
+export const isMatchExtra = (match: MatchWithOptionalPhase | string) => {
+	return resolvePlayoffPhase(match) === 'extra'
 }
 
 // Funzione per calcolare gli scontri diretti tra due squadre

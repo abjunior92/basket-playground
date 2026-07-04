@@ -40,6 +40,16 @@ model Group {
   @@unique([playgroundId, color])
 }
 
+enum PlayoffMatchPhase {
+  final_eight
+  final_four
+  semifinal
+  third_place
+  final
+  third_fourth_final
+  extra
+}
+
 enum ColorGroup {
   red
   blue
@@ -137,6 +147,7 @@ model Match {
   day          Int
   timeSlot     String
   field        String
+  matchPhase   PlayoffMatchPhase?
 
   team1       Team @relation(name: "Team1Matches", fields: [team1Id], references: [id], onDelete: Cascade)
   team1Id     String

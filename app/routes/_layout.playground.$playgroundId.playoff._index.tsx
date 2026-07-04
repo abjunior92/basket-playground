@@ -1,13 +1,21 @@
-import { type LoaderFunctionArgs, type MetaFunction } from '@remix-run/node'
-import { Link, useLoaderData, useParams } from '@remix-run/react'
-import { Trophy, Users, Calendar, Pencil, Plus } from 'lucide-react'
+import {
+	json,
+	type ActionFunctionArgs,
+	type LoaderFunctionArgs,
+	type MetaFunction,
+	redirect,
+} from '@remix-run/node'
+import { Form, Link, useLoaderData, useParams } from '@remix-run/react'
+import { Trophy, Users, Calendar, Pencil, Plus, Trash2 } from 'lucide-react'
 import invariant from 'tiny-invariant'
+import DialogAlert from '~/components/DialogAlert'
 import Header from '~/components/Header'
 import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
 import { prisma } from '~/db.server'
+import { deleteMatch } from '~/lib/delete-match.server'
 import { loadPlayoffQualificationContext } from '~/lib/playoff-qualification.server'
 import { PLAYIN_WINNERS_COUNT } from '~/lib/tournament-format'
 import { colorGroupClasses } from '~/lib/types'
@@ -105,6 +113,79 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 		playinWinners,
 		playoffMatches,
 	}
+}
+
+export const action = async ({ request, params }: ActionFunctionArgs) => {
+	invariant(params.playgroundId, 'playgroundId is required')
+
+	const formData = await request.formData()
+	const intent = formData.get('intent')
+
+	if (intent !== 'delete-match') {
+		return json({ error: 'Azione non valida' }, { status: 400 })
+	}
+
+	const matchId = formData.get('matchId') as string
+
+	if (!matchId) {
+		return json({ error: 'ID partita mancante' }, { status: 400 })
+	}
+
+	const match = await prisma.match.findFirst({
+		where: {
+			id: matchId,
+			playgroundId: params.playgroundId,
+			day: { in: [5, 7] },
+		},
+		select: { id: true },
+	})
+
+	if (!match) {
+		return json({ error: 'Partita non trovata' }, { status: 404 })
+	}
+
+	try {
+		await deleteMatch(matchId, params.playgroundId)
+		return redirect(`/playground/${params.playgroundId}/playoff`)
+	} catch (error) {
+		console.error("Errore durante l'eliminazione della partita:", error)
+		return json(
+			{ error: "Errore durante l'eliminazione della partita" },
+			{ status: 500 },
+		)
+	}
+}
+
+function DeleteMatchButton({
+	matchId,
+	formIdPrefix,
+}: {
+	matchId: string
+	formIdPrefix: string
+}) {
+	const formId = `${formIdPrefix}-${matchId}`
+
+	return (
+		<Form id={formId} method="post">
+			<input type="hidden" name="intent" value="delete-match" />
+			<input type="hidden" name="matchId" value={matchId} />
+			<DialogAlert
+				trigger={
+					<Button
+						type="button"
+						variant="outline"
+						size="sm"
+						className="text-red-600 hover:bg-red-50 hover:text-red-700"
+					>
+						<Trash2 className="h-4 w-4" />
+					</Button>
+				}
+				title="Elimina partita"
+				description="Sei sicuro di voler eliminare questa partita? Questa azione non può essere annullata ed eliminerà anche tutti i risultati e i punteggi dei giocatori."
+				formId={formId}
+			/>
+		</Form>
+	)
 }
 
 export default function Playoff() {
@@ -376,21 +457,22 @@ export default function Playoff() {
 														<span>
 															{match.timeSlot} - Campo {match.field}
 														</span>
-														<Button
-															variant="outline"
-															size="sm"
-															asChild
-															className="md:hidden"
-														>
-															<Link
-																to={`/playground/${params.playgroundId}/matches/${match.id}/edit`}
-																state={{
-																	backLink: `/playground/${params.playgroundId}/playoff`,
-																}}
-															>
-																<Pencil className="h-4 w-4" />
-															</Link>
-														</Button>
+														<div className="flex items-center gap-2 md:hidden">
+															<Button variant="outline" size="sm" asChild>
+																<Link
+																	to={`/playground/${params.playgroundId}/matches/${match.id}/edit`}
+																	state={{
+																		backLink: `/playground/${params.playgroundId}/playoff`,
+																	}}
+																>
+																	<Pencil className="h-4 w-4" />
+																</Link>
+															</Button>
+															<DeleteMatchButton
+																matchId={match.id}
+																formIdPrefix="deletePlayinMatchForm-mobile"
+															/>
+														</div>
 													</div>
 
 													{/* Layout desktop */}
@@ -461,6 +543,10 @@ export default function Playoff() {
 																	<Pencil className="h-4 w-4" />
 																</Link>
 															</Button>
+															<DeleteMatchButton
+																matchId={match.id}
+																formIdPrefix="deletePlayinMatchForm"
+															/>
 														</div>
 													</div>
 
@@ -673,24 +759,25 @@ export default function Playoff() {
 													{/* Header con orario e campo */}
 													<div className="text-muted-foreground mb-3 flex items-center justify-between text-sm">
 														<span>
-															{match.timeSlot} - {getMatchLabel(match.timeSlot)}{' '}
+															{match.timeSlot} - {getMatchLabel(match)}{' '}
 															- Campo {match.field}
 														</span>
-														<Button
-															variant="outline"
-															size="sm"
-															asChild
-															className="md:hidden"
-														>
-															<Link
-																to={`/playground/${params.playgroundId}/matches/${match.id}/edit`}
-																state={{
-																	backLink: `/playground/${params.playgroundId}/playoff`,
-																}}
-															>
-																<Pencil className="h-4 w-4" />
-															</Link>
-														</Button>
+														<div className="flex items-center gap-2 md:hidden">
+															<Button variant="outline" size="sm" asChild>
+																<Link
+																	to={`/playground/${params.playgroundId}/matches/${match.id}/edit`}
+																	state={{
+																		backLink: `/playground/${params.playgroundId}/playoff`,
+																	}}
+																>
+																	<Pencil className="h-4 w-4" />
+																</Link>
+															</Button>
+															<DeleteMatchButton
+																matchId={match.id}
+																formIdPrefix="deletePlayoffMatchForm-mobile"
+															/>
+														</div>
 													</div>
 
 													{/* Layout desktop */}
@@ -761,6 +848,10 @@ export default function Playoff() {
 																	<Pencil className="h-4 w-4" />
 																</Link>
 															</Button>
+															<DeleteMatchButton
+																matchId={match.id}
+																formIdPrefix="deletePlayoffMatchForm"
+															/>
 														</div>
 													</div>
 

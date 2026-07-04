@@ -24,7 +24,7 @@ import {
 import { prisma } from '~/db.server'
 import { loadPlayoffQualificationContext } from '~/lib/playoff-qualification.server'
 import { colorGroupClasses } from '~/lib/types'
-import { cn, getDayLabel, getFinalTimeSlots, getMatchLabel } from '~/lib/utils'
+import { cn, getDayLabel, getTimeSlots, getMatchLabel, PLAYOFF_MATCH_PHASE_OPTIONS } from '~/lib/utils'
 
 
 export const meta: MetaFunction = () => {
@@ -112,8 +112,9 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 	const field = formData.get('field') as string
 	const team1Id = formData.get('team1Id') as string
 	const team2Id = formData.get('team2Id') as string
+	const matchPhase = formData.get('matchPhase') as string
 
-	if (!day || !timeSlot || !field || !team1Id || !team2Id) {
+	if (!day || !timeSlot || !field || !team1Id || !team2Id || !matchPhase) {
 		return json({ error: 'Tutti i campi sono obbligatori' }, { status: 400 })
 	}
 
@@ -155,6 +156,14 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 			field,
 			team1Id,
 			team2Id,
+			matchPhase: matchPhase as
+				| 'final_eight'
+				| 'final_four'
+				| 'semifinal'
+				| 'third_place'
+				| 'final'
+				| 'third_fourth_final'
+				| 'extra',
 		},
 	})
 
@@ -167,7 +176,7 @@ export default function NewPlayoffMatch() {
 	const actionData = useActionData<typeof action>()
 	const params = useParams()
 
-	const timeSlots = getFinalTimeSlots()
+	const timeSlots = getTimeSlots()
 
 	return (
 		<div className="md:p-4">
@@ -202,6 +211,30 @@ export default function NewPlayoffMatch() {
 
 						<div>
 							<label
+								htmlFor="matchPhase"
+								className="mb-2 block text-sm font-medium"
+							>
+								Tipo di partita:
+							</label>
+							<Select name="matchPhase">
+								<SelectTrigger>
+									<SelectValue placeholder="Seleziona il tipo di partita" />
+								</SelectTrigger>
+								<SelectContent>
+									<SelectGroup>
+										<SelectLabel>Fase</SelectLabel>
+										{PLAYOFF_MATCH_PHASE_OPTIONS.map((option) => (
+											<SelectItem key={option.value} value={option.value}>
+												{option.label}
+											</SelectItem>
+										))}
+									</SelectGroup>
+								</SelectContent>
+							</Select>
+						</div>
+
+						<div>
+							<label
 								htmlFor="timeSlot"
 								className="mb-2 block text-sm font-medium"
 							>
@@ -216,7 +249,7 @@ export default function NewPlayoffMatch() {
 										<SelectLabel>Orario</SelectLabel>
 										{timeSlots.map((slot) => (
 											<SelectItem key={slot} value={slot}>
-												{`${getMatchLabel(slot)} - ${slot}`}
+												{slot}
 											</SelectItem>
 										))}
 									</SelectGroup>
@@ -316,7 +349,8 @@ export default function NewPlayoffMatch() {
 										{/* Header con orario e campo */}
 										<div className="text-muted-foreground mb-3 flex items-center justify-between text-sm">
 											<span>
-												{match.timeSlot} - Campo {match.field}
+												{getMatchLabel(match)} - {match.timeSlot} - Campo{' '}
+												{match.field}
 											</span>
 										</div>
 

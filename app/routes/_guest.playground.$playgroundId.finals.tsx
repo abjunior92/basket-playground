@@ -20,7 +20,6 @@ import {
 	isMatchThirdPlace,
 } from '~/lib/utils'
 
-
 export const meta: MetaFunction = () => {
 	return [
 		{ title: 'Playoff' },
@@ -35,7 +34,7 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 		prisma,
 		params.playgroundId,
 	)
-	const { directPlayoffTeams, playinTeams, rankedGroups } = qualification
+	const { playinTeams, rankedGroups } = qualification
 
 	const playinMatches = await prisma.match.findMany({
 		where: {
@@ -398,7 +397,7 @@ export default function Playoff() {
 														<div className="flex items-center gap-2">
 															{match.score1 !== null &&
 															match.score2 !== null ? (
-																<div className="text-lg font-mono tabular-nums">
+																<div className="font-mono text-lg tabular-nums">
 																	<span
 																		className={cn(
 																			isTeam1Winner &&
@@ -445,7 +444,7 @@ export default function Playoff() {
 															{match.score1 !== null && (
 																<span
 																	className={cn(
-																		'text-lg font-bold font-mono tabular-nums',
+																		'font-mono text-lg font-bold tabular-nums',
 																		isTeam1Winner && 'text-green-600',
 																	)}
 																>
@@ -477,7 +476,7 @@ export default function Playoff() {
 															{match.score2 !== null && (
 																<span
 																	className={cn(
-																		'text-lg font-bold font-mono tabular-nums',
+																		'font-mono text-lg font-bold tabular-nums',
 																		isTeam2Winner && 'text-green-600',
 																	)}
 																>
@@ -622,8 +621,8 @@ export default function Playoff() {
 													{/* Header con orario e campo */}
 													<div className="text-muted-foreground mb-3 flex items-center justify-between text-sm">
 														<span>
-															{match.timeSlot} - {getMatchLabel(match.timeSlot)}{' '}
-															- Campo {match.field}
+															{match.timeSlot} - {getMatchLabel(match)} - Campo{' '}
+															{match.field}
 														</span>
 													</div>
 
@@ -661,7 +660,7 @@ export default function Playoff() {
 														<div className="flex items-center gap-2">
 															{match.score1 !== null &&
 															match.score2 !== null ? (
-																<div className="text-lg font-mono tabular-nums">
+																<div className="font-mono text-lg tabular-nums">
 																	<span
 																		className={cn(
 																			isTeam1Winner &&
@@ -708,7 +707,7 @@ export default function Playoff() {
 															{match.score1 !== null && (
 																<span
 																	className={cn(
-																		'text-lg font-bold font-mono tabular-nums',
+																		'font-mono text-lg font-bold tabular-nums',
 																		isTeam1Winner && 'text-green-600',
 																	)}
 																>
@@ -740,7 +739,7 @@ export default function Playoff() {
 															{match.score2 !== null && (
 																<span
 																	className={cn(
-																		'text-lg font-bold font-mono tabular-nums',
+																		'font-mono text-lg font-bold tabular-nums',
 																		isTeam2Winner && 'text-green-600',
 																	)}
 																>
@@ -834,7 +833,7 @@ export default function Playoff() {
 
 																				<span
 																					className={cn(
-																						'text-sm font-bold font-mono tabular-nums',
+																						'font-mono text-sm font-bold tabular-nums',
 																						isTeam1Winner && 'text-green-600',
 																					)}
 																				>
@@ -868,7 +867,7 @@ export default function Playoff() {
 
 																				<span
 																					className={cn(
-																						'text-sm font-bold font-mono tabular-nums',
+																						'font-mono text-sm font-bold tabular-nums',
 																						isTeam2Winner && 'text-green-600',
 																					)}
 																				>
@@ -957,7 +956,7 @@ export default function Playoff() {
 																						</div>
 																						<span
 																							className={cn(
-																								'text-sm font-bold font-mono tabular-nums',
+																								'font-mono text-sm font-bold tabular-nums',
 																								isTeam1Winner &&
 																									'text-green-600',
 																							)}
@@ -991,7 +990,7 @@ export default function Playoff() {
 																						</div>
 																						<span
 																							className={cn(
-																								'text-sm font-bold font-mono tabular-nums',
+																								'font-mono text-sm font-bold tabular-nums',
 																								isTeam2Winner &&
 																									'text-green-600',
 																							)}
@@ -1092,7 +1091,7 @@ export default function Playoff() {
 																						</div>
 																						<span
 																							className={cn(
-																								'text-sm font-bold font-mono tabular-nums',
+																								'font-mono text-sm font-bold tabular-nums',
 																								isTeam1Winner &&
 																									'text-green-600',
 																							)}
@@ -1126,7 +1125,7 @@ export default function Playoff() {
 																						</div>
 																						<span
 																							className={cn(
-																								'text-sm font-bold font-mono tabular-nums',
+																								'font-mono text-sm font-bold tabular-nums',
 																								isTeam2Winner &&
 																									'text-green-600',
 																							)}
@@ -1227,7 +1226,7 @@ export default function Playoff() {
 																							</div>
 																							<span
 																								className={cn(
-																									'text-sm font-bold font-mono tabular-nums',
+																									'font-mono text-sm font-bold tabular-nums',
 																									isTeam1Winner &&
 																										'text-green-600',
 																								)}
@@ -1261,7 +1260,7 @@ export default function Playoff() {
 																							</div>
 																							<span
 																								className={cn(
-																									'text-sm font-bold font-mono tabular-nums',
+																									'font-mono text-sm font-bold tabular-nums',
 																									isTeam2Winner &&
 																										'text-green-600',
 																								)}
@@ -1360,7 +1359,7 @@ export default function Playoff() {
 																							</div>
 																							<span
 																								className={cn(
-																									'text-sm font-bold font-mono tabular-nums',
+																									'font-mono text-sm font-bold tabular-nums',
 																									isTeam1Winner &&
 																										'text-green-600',
 																								)}
@@ -1394,7 +1393,7 @@ export default function Playoff() {
 																							</div>
 																							<span
 																								className={cn(
-																									'text-sm font-bold font-mono tabular-nums',
+																									'font-mono text-sm font-bold tabular-nums',
 																									isTeam2Winner &&
 																										'text-green-600',
 																								)}

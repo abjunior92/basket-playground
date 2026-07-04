@@ -64,7 +64,10 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 			playgroundId: params.playgroundId,
 			day: 7,
 			winner: { not: null },
-			timeSlot: { in: ['22:00 > 22:15'] },
+			OR: [
+				{ matchPhase: 'final' },
+				{ matchPhase: null, timeSlot: '22:00 > 22:15' },
+			],
 		},
 		select: {
 			id: true,
@@ -72,6 +75,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 			team1Id: true,
 			team2Id: true,
 			timeSlot: true,
+			matchPhase: true,
 		},
 	})
 
@@ -80,7 +84,10 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 			playgroundId: params.playgroundId,
 			day: 7,
 			winner: { not: null },
-			timeSlot: { in: ['21:40 > 21:55'] },
+			OR: [
+				{ matchPhase: { in: ['third_place', 'third_fourth_final'] } },
+				{ matchPhase: null, timeSlot: '21:40 > 21:55' },
+			],
 		},
 		select: {
 			id: true,
@@ -88,10 +95,11 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 			team1Id: true,
 			team2Id: true,
 			timeSlot: true,
+			matchPhase: true,
 		},
 	})
 
-	if (!finalMatch || !isMatchFinal(finalMatch.timeSlot)) {
+	if (!finalMatch || !isMatchFinal(finalMatch)) {
 		return json(
 			{
 				error:
@@ -101,7 +109,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 		)
 	}
 
-	if (!thirdPlaceMatch || !isMatchThirdPlace(thirdPlaceMatch.timeSlot)) {
+	if (!thirdPlaceMatch || !isMatchThirdPlace(thirdPlaceMatch)) {
 		return json(
 			{
 				error:
